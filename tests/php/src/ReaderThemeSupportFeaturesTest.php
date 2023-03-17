@@ -324,36 +324,36 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 	public function test_get_theme_support_features_with_theme_json() {
 		// wp_get_global_settings() is only available in WP 5.9+.
 		if ( ! function_exists( 'wp_get_global_settings' ) ) {
-			$this->markTestSkipped( 'This test requires WP 5.9+' );
+			$this->markTestSkipped( __METHOD__ . ' requires WP 5.9+' );
 		}
 
 		$current_theme = wp_get_theme();
 
 		switch_theme( self::THEME_WITH_THEME_JSON );
 
-		$non_reduced = $this->instance->get_theme_support_features( false );
+		$features = $this->instance->get_theme_support_features( false );
 
-		$this->assertArrayHasKey( 'editor-color-palette', $non_reduced );
+		$this->assertArrayHasKey( 'editor-color-palette', $features );
 		$this->assertContains(
 			[
 				'color' => '#9DFF20',
 				'name'  => 'Primary',
 				'slug'  => 'primary',
 			],
-			$non_reduced['editor-color-palette']
+			$features['editor-color-palette']
 		);
 
-		$this->assertArrayHasKey( 'editor-gradient-presets', $non_reduced );
+		$this->assertArrayHasKey( 'editor-gradient-presets', $features );
 		$this->assertContains(
 			[
 				'name'     => 'Vivid cyan blue to vivid purple',
 				'gradient' => 'linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%)',
 				'slug'     => 'vivid-cyan-blue-to-vivid-purple',
 			],
-			$non_reduced['editor-gradient-presets']
+			$features['editor-gradient-presets']
 		);
 
-		$this->assertArrayHasKey( 'editor-font-sizes', $non_reduced );
+		$this->assertArrayHasKey( 'editor-font-sizes', $features );
 		$this->assertContains(
 			[
 				'fluid' => [
@@ -364,7 +364,7 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 				'slug'  => 'small',
 				'name'  => 'Small',
 			],
-			$non_reduced['editor-font-sizes']
+			$features['editor-font-sizes']
 		);
 
 		switch_theme( $current_theme->get_stylesheet() );
