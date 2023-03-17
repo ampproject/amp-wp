@@ -258,7 +258,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		$features = [];
 
 		foreach ( array_keys( self::SUPPORTED_FEATURES ) as $feature_key ) {
-			if ( $this->theme_has_theme_json() ) {
+			if ( $this->theme_has_theme_json() && function_exists( 'wp_get_global_settings' ) ) {
 				$feature_value   = [];
 				$global_settings = wp_get_global_settings( self::SUPPORTED_THEME_JSON_FEATURES[ $feature_key ], 'theme' );
 
@@ -498,11 +498,6 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	private function theme_has_theme_json() {
 		if ( function_exists( 'wp_theme_has_theme_json' ) ) {
 			return wp_theme_has_theme_json();
-		}
-
-		// wp_get_global_settings() is only available in WP 5.9+.
-		if ( ! function_exists( 'wp_get_global_settings' ) ) {
-			return false;
 		}
 
 		static $theme_has_support = null;
