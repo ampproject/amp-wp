@@ -487,6 +487,9 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 * @return bool False if `wp_get_global_settings()` not exists or theme.json not found, true otherwise.
 	 */
 	private function theme_has_theme_json() {
+		if ( function_exists( 'wp_theme_has_theme_json' ) ) {
+			return wp_theme_has_theme_json();
+		}
 		// wp_get_global_settings() is only available in WP 5.9+.
 		if ( ! function_exists( 'wp_get_global_settings' ) ) {
 			return false;
