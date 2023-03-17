@@ -407,7 +407,14 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			// Just in case the font size is not in the expected format.
 			$font_size[ self::KEY_SIZE ] = $this->get_typography_value_and_unit( $font_size[ self::KEY_SIZE ] );
 
-			if ( empty( $font_size[ self::KEY_SIZE ] ) ) {
+			if ( ! is_array( $font_size[ self::KEY_SIZE ] ) || empty( $font_size[ self::KEY_SIZE ] ) ) {
+				continue;
+			}
+
+			// Normalize the font size value to a string.
+			$font_size[ self::KEY_SIZE ] = $font_size[ self::KEY_SIZE ]['value'] . $font_size[ self::KEY_SIZE ]['unit'];
+
+			if ( ! is_string( $font_size[ self::KEY_SIZE ] ) ) {
 				continue;
 			}
 
@@ -492,6 +499,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		if ( function_exists( 'wp_theme_has_theme_json' ) ) {
 			return wp_theme_has_theme_json();
 		}
+
 		// wp_get_global_settings() is only available in WP 5.9+.
 		if ( ! function_exists( 'wp_get_global_settings' ) ) {
 			return false;
@@ -550,12 +558,13 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 *     @type int      $root_size_value  Value of root font size for rem|em <-> px conversion. Default `16`.
 	 *     @type string[] $acceptable_units An array of font size units. Default `array( 'rem', 'px', 'em' )`;
 	 * }
-	 * @return string|null The value and unit, or null if the value is empty.
+	 * @return array|null The value and unit, or null if the value is empty.
 	 */
 	private function get_typography_value_and_unit( $raw_value, $options = [] ) {
 		if ( function_exists( 'wp_get_typography_value_and_unit' ) ) {
 			return wp_get_typography_value_and_unit( $raw_value, $options );
 		}
+
 		if ( ! is_string( $raw_value ) && ! is_int( $raw_value ) && ! is_float( $raw_value ) ) {
 			_doing_it_wrong(
 				__METHOD__,
@@ -618,6 +627,9 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			$unit = $options['coerce_to'];
 		}
 
-		return round( $value, 3 ) . $unit;
+		return [
+			'value' => round( $value, 3 ),
+			'unit'  => $unit,
+		];
 	}
 }
