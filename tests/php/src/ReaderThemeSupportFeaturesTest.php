@@ -470,6 +470,22 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		$this->assertStringNotContainsString( '.has-yellow-background-color { background-color: rgb(255, 255, 0); color: #000; }', $output );
 		$this->assertStringContainsString( '.has-purple-color { color: var(--base-purple); }', $output );
 		$this->assertStringContainsString( '.has-yellow-color { color: rgb(255, 255, 0); }', $output );
+
+		// Assert fluid typography styles.
+		if ( function_exists( 'wp_get_typography_font_size_value' ) && $is_legacy ) {
+			$current_theme = wp_get_theme();
+
+			switch_theme( self::THEME_WITH_THEME_JSON );
+
+			$output = get_echo( [ $this->instance, 'print_theme_support_styles' ] );
+
+			$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
+			$this->assertStringContainsString( 'font-size: clamp(', $output );
+			$this->assertStringContainsString( '+ ((', $output );
+			$this->assertStringContainsString( ':root .has-small-font-size { font-size: clamp(0.875rem, 0.875rem + ((1vw - 0.48rem) * 0.24), 1rem); }', $output );
+
+			switch_theme( $current_theme->get_stylesheet() );
+		}
 	}
 
 	/** @return array */
