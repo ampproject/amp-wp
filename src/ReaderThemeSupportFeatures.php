@@ -476,7 +476,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 */
 	private function print_spacing_sizes_custom_properties() {
 		$custom_properties = [];
-		$spacing_sizes     = wp_get_global_settings( [ 'spacing', 'spacingSizes' ], self::KEY_THEME );
+		$spacing_sizes     = wp_get_global_settings( [ self::KEY_SPACING, self::KEY_SPACING_SIZES ], self::KEY_THEME );
 
 		if ( isset( $spacing_sizes[ self::KEY_THEME ] ) ) {
 			$custom_properties = array_merge( $custom_properties, $spacing_sizes[ self::KEY_THEME ] );
