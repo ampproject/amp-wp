@@ -327,8 +327,6 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 			$this->markTestSkipped( __METHOD__ . ' requires WP 5.9+' );
 		}
 
-		$current_theme = wp_get_theme();
-
 		switch_theme( self::THEME_WITH_THEME_JSON );
 
 		$features = $this->instance->get_theme_support_features( false );
@@ -423,6 +421,7 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 	 * @covers ::print_editor_color_palette_styles()
 	 * @covers ::print_editor_font_sizes_styles()
 	 * @covers ::print_editor_gradient_presets_styles()
+	 * @covers ::print_spacing_sizes_custom_properties()
 	 *
 	 * @dataProvider get_data_for_test_print_theme_support_styles_reader
 	 *
@@ -469,18 +468,34 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		$this->assertStringContainsString( '.has-purple-color { color: var(--base-purple); }', $output );
 		$this->assertStringContainsString( '.has-yellow-color { color: rgb(255, 255, 0); }', $output );
 
-		// Assert fluid typography styles.
-		if ( function_exists( 'wp_get_typography_font_size_value' ) && $is_legacy ) {
-			$current_theme = wp_get_theme();
+		// No spacing sizes custom properties.
+		$this->assertStringNotContainsString( '<style id="amp-wp-theme-support-spacing-sizes-custom-properties">', $output );
+		// No fluid typography styles.
+		$this->assertStringNotContainsString( 'font-size: clamp(0.875rem, 0.875rem + ((1vw - 0.48rem) * 0.24), 1rem);', $output );
 
+		if ( $is_legacy ) {
 			switch_theme( self::THEME_WITH_THEME_JSON );
 
 			$output = get_echo( [ $this->instance, 'print_theme_support_styles' ] );
 
-			$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
-			$this->assertStringContainsString( 'font-size: clamp(', $output );
-			$this->assertStringContainsString( '+ ((', $output );
-			$this->assertStringContainsString( ':root .has-small-font-size { font-size: clamp(0.875rem, 0.875rem + ((1vw - 0.48rem) * 0.24), 1rem); }', $output );
+			// Assert fluid typography styles.
+			if ( function_exists( 'wp_get_typography_font_size_value' ) ) {
+				$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
+				$this->assertStringContainsString( 'font-size: clamp(', $output );
+				$this->assertStringContainsString( '+ ((', $output );
+				$this->assertStringContainsString( ':root .has-small-font-size { font-size: clamp(0.875rem, 0.875rem + ((1vw - 0.48rem) * 0.24), 1rem); }', $output );
+			}
+
+			// Assert spacing size custom properties.
+			if ( $this->call_private_method( $this->instance, 'theme_has_theme_json' ) && function_exists( 'wp_get_global_settings' ) ) {
+				$this->assertStringContainsString( '<style id="amp-wp-theme-support-spacing-sizes-custom-properties">', $output );
+				$this->assertStringContainsString( ':root {', $output );
+				$this->assertStringContainsString( '--wp--preset--spacing--30: clamp(1.5rem, 5vw, 2rem);', $output );
+				$this->assertStringContainsString( 'clamp(1.8rem, 1.8rem + ((1vw - 0.48rem) * 2.885), 3rem);', $output );
+				$this->assertStringContainsString( '--wp--preset--spacing--80: clamp(7rem, 14vw, 11rem);', $output );
+				$this->assertStringContainsString( '}', $output );
+				$this->assertStringContainsString( '</style>', $output );
+			}
 		}
 	}
 
