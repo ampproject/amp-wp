@@ -124,11 +124,32 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	const KEY_SPACING = 'spacing';
 
 	/**
+	 * Key for `steps` presets in theme.json.
+	 *
+	 * @var string
+	 */
+	const KEY_STEPS = 'steps';
+
+	/**
 	 * Key for `spacingSizes` presets in theme.json.
 	 *
 	 * @var string
 	 */
 	const KEY_SPACING_SIZES = 'spacingSizes';
+
+	/**
+	 * Key for `spacingScale` presets in theme.json.
+	 *
+	 * @var string
+	 */
+	const KEY_SPACING_SCALE = 'spacingScale';
+
+	/**
+	 * Key for `customSpacingSize` presets in theme.json.
+	 *
+	 * @var string
+	 */
+	const KEY_CUSTOM_SPACING_SIZE = 'customSpacingSize';
 
 	/**
 	 * Action fired when the cached primary_theme_support should be updated.
@@ -475,15 +496,19 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 * Print spacing sizes custom properties.
 	 */
 	private function print_spacing_sizes_custom_properties() {
-		$custom_properties = [];
-		$spacing_sizes     = wp_get_global_settings( [ self::KEY_SPACING, self::KEY_SPACING_SIZES ], self::KEY_THEME );
+		$custom_properties              = [];
+		$spacing_sizes                  = wp_get_global_settings( [ self::KEY_SPACING, self::KEY_SPACING_SIZES ], self::KEY_THEME );
+		$is_wp_generating_spacing_sizes = 0 !== wp_get_global_settings( [ self::KEY_SPACING, self::KEY_SPACING_SCALE ], self::KEY_THEME )[ self::KEY_STEPS ];
+		$custom_spacing_size            = wp_get_global_settings( [ self::KEY_SPACING, self::KEY_CUSTOM_SPACING_SIZE ], self::KEY_THEME );
 
-		if ( isset( $spacing_sizes[ self::KEY_THEME ] ) ) {
-			$custom_properties = array_merge( $custom_properties, $spacing_sizes[ self::KEY_THEME ] );
-		}
-
-		if ( isset( $spacing_sizes[ self::KEY_DEFAULT ] ) ) {
-			$custom_properties = array_merge( $custom_properties, $spacing_sizes[ self::KEY_DEFAULT ] );
+		if ( ! $is_wp_generating_spacing_sizes && $custom_spacing_size ) {
+			if ( isset( $spacing_sizes[ self::KEY_THEME ] ) ) {
+				$custom_properties = array_merge( $custom_properties, $spacing_sizes[ self::KEY_THEME ] );
+			}
+		} else {
+			if ( isset( $spacing_sizes[ self::KEY_DEFAULT ] ) ) {
+				$custom_properties = array_merge( $custom_properties, $spacing_sizes[ self::KEY_DEFAULT ] );
+			}
 		}
 
 		if ( empty( $custom_properties ) ) {
