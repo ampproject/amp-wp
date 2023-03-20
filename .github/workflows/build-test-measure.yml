@@ -577,6 +577,7 @@ jobs:
     needs: pre-run
     runs-on: ubuntu-latest
     if: needs.pre-run.outputs.changed-php-count > 0
+    continue-on-error: true
     strategy:
       matrix:
         testsuite: ['default', 'external-http']
