@@ -27,7 +27,7 @@ class AMP_Customizer_Design_Settings {
 	 *
 	 * @var string
 	 */
-	const DEFAULT_HEADER_BACKGROUND_COLOR = '#0a89c0';
+	const DEFAULT_HEADER_BACKGROUND_COLOR = '#0A5F85';
 
 	/**
 	 * Default color scheme.
