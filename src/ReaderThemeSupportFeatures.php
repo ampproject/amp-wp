@@ -103,6 +103,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 
 	/**
 	 * Key for `theme` presets in block editor.
+	 * Key for `theme` context in `wp_get_global_settings()`.
 	 *
 	 * @var string
 	 */
@@ -114,6 +115,20 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 * @var string
 	 */
 	const KEY_DEFAULT = 'default';
+
+	/**
+	 * Key for `spacing` presets in theme.json.
+	 *
+	 * @var string
+	 */
+	const KEY_SPACING = 'spacing';
+
+	/**
+	 * Key for `spacingSizes` presets in theme.json.
+	 *
+	 * @var string
+	 */
+	const KEY_SPACING_SIZES = 'spacingSizes';
 
 	/**
 	 * Action fired when the cached primary_theme_support should be updated.
@@ -260,7 +275,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		foreach ( array_keys( self::SUPPORTED_FEATURES ) as $feature_key ) {
 			if ( $this->theme_has_theme_json() && function_exists( 'wp_get_global_settings' ) ) {
 				$feature_value   = [];
-				$global_settings = wp_get_global_settings( self::SUPPORTED_THEME_JSON_FEATURES[ $feature_key ], 'theme' );
+				$global_settings = wp_get_global_settings( self::SUPPORTED_THEME_JSON_FEATURES[ $feature_key ], self::KEY_THEME );
 
 				if ( isset( $global_settings[ self::KEY_THEME ] ) ) {
 					$feature_value = array_merge( $feature_value, $global_settings[ self::KEY_THEME ] );
@@ -346,6 +361,11 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 					$this->print_editor_gradient_presets_styles( $value );
 					break;
 			}
+		}
+
+		// Print the custom properties for the spacing sizes.
+		if ( $this->theme_has_theme_json() && function_exists( 'wp_get_global_settings' ) ) {
+			$this->print_spacing_sizes_custom_properties();
 		}
 	}
 
@@ -448,6 +468,44 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 				$gradient_preset[ self::KEY_GRADIENT ] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
 		}
+		echo '</style>';
+	}
+
+	/**
+	 * Print spacing sizes custom properties.
+	 */
+	private function print_spacing_sizes_custom_properties() {
+		$custom_properties = [];
+		$spacing_sizes     = wp_get_global_settings( [ 'spacing', 'spacingSizes' ], self::KEY_THEME );
+
+		if ( isset( $spacing_sizes[ self::KEY_THEME ] ) ) {
+			$custom_properties = array_merge( $custom_properties, $spacing_sizes[ self::KEY_THEME ] );
+		}
+
+		if ( isset( $spacing_sizes[ self::KEY_DEFAULT ] ) ) {
+			$custom_properties = array_merge( $custom_properties, $spacing_sizes[ self::KEY_DEFAULT ] );
+		}
+
+		if ( empty( $custom_properties ) ) {
+			return;
+		}
+
+		echo '<style id="amp-wp-theme-support-spacing-sizes-custom-properties">';
+		echo ':root {';
+		foreach ( $custom_properties as $custom_property ) {
+			if ( ! isset( $custom_property[ self::KEY_SIZE ], $custom_property[ self::KEY_SLUG ] ) ) {
+				continue;
+			}
+
+			printf(
+				'--wp--preset--spacing--%1$s: %2$s;',
+				sanitize_key( $custom_property[ self::KEY_SLUG ] ),
+				// phpcs:disable WordPressVIPMinimum.Functions.StripTags.StripTagsOneParameter
+				strip_tags( $custom_property[ self::KEY_SIZE ] ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				// phpcs:enable WordPressVIPMinimum.Functions.StripTags.StripTagsOneParameter
+			);
+		}
+		echo '}';
 		echo '</style>';
 	}
 
