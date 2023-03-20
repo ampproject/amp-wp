@@ -45,6 +45,12 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 			'size'      => 144,
 			'slug'      => 'gigantic',
 		],
+		[
+			'name'      => 'Huge',
+			'shortName' => 'XXL',
+			'size'      => '',
+			'slug'      => 'huge',
+		],
 	];
 
 	const TEST_COLOR_PALETTE = [
@@ -82,6 +88,13 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 	 * @var string
 	 */
 	const THEME_PRIMARY = 'twentytwenty';
+
+	/**
+	 * Theme with theme.json
+	 *
+	 * @var string
+	 */
+	const THEME_WITH_THEME_JSON = 'twentytwentythree';
 
 	/**
 	 * Reader theme slug.
@@ -303,6 +316,56 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		}
 	}
 
+	/**
+	 * Test when a theme with theme.json is active.
+	 *
+	 * @covers ::get_theme_support_features()
+	*/
+	public function test_get_theme_support_features_with_theme_json() {
+		// wp_get_global_settings() is only available in WP 5.9+.
+		if ( ! function_exists( 'wp_get_global_settings' ) ) {
+			$this->markTestSkipped( __METHOD__ . ' requires WP 5.9+' );
+		}
+
+		switch_theme( self::THEME_WITH_THEME_JSON );
+
+		$features = $this->instance->get_theme_support_features( false );
+
+		$this->assertArrayHasKey( 'editor-color-palette', $features );
+		$this->assertContains(
+			[
+				'color' => '#9DFF20',
+				'name'  => 'Primary',
+				'slug'  => 'primary',
+			],
+			$features['editor-color-palette']
+		);
+
+		$this->assertArrayHasKey( 'editor-gradient-presets', $features );
+		$this->assertContains(
+			[
+				'name'     => 'Vivid cyan blue to vivid purple',
+				'gradient' => 'linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%)',
+				'slug'     => 'vivid-cyan-blue-to-vivid-purple',
+			],
+			$features['editor-gradient-presets']
+		);
+
+		$this->assertArrayHasKey( 'editor-font-sizes', $features );
+		$this->assertContains(
+			[
+				'fluid' => [
+					'min' => '0.875rem',
+					'max' => '1rem',
+				],
+				'size'  => '1rem',
+				'slug'  => 'small',
+				'name'  => 'Small',
+			],
+			$features['editor-font-sizes']
+		);
+	}
+
 	/** @covers ::is_reader_request() */
 	public function test_is_reader_request() {
 		if ( ! wp_get_theme( self::THEME_PRIMARY )->exists() || ! wp_get_theme( self::THEME_READER )->exists() ) {
@@ -358,6 +421,7 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 	 * @covers ::print_editor_color_palette_styles()
 	 * @covers ::print_editor_font_sizes_styles()
 	 * @covers ::print_editor_gradient_presets_styles()
+	 * @covers ::print_spacing_sizes_custom_properties()
 	 *
 	 * @dataProvider get_data_for_test_print_theme_support_styles_reader
 	 *
@@ -403,6 +467,36 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		$this->assertStringNotContainsString( '.has-yellow-background-color { background-color: rgb(255, 255, 0); color: #000; }', $output );
 		$this->assertStringContainsString( '.has-purple-color { color: var(--base-purple); }', $output );
 		$this->assertStringContainsString( '.has-yellow-color { color: rgb(255, 255, 0); }', $output );
+
+		// No spacing sizes custom properties.
+		$this->assertStringNotContainsString( '<style id="amp-wp-theme-support-spacing-sizes-custom-properties">', $output );
+		// No fluid typography styles.
+		$this->assertStringNotContainsString( 'font-size: clamp(0.875rem, 0.875rem + ((1vw - 0.48rem) * 0.24), 1rem);', $output );
+
+		if ( $is_legacy ) {
+			switch_theme( self::THEME_WITH_THEME_JSON );
+
+			$output = get_echo( [ $this->instance, 'print_theme_support_styles' ] );
+
+			// Assert fluid typography styles.
+			if ( function_exists( 'wp_get_typography_font_size_value' ) ) {
+				$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
+				$this->assertStringContainsString( 'font-size: clamp(', $output );
+				$this->assertStringContainsString( '+ ((', $output );
+				$this->assertStringContainsString( ':root .has-small-font-size { font-size: clamp(0.875rem, 0.875rem + ((1vw - 0.48rem) * 0.24), 1rem); }', $output );
+			}
+
+			// Assert spacing size custom properties.
+			if ( $this->call_private_method( $this->instance, 'theme_has_theme_json' ) && function_exists( 'wp_get_global_settings' ) ) {
+				$this->assertStringContainsString( '<style id="amp-wp-theme-support-spacing-sizes-custom-properties">', $output );
+				$this->assertStringContainsString( ':root {', $output );
+				$this->assertStringContainsString( '--wp--preset--spacing--30: clamp(1.5rem, 5vw, 2rem);', $output );
+				$this->assertStringContainsString( 'clamp(1.8rem, 1.8rem + ((1vw - 0.48rem) * 2.885), 3rem);', $output );
+				$this->assertStringContainsString( '--wp--preset--spacing--80: clamp(7rem, 14vw, 11rem);', $output );
+				$this->assertStringContainsString( '}', $output );
+				$this->assertStringContainsString( '</style>', $output );
+			}
+		}
 	}
 
 	/** @return array */

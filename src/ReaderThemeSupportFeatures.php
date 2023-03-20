@@ -74,6 +74,84 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	const KEY_GRADIENT = 'gradient';
 
 	/**
+	 * Key gradients.
+	 *
+	 * @var string
+	 */
+	const KEY_GRADIENTS = 'gradients';
+
+	/**
+	 * Key palette.
+	 *
+	 * @var string
+	 */
+	const KEY_PALETTE = 'palette';
+
+	/**
+	 * Key fontSizes.
+	 *
+	 * @var string
+	 */
+	const KEY_FONT_SIZES = 'fontSizes';
+
+	/**
+	 * Key typography.
+	 *
+	 * @var string
+	 */
+	const KEY_TYPOGRAPHY = 'typography';
+
+	/**
+	 * Key for `theme` presets in block editor.
+	 * Key for `theme` context in `wp_get_global_settings()`.
+	 *
+	 * @var string
+	 */
+	const KEY_THEME = 'theme';
+
+	/**
+	 * Key for `default` presets in block editor.
+	 *
+	 * @var string
+	 */
+	const KEY_DEFAULT = 'default';
+
+	/**
+	 * Key for `spacing` presets in theme.json.
+	 *
+	 * @var string
+	 */
+	const KEY_SPACING = 'spacing';
+
+	/**
+	 * Key for `steps` presets in theme.json.
+	 *
+	 * @var string
+	 */
+	const KEY_STEPS = 'steps';
+
+	/**
+	 * Key for `spacingSizes` presets in theme.json.
+	 *
+	 * @var string
+	 */
+	const KEY_SPACING_SIZES = 'spacingSizes';
+
+	/**
+	 * Key for `spacingScale` presets in theme.json.
+	 *
+	 * @var string
+	 */
+	const KEY_SPACING_SCALE = 'spacingScale';
+
+	/**
+	 * Key for `customSpacingSize` presets in theme.json.
+	 *
+	 * @var string
+	 */
+	const KEY_CUSTOM_SPACING_SIZE = 'customSpacingSize';
+
+	/**
 	 * Action fired when the cached primary_theme_support should be updated.
 	 *
 	 * @var string
@@ -89,6 +167,17 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		self::FEATURE_EDITOR_COLOR_PALETTE    => [ self::KEY_SLUG, self::KEY_COLOR ],
 		self::FEATURE_EDITOR_GRADIENT_PRESETS => [ self::KEY_SLUG, self::KEY_GRADIENT ],
 		self::FEATURE_EDITOR_FONT_SIZES       => [ self::KEY_SLUG, self::KEY_SIZE ],
+	];
+
+	/**
+	 * The theme.json paths mapping to be fetched using `wp_get_global_settings()`.
+	 *
+	 * @var array[]
+	 */
+	const SUPPORTED_THEME_JSON_FEATURES = [
+		self::FEATURE_EDITOR_COLOR_PALETTE    => [ self::KEY_COLOR, self::KEY_PALETTE ],
+		self::FEATURE_EDITOR_GRADIENT_PRESETS => [ self::KEY_COLOR, self::KEY_GRADIENTS ],
+		self::FEATURE_EDITOR_FONT_SIZES       => [ self::KEY_TYPOGRAPHY, self::KEY_FONT_SIZES ],
 	];
 
 	/**
@@ -203,13 +292,35 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 */
 	public function get_theme_support_features( $reduced = false ) {
 		$features = [];
+
 		foreach ( array_keys( self::SUPPORTED_FEATURES ) as $feature_key ) {
-			$feature_value = current( (array) get_theme_support( $feature_key ) );
+			if ( $this->theme_has_theme_json() && function_exists( 'wp_get_global_settings' ) ) {
+				$feature_value   = [];
+				$global_settings = wp_get_global_settings( self::SUPPORTED_THEME_JSON_FEATURES[ $feature_key ], self::KEY_THEME );
+
+				if ( isset( $global_settings[ self::KEY_THEME ] ) ) {
+					$feature_value = array_merge( $feature_value, $global_settings[ self::KEY_THEME ] );
+				}
+
+				if ( isset( $global_settings[ self::KEY_DEFAULT ] ) ) {
+					$feature_value = array_merge( $feature_value, $global_settings[ self::KEY_DEFAULT ] );
+				}
+			} else {
+				$feature_value = current( (array) get_theme_support( $feature_key ) );
+			}
+
 			if ( ! is_array( $feature_value ) || empty( $feature_value ) ) {
 				continue;
 			}
+
+			// Avoid reducing font sizes if theme.json is used for the sake of fluid typography.
+			if ( $this->theme_has_theme_json() && self::FEATURE_EDITOR_FONT_SIZES === $feature_key ) {
+				$reduced = false;
+			}
+
 			if ( $reduced ) {
 				$features[ $feature_key ] = [];
+
 				foreach ( $feature_value as $item ) {
 					if ( $this->has_required_feature_props( $feature_key, $item ) ) {
 						$features[ $feature_key ][] = wp_array_slice_assoc( $item, self::SUPPORTED_FEATURES[ $feature_key ] );
@@ -219,6 +330,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 				$features[ $feature_key ] = $feature_value;
 			}
 		}
+
 		return $features;
 	}
 
@@ -270,6 +382,11 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 					$this->print_editor_gradient_presets_styles( $value );
 					break;
 			}
+		}
+
+		// Print the custom properties for the spacing sizes.
+		if ( $this->theme_has_theme_json() && function_exists( 'wp_get_global_settings' ) ) {
+			$this->print_spacing_sizes_custom_properties();
 		}
 	}
 
@@ -327,10 +444,29 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			if ( ! $this->has_required_feature_props( self::FEATURE_EDITOR_FONT_SIZES, $font_size ) ) {
 				continue;
 			}
+
+			// Just in case the font size is not in the expected format.
+			$font_size[ self::KEY_SIZE ] = $this->get_typography_value_and_unit( $font_size[ self::KEY_SIZE ] );
+
+			if ( ! is_array( $font_size[ self::KEY_SIZE ] ) || empty( $font_size[ self::KEY_SIZE ] ) ) {
+				continue;
+			}
+
+			// Normalize the font size value to a string.
+			$font_size[ self::KEY_SIZE ] = $font_size[ self::KEY_SIZE ]['value'] . $font_size[ self::KEY_SIZE ]['unit'];
+
+			if ( ! is_string( $font_size[ self::KEY_SIZE ] ) ) {
+				continue;
+			}
+
 			printf(
-				':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$spx; }',
+				':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$s; }',
 				sanitize_key( $font_size[ self::KEY_SLUG ] ),
-				(float) $font_size[ self::KEY_SIZE ]
+				function_exists( 'wp_get_typography_font_size_value' )
+					// phpcs:disable WordPressVIPMinimum.Functions.StripTags.StripTagsOneParameter
+					? strip_tags( wp_get_typography_font_size_value( $font_size ) ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					: strip_tags( $font_size[ self::KEY_SIZE ] ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					// phpcs:enable WordPressVIPMinimum.Functions.StripTags.StripTagsOneParameter
 			);
 		}
 		echo '</style>';
@@ -353,6 +489,48 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 				$gradient_preset[ self::KEY_GRADIENT ] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
 		}
+		echo '</style>';
+	}
+
+	/**
+	 * Print spacing sizes custom properties.
+	 */
+	private function print_spacing_sizes_custom_properties() {
+		$custom_properties              = [];
+		$spacing_sizes                  = wp_get_global_settings( [ self::KEY_SPACING, self::KEY_SPACING_SIZES ], self::KEY_THEME );
+		$is_wp_generating_spacing_sizes = 0 !== wp_get_global_settings( [ self::KEY_SPACING, self::KEY_SPACING_SCALE ], self::KEY_THEME )[ self::KEY_STEPS ];
+		$custom_spacing_size            = wp_get_global_settings( [ self::KEY_SPACING, self::KEY_CUSTOM_SPACING_SIZE ], self::KEY_THEME );
+
+		if ( ! $is_wp_generating_spacing_sizes && $custom_spacing_size ) {
+			if ( isset( $spacing_sizes[ self::KEY_THEME ] ) ) {
+				$custom_properties = array_merge( $custom_properties, $spacing_sizes[ self::KEY_THEME ] );
+			}
+		} else {
+			if ( isset( $spacing_sizes[ self::KEY_DEFAULT ] ) ) {
+				$custom_properties = array_merge( $custom_properties, $spacing_sizes[ self::KEY_DEFAULT ] );
+			}
+		}
+
+		if ( empty( $custom_properties ) ) {
+			return;
+		}
+
+		echo '<style id="amp-wp-theme-support-spacing-sizes-custom-properties">';
+		echo ':root {';
+		foreach ( $custom_properties as $custom_property ) {
+			if ( ! isset( $custom_property[ self::KEY_SIZE ], $custom_property[ self::KEY_SLUG ] ) ) {
+				continue;
+			}
+
+			printf(
+				'--wp--preset--spacing--%1$s: %2$s;',
+				sanitize_key( $custom_property[ self::KEY_SLUG ] ),
+				// phpcs:disable WordPressVIPMinimum.Functions.StripTags.StripTagsOneParameter
+				strip_tags( $custom_property[ self::KEY_SIZE ] ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				// phpcs:enable WordPressVIPMinimum.Functions.StripTags.StripTagsOneParameter
+			);
+		}
+		echo '}';
 		echo '</style>';
 	}
 
@@ -384,5 +562,152 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		// Calculate the luminance.
 		$lum = ( 0.2126 * $red ) + ( 0.7152 * $green ) + ( 0.0722 * $blue );
 		return (int) round( $lum );
+	}
+
+	/**
+	 * Checks whether a theme or its parent has a theme.json file.
+	 * Checks if `wp_get_global_settings()` exists and bail for WP < 5.9.
+	 *
+	 * Copied from `wp_theme_has_theme_json()`
+	 *
+	 * @codeCoverageIgnore
+	 *
+	 * @see https://github.com/WordPress/wordpress-develop/blob/200868214a1ae0a108dac491677ba82e7541fc8d/src/wp-includes/global-styles-and-settings.php#L384
+	 *
+	 * @since 2.4.1
+	 *
+	 * @return bool False if `wp_get_global_settings()` not exists or theme.json not found, true otherwise.
+	 */
+	private function theme_has_theme_json() {
+		if ( function_exists( 'wp_theme_has_theme_json' ) ) {
+			return wp_theme_has_theme_json();
+		}
+
+		static $theme_has_support = null;
+
+		if (
+			null !== $theme_has_support &&
+
+			/*
+			* Ignore static cache when `WP_DEBUG` is enabled. Why? To avoid interfering with
+			* the theme developer's workflow.
+			*
+			* @todo Replace `WP_DEBUG` once an "in development mode" check is available in Core.
+			*/
+			! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) &&
+
+			/*
+			* Ignore cache when automated test suites are running. Why? To ensure
+			* the static cache is reset between each test.
+			*/
+			! ( defined( 'WP_RUN_CORE_TESTS' ) && WP_RUN_CORE_TESTS )
+		) {
+			return $theme_has_support;
+		}
+
+		// Does the theme have its own theme.json?
+		$theme_has_support = is_readable( get_stylesheet_directory() . '/theme.json' );
+
+		// Look up the parent if the child does not have a theme.json.
+		if ( ! $theme_has_support ) {
+			$theme_has_support = is_readable( get_template_directory() . '/theme.json' );
+		}
+
+		return $theme_has_support;
+	}
+
+	/**
+	 * Checks a string for a unit and value and returns an array
+	 * consisting of `'value'` and `'unit'`, e.g. array( '42', 'rem' ).
+	 *
+	 * Copied from `wp_get_typography_value_and_unit()`
+	 *
+	 * @codeCoverageIgnore
+	 *
+	 * @see https://github.com/WordPress/WordPress/blob/9caf1c4adeddff2577c24d622ebbbf278a671271/wp-includes/block-supports/typography.php#L297
+	 *
+	 * @since 2.4.1
+	 *
+	 * @param string|int|float $raw_value Raw size value from theme.json.
+	 * @param array            $options   {
+	 *     Optional. An associative array of options. Default is empty array.
+	 *
+	 *     @type string   $coerce_to        Coerce the value to rem or px. Default `'rem'`.
+	 *     @type int      $root_size_value  Value of root font size for rem|em <-> px conversion. Default `16`.
+	 *     @type string[] $acceptable_units An array of font size units. Default `array( 'rem', 'px', 'em' )`;
+	 * }
+	 * @return array|null The value and unit, or null if the value is empty.
+	 */
+	private function get_typography_value_and_unit( $raw_value, $options = [] ) {
+		if ( function_exists( 'wp_get_typography_value_and_unit' ) ) {
+			return wp_get_typography_value_and_unit( $raw_value, $options );
+		}
+
+		if ( ! is_string( $raw_value ) && ! is_int( $raw_value ) && ! is_float( $raw_value ) ) {
+			_doing_it_wrong(
+				__METHOD__,
+				esc_html__( 'Raw size value must be a string, integer, or float.', 'default' ),
+				'2.4.1'
+			);
+			return null;
+		}
+
+		if ( empty( $raw_value ) ) {
+			return null;
+		}
+
+		// Converts numbers to pixel values by default.
+		if ( is_numeric( $raw_value ) ) {
+			$raw_value = $raw_value . 'px';
+		}
+
+		$defaults = [
+			'coerce_to'        => '',
+			'root_size_value'  => 16,
+			'acceptable_units' => [ 'rem', 'px', 'em' ],
+		];
+
+		$options = wp_parse_args( $options, $defaults );
+
+		$acceptable_units_group = implode( '|', $options['acceptable_units'] );
+		$pattern                = '/^(\d*\.?\d+)(' . $acceptable_units_group . '){1,1}$/';
+
+		preg_match( $pattern, $raw_value, $matches );
+
+		// Bails out if not a number value and a px or rem unit.
+		if ( ! isset( $matches[1] ) || ! isset( $matches[2] ) ) {
+			return null;
+		}
+
+		$value = $matches[1];
+		$unit  = $matches[2];
+
+		/*
+		 * Default browser font size. Later, possibly could inject some JS to
+		 * compute this `getComputedStyle( document.querySelector( "html" ) ).fontSize`.
+		 */
+		if ( 'px' === $options['coerce_to'] && ( 'em' === $unit || 'rem' === $unit ) ) {
+			$value = $value * $options['root_size_value'];
+			$unit  = $options['coerce_to'];
+		}
+
+		if ( 'px' === $unit && ( 'em' === $options['coerce_to'] || 'rem' === $options['coerce_to'] ) ) {
+			$value = $value / $options['root_size_value'];
+			$unit  = $options['coerce_to'];
+		}
+
+		/*
+		 * No calculation is required if swapping between em and rem yet,
+		 * since we assume a root size value. Later we might like to differentiate between
+		 * :root font size (rem) and parent element font size (em) relativity.
+		 */
+		if ( ( 'em' === $options['coerce_to'] || 'rem' === $options['coerce_to'] ) && ( 'em' === $unit || 'rem' === $unit ) ) {
+			$unit = $options['coerce_to'];
+		}
+
+		return [
+			'value' => round( $value, 3 ),
+			'unit'  => $unit,
+		];
 	}
 }
