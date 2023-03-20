@@ -113,7 +113,7 @@ body {
 	color: <?php echo sanitize_hex_color( $text_color ); ?>;
 	font-family: Georgia, 'Times New Roman', Times, Serif;
 	font-weight: 300;
-	line-height: 1.75em;
+	line-height: 1.75;
 }
 
 p,
