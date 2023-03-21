@@ -273,6 +273,7 @@ jobs:
         run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache" --collectCoverage
 
       - name: Upload code coverage report
+        if: github.actor != 'dependabot[bot]'
         uses: codecov/codecov-action@v3
         with:
           file: build/logs/lcov.info
@@ -563,7 +564,7 @@ jobs:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Upload code coverage report
-        if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
+        if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 && github.actor != 'dependabot[bot]' }}
         uses: codecov/codecov-action@v3
         with:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
@@ -771,7 +772,7 @@ jobs:
           echo "COVERAGE_FILES=$FILES" >> $GITHUB_ENV
 
       - name: Upload code coverage report
-        if: ${{ matrix.coverage == true }}
+        if: ${{ matrix.coverage == true && github.actor != 'dependabot[bot]' }}
         uses: codecov/codecov-action@v3
         with:
           files: ${{ env.COVERAGE_FILES }}
