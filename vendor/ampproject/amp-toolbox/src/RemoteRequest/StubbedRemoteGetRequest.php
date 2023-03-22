@@ -1,0 +1,51 @@
+<?php
+
+namespace AmpProject\RemoteRequest;
+
+use AmpProject\Exception\FailedRemoteRequest;
+use AmpProject\RemoteGetRequest;
+use AmpProject\Response;
+use LogicException;
+
+/**
+ * Stub for simulating remote requests.
+ *
+ * @package ampproject/amp-toolbox
+ */
+final class StubbedRemoteGetRequest implements RemoteGetRequest
+{
+    /**
+     * Associative array of data for mapping between arguments and returned results.
+     *
+     * @var array
+     */
+    private $argumentMap;
+
+    /**
+     * Instantiate a StubbedRemoteGetRequest object.
+     *
+     * @param array $argumentMap Associative array of data for mapping between arguments and returned results.
+     */
+    public function __construct($argumentMap)
+    {
+        $this->argumentMap = $argumentMap;
+    }
+
+    /**
+     * Do a GET request to retrieve the contents of a remote URL.
+     *
+     * @param string $url     URL to get.
+     * @param array  $headers Optional. Associative array of headers to send with the request. Defaults to empty array.
+     * @return Response Response for the executed request.
+     * @throws FailedRemoteRequest If retrieving the contents from the URL failed.
+     */
+    public function get($url, $headers = [])
+    {
+        if (! array_key_exists($url, $this->argumentMap)) {
+            throw new LogicException("Trying to stub a remote request for an unknown URL: {$url}.");
+        }
+
+        $args = $this->argumentMap[$url];
+        return new RemoteGetRequestResponse($args['body'], [], isset($args['status']) ? $args['status'] : 200);
+    }
+}
