@@ -351,6 +351,9 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$expected = preg_replace( '/ data-id="\d+"/', '', $expected );
 		$actual   = preg_replace( '/ data-id="\d+"/', '', $actual );
 
+		// Remove `wp-block-gallery-is-layout-flex` class name injected by block editor layout styles.
+		$actual = preg_replace( '/\s*(?<= class=")?wp-block-gallery-is-layout-flex\s*/', '', $actual );
+
 		// Remove `is-layout-flex` class name injected by block editor layout styles.
 		$actual = preg_replace( '/\s*(?<= class=")?is-layout-flex\s*/', '', $actual );
 
