@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 2.4.1
+ * Version: 2.4.2-alpha
  * License: GPLv2 or later
  * Requires at least: 4.9
  * Requires PHP: 7.0
