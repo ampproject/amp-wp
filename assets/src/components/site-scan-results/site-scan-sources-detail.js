@@ -27,7 +27,7 @@ import ClipboardButton from '../clipboard-button';
  */
 function getAssociatedSources(sources, slug) {
 	return sources.filter((source) => {
-		return slug === getPluginSlugFromFile(source.name);
+		return source?.name && slug === getPluginSlugFromFile(source.name);
 	});
 }
 
