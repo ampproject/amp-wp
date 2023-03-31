@@ -1600,7 +1600,8 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Accessibility_Sanitizer::class         => [],
 		// Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 		AMP_Tag_And_Attribute_Sanitizer::class     => [
-			'prefer_bento' => amp_is_bento_enabled(),
+			'prefer_bento'                  => amp_is_bento_enabled(),
+			'allow_localhost_http_protocol' => amp_is_dev_mode(),
 		],
 	];
 
