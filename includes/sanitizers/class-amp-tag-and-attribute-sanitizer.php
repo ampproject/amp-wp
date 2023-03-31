@@ -1947,7 +1947,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
 					$url_scheme = $this->parse_protocol( $this->normalize_url_from_attribute_value( $url ) );
-					if ( self::LOCALHOST === wp_parse_url( $url, PHP_URL_HOST ) && $this->args['allow_localhost_http_protocol'] ) {
+					if ( $this->args['allow_localhost_http_protocol'] && self::LOCALHOST === wp_parse_url( $url, PHP_URL_HOST ) ) {
 						return AMP_Rule_Spec::PASS;
 					} elseif ( isset( $url_scheme ) && ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
 						return AMP_Rule_Spec::FAIL;
@@ -1961,7 +1961,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $alternative_name ), $attr_name ) as $url ) {
 							$url_scheme = $this->parse_protocol( $this->normalize_url_from_attribute_value( $url ) );
-							if ( self::LOCALHOST === wp_parse_url( $url, PHP_URL_HOST ) && $this->args['allow_localhost_http_protocol'] ) {
+							if ( $this->args['allow_localhost_http_protocol'] && self::LOCALHOST === wp_parse_url( $url, PHP_URL_HOST ) ) {
 								return AMP_Rule_Spec::PASS;
 							} elseif ( isset( $url_scheme ) && ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
 								return AMP_Rule_Spec::FAIL;
