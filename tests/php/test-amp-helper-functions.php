@@ -1924,6 +1924,13 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		// Test on localhost with HTTP.
 		$_SERVER['HTTPS'] = false;
 
+		add_filter(
+			'home_url',
+			static function () {
+				return 'http://localhost';
+			}
+		);
+
 		$this->assertFalse( is_ssl() );
 		$this->assertTrue( amp_is_dev_mode() );
 		$this->assertTrue( 'localhost' === wp_parse_url( home_url(), PHP_URL_HOST ) );
