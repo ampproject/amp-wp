@@ -184,6 +184,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			'amp_globally_allowed_attributes' => AMP_Allowed_Tags_Generated::get_allowed_attributes(),
 			'amp_layout_allowed_attributes'   => AMP_Allowed_Tags_Generated::get_layout_attributes(),
 			'prefer_bento'                    => false,
+			'allow_localhost_http_protocol'   => false,
 		];
 
 		parent::__construct( $dom, $args );
