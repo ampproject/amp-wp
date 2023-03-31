@@ -5,6 +5,8 @@
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\Html\Attribute;
+use AmpProject\Validator\Spec\Tag\Html;
 
 class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends TestCase {
 
@@ -1786,6 +1788,52 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends TestCase {
 		$got = $this->call_private_method( $sanitizer, 'check_attr_spec_rule_allowed_protocol', [ $node, $data['attr_name'], $data['attr_spec_rule'] ] );
 
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
+	}
+
+	/**
+	 * Test `check_attr_spec_rule_allowed_protocol()` with `allow_localhost_http_protocol` arg.
+	 *
+	 * @covers AMP_Tag_And_Attribute_Sanitizer::check_attr_spec_rule_allowed_protocol()
+	 * @group allowed-tags-private-methods
+	 */
+	public function test_check_attr_spec_rule_allowed_protocol_with_allow_localhost_http_protocol() {
+		$dom            = AMP_DOM_Utils::get_dom_from_content(
+			'<amp-autocomplete filter="substring"
+				src="http://localhost/static/samples/json/amp-autocomplete-cities.json">
+				<input>
+			</amp-autocomplete>'
+		);
+		$node           = $dom->getElementsByTagName( 'amp-autocomplete' )->item( 0 );
+		$attr           = Attribute::SRC;
+		$attr_spec_rule = [
+			'value_url' => [
+				'allow_relative' => true,
+				'protocol' => [
+					'https',
+				],
+			],
+		];
+		$sanitizer      = new AMP_Tag_And_Attribute_Sanitizer(
+			$dom,
+			[
+				'allow_localhost_http_protocol' => true,
+			]
+		);
+
+		$got = $this->call_private_method( $sanitizer, 'check_attr_spec_rule_allowed_protocol', [ $node, $attr, $attr_spec_rule ] );
+
+		$this->assertEquals( AMP_Rule_Spec::PASS, $got );
+
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
+			$dom,
+			[
+				'allow_localhost_http_protocol' => false,
+			]
+		);
+
+		$got = $this->call_private_method( $sanitizer, 'check_attr_spec_rule_allowed_protocol', [ $node, $attr, $attr_spec_rule ] );
+
+		$this->assertEquals( AMP_Rule_Spec::FAIL, $got );
 	}
 
 	public function get_check_attr_spec_rule_disallowed_relative() {
