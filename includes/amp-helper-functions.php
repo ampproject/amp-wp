@@ -1532,6 +1532,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 	);
 
+	$is_dev_mode     = amp_is_dev_mode();
 	$native_img_used = amp_is_native_img_used();
 
 	$sanitizers = [
@@ -1601,7 +1602,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		// Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 		AMP_Tag_And_Attribute_Sanitizer::class     => [
 			'prefer_bento'                  => amp_is_bento_enabled(),
-			'allow_localhost_http_protocol' => amp_is_dev_mode(),
+			'allow_localhost_http_protocol' => $is_dev_mode,
 		],
 	];
 
@@ -1662,7 +1663,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$sanitizers = apply_filters( 'amp_content_sanitizers', $sanitizers, $post );
 
-	if ( amp_is_dev_mode() ) {
+	if ( $is_dev_mode ) {
 		/**
 		 * Filters the XPath queries for elements that should be enabled for dev mode.
 		 *
