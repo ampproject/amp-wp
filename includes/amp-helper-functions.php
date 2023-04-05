@@ -1454,11 +1454,11 @@ function amp_is_dev_mode() {
 			(
 				! is_ssl()
 				&&
-				(
-					( function_exists( 'wp_get_environment_type' ) && 'local' === wp_get_environment_type() )
-					||
-					'localhost' === wp_parse_url( home_url(), PHP_URL_HOST )
-				)
+				function_exists( 'wp_get_environment_type' )
+				&&
+				'local' === wp_get_environment_type()
+				&&
+				'localhost' === wp_parse_url( home_url(), PHP_URL_HOST )
 			)
 		)
 	);
