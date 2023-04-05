@@ -703,7 +703,7 @@ class SupportData {
 				if ( ! $amp_validated_post ) {
 					$validity = AMP_Validation_Manager::validate_url_and_store( $url );
 
-					if ( ! is_array( $validity ) || is_wp_error( $validity ) ) {
+					if ( is_wp_error( $validity ) || ! is_array( $validity ) ) {
 						continue;
 					}
 

@@ -34,17 +34,6 @@ $ignore_errors_in_class_amp_allowed_tags_generated = [
 ];
 
 /**
- * Errors due to `Property _WP_Dependency::$src (string) does not accept false.` in PHPStan.
- */
-$ignore_errors_due_to_property_wp_dependency_src_does_not_accept_false = [
-	[
-		'message' => '#^Property _WP_Dependency\\:\\:\\$src \\(string\\) does not accept false\\.$#',
-		'count'   => 1,
-		'path'    => __DIR__ . '/includes/sanitizers/class-amp-core-theme-sanitizer.php',
-	],
-];
-
-/**
  * Errors due to `Instanceof always evaluate to false`` in PHPStan.
  *
  * @see https://github.com/phpstan/phpstan/issues/3632
@@ -99,7 +88,6 @@ return [
 	'parameters' => [
 		'ignoreErrors' => array_merge(
 			$ignore_errors_in_class_amp_allowed_tags_generated,
-			$ignore_errors_due_to_property_wp_dependency_src_does_not_accept_false,
 			$ignore_errors_due_to_instanceof_always_evaluating_to_false,
 			$ignore_errors_due_to_function_and_method_exists_always_evaluating_to_true
 		),
