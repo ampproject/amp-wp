@@ -1897,10 +1897,6 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	public function test_amp_is_dev_mode() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 
-		// `amp_is_dev_mode()` uses `is_ssl()` so enable HTTPS, so it doesn't interfere with the usage of
-		// dev mode while showing admin bar or customizer screen.
-		$_SERVER['HTTPS'] = 'on';
-
 		$this->assertFalse( amp_is_dev_mode() );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		$this->assertTrue( amp_is_dev_mode() );
@@ -1921,22 +1917,24 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->assertTrue( is_admin_bar_showing() );
 		$this->assertFalse( amp_is_dev_mode() );
 
-		// Test on localhost with HTTP.
-		$_SERVER['HTTPS'] = false;
-
-		add_filter(
-			'home_url',
-			static function () {
-				return 'http://localhost';
-			}
-		);
-
-		$this->assertFalse( is_ssl() );
-		$this->assertTrue( amp_is_dev_mode() );
-		$this->assertTrue( 'localhost' === wp_parse_url( home_url(), PHP_URL_HOST ) );
-
 		if ( function_exists( 'wp_get_environment_type' ) ) {
+			// Just to ensure is_ssl() is false.
+			$_SERVER['HTTPS'] = false;
+
+			add_filter(
+				'home_url',
+				static function () {
+					return 'http://localhost';
+				}
+			);
+
+			$this->assertFalse( is_ssl() );
+			$this->assertTrue( amp_is_dev_mode() );
 			$this->assertEquals( 'local', wp_get_environment_type() );
+			$this->assertTrue( 'localhost' === wp_parse_url( home_url(), PHP_URL_HOST ) );
+		} else {
+			$this->assertFalse( amp_is_dev_mode() );
+			$this->assertFalse( function_exists( 'wp_get_environment_type' ) );
 		}
 	}
 
@@ -1979,10 +1977,6 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	public function test_amp_get_content_sanitizers() {
 		$post = self::factory()->post->create_and_get();
 		add_filter( 'amp_content_sanitizers', [ $this, 'capture_filter_call' ], 10, 2 );
-
-		// `amp_is_dev_mode()` uses `is_ssl()` so enable HTTPS, so it doesn't interfere with the usage of
-		// dev mode while showing admin bar or customizer screen.
-		$_SERVER['HTTPS'] = 'on';
 
 		$this->last_filter_call = null;
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
@@ -2059,10 +2053,6 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 				return array_merge( $xpaths, $element_xpaths );
 			}
 		);
-
-		// `amp_is_dev_mode()` uses `is_ssl()` so enable HTTPS, so it doesn't interfere with the usage of
-		// dev mode while showing admin bar or customizer screen.
-		$_SERVER['HTTPS'] = 'on';
 
 		// Check that AMP_Dev_Mode_Sanitizer is not registered if not in dev mode.
 		$sanitizers = amp_get_content_sanitizers();
