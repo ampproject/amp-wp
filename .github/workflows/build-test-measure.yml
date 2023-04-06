@@ -542,6 +542,10 @@ jobs:
         if: needs.pre-run.outputs.changed-php-count > 0
         run: cp -r "$PWD" "$WP_CORE_DIR/src/wp-content/plugins/amp"
 
+      - name: Setup required WP constants
+        run: |
+          echo "WP_ENVIRONMENT_TYPE=local" >> $GITHUB_ENV
+
       - name: Run tests
         if: ${{ matrix.coverage == false && needs.pre-run.outputs.changed-php-count > 0 }}
         run: vendor/bin/phpunit --verbose

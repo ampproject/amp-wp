@@ -5,6 +5,8 @@
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\Html\Attribute;
+use AmpProject\Validator\Spec\Tag\Html;
 
 class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends TestCase {
 
@@ -1782,6 +1784,183 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends TestCase {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+
+		$got = $this->call_private_method( $sanitizer, 'check_attr_spec_rule_allowed_protocol', [ $node, $data['attr_name'], $data['attr_spec_rule'] ] );
+
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
+	}
+
+	/** @return array */
+	public function get_check_attr_spec_rule_allowed_protocol_with_allow_localhost_http_protocol() {
+		return [
+			'protocol_pass_and_allow_localhost_http_protocol'               => [
+				[
+					'source'         => '<div attribute1="http://localhost"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
+					'attr_spec_rule' => [
+						'value_url' => [
+							'protocol' => [
+								'https',
+							],
+						],
+					],
+				],
+				AMP_Rule_Spec::PASS,
+				true,
+			],
+			'protocol_alternative_pass_and_allow_localhost_http_protocol'   => [
+				[
+					'source'         => '<div attribute1_alternative1="http://localhost"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
+					'attr_spec_rule' => [
+						'alternative_names' => [
+							'attribute1_alternative1',
+						],
+						'value_url'         => [
+							'protocol' => [
+								'https',
+							],
+						],
+					],
+				],
+				AMP_Rule_Spec::PASS,
+				true,
+			],
+			'protocol_pass_and_allow_localhost_http_protocol_with_cross_origin_url'               => [
+				[
+					'source'         => '<div attribute1="http://example.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
+					'attr_spec_rule' => [
+						'value_url' => [
+							'protocol' => [
+								'https',
+							],
+						],
+					],
+				],
+				AMP_Rule_Spec::FAIL,
+				true,
+			],
+			'protocol_alternative_pass_and_allow_localhost_http_protocol_with_cross_origin_url'   => [
+				[
+					'source'         => '<div attribute1_alternative1="http://example.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
+					'attr_spec_rule' => [
+						'alternative_names' => [
+							'attribute1_alternative1',
+						],
+						'value_url'         => [
+							'protocol' => [
+								'https',
+							],
+						],
+					],
+				],
+				AMP_Rule_Spec::FAIL,
+				true,
+			],
+			'protocol_pass_and_disallow_localhost_http_protocol'            => [
+				[
+					'source'         => '<div attribute1="http://localhost"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
+					'attr_spec_rule' => [
+						'value_url' => [
+							'protocol' => [
+								'https',
+							],
+						],
+					],
+				],
+				AMP_Rule_Spec::FAIL,
+				false,
+			],
+			'protocol_alternative_pass_and_disallow_localhost_http_protocol' => [
+				[
+					'source'         => '<div attribute1_alternative1="http://localhost"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
+					'attr_spec_rule' => [
+						'alternative_names' => [
+							'attribute1_alternative1',
+						],
+						'value_url'         => [
+							'protocol' => [
+								'https',
+							],
+						],
+					],
+				],
+				AMP_Rule_Spec::FAIL,
+				false,
+			],
+			'protocol_pass_and_disallow_localhost_http_protocol_with_cross_origin_url'            => [
+				[
+					'source'         => '<div attribute1="http://example.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
+					'attr_spec_rule' => [
+						'value_url' => [
+							'protocol' => [
+								'https',
+							],
+						],
+					],
+				],
+				AMP_Rule_Spec::FAIL,
+				false,
+			],
+			'protocol_alternative_pass_and_disallow_localhost_http_protocol_with_cross_origin_url' => [
+				[
+					'source'         => '<div attribute1_alternative1="http://example"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
+					'attr_spec_rule' => [
+						'alternative_names' => [
+							'attribute1_alternative1',
+						],
+						'value_url'         => [
+							'protocol' => [
+								'https',
+							],
+						],
+					],
+				],
+				AMP_Rule_Spec::FAIL,
+				false,
+			],
+		];
+	}
+
+	/**
+	 * Test `check_attr_spec_rule_allowed_protocol()` with `allow_localhost_http_protocol` arg.
+	 *
+	 * @dataProvider get_check_attr_spec_rule_allowed_protocol_with_allow_localhost_http_protocol
+	 *
+	 * @covers AMP_Tag_And_Attribute_Sanitizer::check_attr_spec_rule_allowed_protocol()
+	 * @group allowed-tags-private-methods
+	 *
+	 * @param array $data The data.
+	 * @param int   $expected The expected result.
+	 * @param bool  $allow_localhost_http_protocol Whether to allow localhost http protocol.
+	 */
+	public function test_check_attr_spec_rule_allowed_protocol_with_allow_localhost_http_protocol(
+		$data,
+		$expected,
+		$allow_localhost_http_protocol
+	) {
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
+		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
+			$dom,
+			[
+				'allow_localhost_http_protocol' => $allow_localhost_http_protocol,
+			]
+		);
 
 		$got = $this->call_private_method( $sanitizer, 'check_attr_spec_rule_allowed_protocol', [ $node, $data['attr_name'], $data['attr_spec_rule'] ] );
 

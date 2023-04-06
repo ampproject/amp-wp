@@ -1450,6 +1450,16 @@ function amp_is_dev_mode() {
 			( is_admin_bar_showing() && is_user_logged_in() )
 			||
 			is_customize_preview()
+			||
+			(
+				! is_ssl()
+				&&
+				function_exists( 'wp_get_environment_type' )
+				&&
+				'local' === wp_get_environment_type()
+				&&
+				'localhost' === wp_parse_url( home_url(), PHP_URL_HOST )
+			)
 		)
 	);
 }
@@ -1522,6 +1532,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 	);
 
+	$is_dev_mode     = amp_is_dev_mode();
 	$native_img_used = amp_is_native_img_used();
 
 	$sanitizers = [
@@ -1590,7 +1601,8 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Accessibility_Sanitizer::class         => [],
 		// Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 		AMP_Tag_And_Attribute_Sanitizer::class     => [
-			'prefer_bento' => amp_is_bento_enabled(),
+			'prefer_bento'                  => amp_is_bento_enabled(),
+			'allow_localhost_http_protocol' => $is_dev_mode,
 		],
 	];
 
@@ -1651,7 +1663,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$sanitizers = apply_filters( 'amp_content_sanitizers', $sanitizers, $post );
 
-	if ( amp_is_dev_mode() ) {
+	if ( $is_dev_mode ) {
 		/**
 		 * Filters the XPath queries for elements that should be enabled for dev mode.
 		 *
@@ -1694,6 +1706,11 @@ function amp_get_content_sanitizers( $post = null ) {
 				'//script[ not( @src ) and contains( text(), "document.location.search" ) and contains( text(), "preview=true" ) and contains( text(), "unload" ) and contains( text(), "window.name" ) and contains( text(), "wp-preview-%d" ) ]',
 				get_queried_object_id()
 			);
+		}
+
+		// Mark the manifest output by PWA plugin as being in dev mode.
+		if ( ! is_ssl() && 'localhost' === $parsed_home_url['host'] ) {
+			$dev_mode_xpaths[] = '//link[@rel="manifest" and contains(@href, "web-app-manifest")]';
 		}
 
 		$sanitizers = array_merge(
