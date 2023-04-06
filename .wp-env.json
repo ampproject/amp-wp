@@ -1,6 +1,6 @@
 {
   "core": "WordPress/WordPress#master",
-  "phpVersion": "7.4",
+  "phpVersion": "8.0",
   "env": {
     "development": {
       "plugins": [
