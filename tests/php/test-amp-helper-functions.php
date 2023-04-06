@@ -2134,6 +2134,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 				'//*[ @id = "wpadminbar" ]//*',
 				'//style[ @id = "admin-bar-inline-css" ]',
 				'//script[ not( @src ) and contains( text(), "document.location.search" ) and contains( text(), "preview=true" ) and contains( text(), "unload" ) and contains( text(), "window.name" ) and contains( text(), "wp-preview-' . $post . '" ) ]',
+				'//link[@rel="manifest" and contains(@href, "web-app-manifest")]',
 			],
 			$sanitizers[ AMP_Dev_Mode_Sanitizer::class ]['element_xpaths']
 		);
