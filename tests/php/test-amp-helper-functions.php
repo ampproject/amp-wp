@@ -1897,6 +1897,10 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	public function test_amp_is_dev_mode() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 
+		// Enabale HTTPS to short circuit `amp_is_dev_mode()` in multiste tests which depends on wp-env.
+		// We require it because wp-env already meets the prerequisites for local development.
+		$_SERVER['HTTPS'] = 'on';
+
 		$this->assertFalse( amp_is_dev_mode() );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		$this->assertTrue( amp_is_dev_mode() );
@@ -1978,6 +1982,10 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$post = self::factory()->post->create_and_get();
 		add_filter( 'amp_content_sanitizers', [ $this, 'capture_filter_call' ], 10, 2 );
 
+		// Enabale HTTPS to short circuit `amp_is_dev_mode()` in multiste tests which depends on wp-env.
+		// We require it because wp-env already meets the prerequisites for local development.
+		$_SERVER['HTTPS'] = 'on';
+
 		$this->last_filter_call = null;
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$handlers = amp_get_content_sanitizers();
@@ -2053,6 +2061,10 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 				return array_merge( $xpaths, $element_xpaths );
 			}
 		);
+
+		// Enabale HTTPS to short circuit `amp_is_dev_mode()` in multiste tests which depends on wp-env.
+		// We require it because wp-env already meets the prerequisites for local development.
+		$_SERVER['HTTPS'] = 'on';
 
 		// Check that AMP_Dev_Mode_Sanitizer is not registered if not in dev mode.
 		$sanitizers = amp_get_content_sanitizers();
