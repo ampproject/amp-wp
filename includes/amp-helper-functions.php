@@ -1708,6 +1708,11 @@ function amp_get_content_sanitizers( $post = null ) {
 			);
 		}
 
+		// Mark the manifest output by PWA plugin as being in dev mode.
+		if ( ! is_ssl() && 'localhost' === $parsed_home_url['host'] ) {
+			$dev_mode_xpaths[] = '//link[@rel="manifest" and contains(@href, "web-app-manifest")]';
+		}
+
 		$sanitizers = array_merge(
 			[
 				AMP_Dev_Mode_Sanitizer::class => [
