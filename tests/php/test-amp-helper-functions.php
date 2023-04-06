@@ -2123,6 +2123,13 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		);
 		$this->go_to( get_preview_post_link( $post ) );
 
+		add_filter(
+			'home_url',
+			static function () {
+				return 'http://localhost';
+			}
+		);
+
 		$sanitizers = amp_get_content_sanitizers();
 		$this->assertTrue( is_admin_bar_showing() );
 		$this->assertTrue( amp_is_dev_mode() );
