@@ -6064,16 +6064,16 @@
         },
         {
             "name": "wp-cli/core-command",
-            "version": "v2.1.9",
+            "version": "v2.1.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/core-command.git",
-                "reference": "33b3ba0c03efa9f280bab59107532272ac2a4235"
+                "reference": "181f41645a8ca869d886a0ce84fbde2008bdab9f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/core-command/zipball/33b3ba0c03efa9f280bab59107532272ac2a4235",
-                "reference": "33b3ba0c03efa9f280bab59107532272ac2a4235",
+                "url": "https://api.github.com/repos/wp-cli/core-command/zipball/181f41645a8ca869d886a0ce84fbde2008bdab9f",
+                "reference": "181f41645a8ca869d886a0ce84fbde2008bdab9f",
                 "shasum": ""
             },
             "require": {
@@ -6129,9 +6129,9 @@
             "homepage": "https://github.com/wp-cli/core-command",
             "support": {
                 "issues": "https://github.com/wp-cli/core-command/issues",
-                "source": "https://github.com/wp-cli/core-command/tree/v2.1.9"
+                "source": "https://github.com/wp-cli/core-command/tree/v2.1.10"
             },
-            "time": "2023-02-17T16:33:19+00:00"
+            "time": "2023-04-10T13:44:51+00:00"
         },
         {
             "name": "wp-cli/eval-command",
@@ -6405,16 +6405,16 @@
         },
         {
             "name": "wp-cli/php-cli-tools",
-            "version": "v0.11.17",
+            "version": "v0.11.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/php-cli-tools.git",
-                "reference": "f6be76b7c4ee2ef93c9531b8a37bdb7ce42c3728"
+                "reference": "0f503a790698cb36cf835e5c8d09cd4b64bf2325"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/php-cli-tools/zipball/f6be76b7c4ee2ef93c9531b8a37bdb7ce42c3728",
-                "reference": "f6be76b7c4ee2ef93c9531b8a37bdb7ce42c3728",
+                "url": "https://api.github.com/repos/wp-cli/php-cli-tools/zipball/0f503a790698cb36cf835e5c8d09cd4b64bf2325",
+                "reference": "0f503a790698cb36cf835e5c8d09cd4b64bf2325",
                 "shasum": ""
             },
             "require": {
@@ -6462,9 +6462,9 @@
             ],
             "support": {
                 "issues": "https://github.com/wp-cli/php-cli-tools/issues",
-                "source": "https://github.com/wp-cli/php-cli-tools/tree/v0.11.17"
+                "source": "https://github.com/wp-cli/php-cli-tools/tree/v0.11.18"
             },
-            "time": "2023-01-12T01:18:21+00:00"
+            "time": "2023-04-04T16:03:53+00:00"
         },
         {
             "name": "wp-cli/wp-cli",
@@ -6539,16 +6539,16 @@
         },
         {
             "name": "wp-cli/wp-cli-tests",
-            "version": "v3.2.1",
+            "version": "v3.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/wp-cli-tests.git",
-                "reference": "ff44534e2899cec53cd9fd6a238d73b0c930bca5"
+                "reference": "c606e4303a35a34bd04ae74c22b4d53d07d272fe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/wp-cli-tests/zipball/ff44534e2899cec53cd9fd6a238d73b0c930bca5",
-                "reference": "ff44534e2899cec53cd9fd6a238d73b0c930bca5",
+                "url": "https://api.github.com/repos/wp-cli/wp-cli-tests/zipball/c606e4303a35a34bd04ae74c22b4d53d07d272fe",
+                "reference": "c606e4303a35a34bd04ae74c22b4d53d07d272fe",
                 "shasum": ""
             },
             "require": {
@@ -6614,7 +6614,7 @@
                 "issues": "https://github.com/wp-cli/wp-cli-tests/issues",
                 "source": "https://github.com/wp-cli/wp-cli-tests"
             },
-            "time": "2023-02-17T16:04:00+00:00"
+            "time": "2023-04-06T00:01:51+00:00"
         },
         {
             "name": "wp-cli/wp-config-transformer",
@@ -6713,16 +6713,16 @@
         },
         {
             "name": "yoast/phpunit-polyfills",
-            "version": "1.0.4",
+            "version": "1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Yoast/PHPUnit-Polyfills.git",
-                "reference": "3c621ff5429d2b1ff96dc5808ad6cde99d31ea4c"
+                "reference": "3b59adeef77fb1c03ff5381dbb9d68b0aaff3171"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Yoast/PHPUnit-Polyfills/zipball/3c621ff5429d2b1ff96dc5808ad6cde99d31ea4c",
-                "reference": "3c621ff5429d2b1ff96dc5808ad6cde99d31ea4c",
+                "url": "https://api.github.com/repos/Yoast/PHPUnit-Polyfills/zipball/3b59adeef77fb1c03ff5381dbb9d68b0aaff3171",
+                "reference": "3b59adeef77fb1c03ff5381dbb9d68b0aaff3171",
                 "shasum": ""
             },
             "require": {
@@ -6730,13 +6730,12 @@
                 "phpunit/phpunit": "^4.8.36 || ^5.7.21 || ^6.0 || ^7.0 || ^8.0 || ^9.0"
             },
             "require-dev": {
-                "yoast/yoastcs": "^2.2.1"
+                "yoast/yoastcs": "^2.3.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "1.x-dev",
-                    "dev-develop": "1.x-dev"
+                    "dev-main": "2.x-dev"
                 }
             },
             "autoload": {
@@ -6770,7 +6769,7 @@
                 "issues": "https://github.com/Yoast/PHPUnit-Polyfills/issues",
                 "source": "https://github.com/Yoast/PHPUnit-Polyfills"
             },
-            "time": "2022-11-16T09:07:52+00:00"
+            "time": "2023-03-30T23:39:05+00:00"
         },
         {
             "name": "yoast/wp-test-utils",
