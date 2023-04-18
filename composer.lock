@@ -6256,16 +6256,16 @@
         },
         {
             "name": "wp-cli/extension-command",
-            "version": "v2.1.12",
+            "version": "v2.1.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/extension-command.git",
-                "reference": "31ebccb1dfb9d7fdb60d495fd724385f75caa140"
+                "reference": "e92390ce3a0d95f534ab6c88f9a77bfd4615de47"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/extension-command/zipball/31ebccb1dfb9d7fdb60d495fd724385f75caa140",
-                "reference": "31ebccb1dfb9d7fdb60d495fd724385f75caa140",
+                "url": "https://api.github.com/repos/wp-cli/extension-command/zipball/e92390ce3a0d95f534ab6c88f9a77bfd4615de47",
+                "reference": "e92390ce3a0d95f534ab6c88f9a77bfd4615de47",
                 "shasum": ""
             },
             "require": {
@@ -6348,9 +6348,9 @@
             "homepage": "https://github.com/wp-cli/extension-command",
             "support": {
                 "issues": "https://github.com/wp-cli/extension-command/issues",
-                "source": "https://github.com/wp-cli/extension-command/tree/v2.1.12"
+                "source": "https://github.com/wp-cli/extension-command/tree/v2.1.13"
             },
-            "time": "2023-03-03T14:38:19+00:00"
+            "time": "2023-04-04T21:39:30+00:00"
         },
         {
             "name": "wp-cli/mustangostang-spyc",
@@ -6405,16 +6405,16 @@
         },
         {
             "name": "wp-cli/php-cli-tools",
-            "version": "v0.11.17",
+            "version": "v0.11.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/php-cli-tools.git",
-                "reference": "f6be76b7c4ee2ef93c9531b8a37bdb7ce42c3728"
+                "reference": "0f503a790698cb36cf835e5c8d09cd4b64bf2325"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/php-cli-tools/zipball/f6be76b7c4ee2ef93c9531b8a37bdb7ce42c3728",
-                "reference": "f6be76b7c4ee2ef93c9531b8a37bdb7ce42c3728",
+                "url": "https://api.github.com/repos/wp-cli/php-cli-tools/zipball/0f503a790698cb36cf835e5c8d09cd4b64bf2325",
+                "reference": "0f503a790698cb36cf835e5c8d09cd4b64bf2325",
                 "shasum": ""
             },
             "require": {
@@ -6462,9 +6462,9 @@
             ],
             "support": {
                 "issues": "https://github.com/wp-cli/php-cli-tools/issues",
-                "source": "https://github.com/wp-cli/php-cli-tools/tree/v0.11.17"
+                "source": "https://github.com/wp-cli/php-cli-tools/tree/v0.11.18"
             },
-            "time": "2023-01-12T01:18:21+00:00"
+            "time": "2023-04-04T16:03:53+00:00"
         },
         {
             "name": "wp-cli/wp-cli",
