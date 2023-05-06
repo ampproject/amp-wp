@@ -7,7 +7,7 @@ import { restEndpoint, args, data, ampValidatedPostCount } from 'amp-support'; /
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { render } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -26,14 +26,14 @@ domReady(() => {
 	const errorHandler = (event) => {
 		// Handle only own errors.
 		if (event.filename && /amp-support(\.min)?\.js/.test(event.filename)) {
-			render(<ErrorScreen error={event.error} />, root);
+			createRoot(root).render(<ErrorScreen error={event.error} />);
 		}
 	};
 
 	global.addEventListener('error', errorHandler);
 
 	if (root) {
-		render(
+		createRoot(root).render(
 			<ErrorContextProvider>
 				<ErrorBoundary>
 					<AMPSupport
@@ -43,8 +43,7 @@ domReady(() => {
 						ampValidatedPostCount={ampValidatedPostCount}
 					/>
 				</ErrorBoundary>
-			</ErrorContextProvider>,
-			root
+			</ErrorContextProvider>
 		);
 	}
 });
