@@ -93,7 +93,7 @@
     "postcss-nested": "6.0.1",
     "postcss-preset-env": "8.3.2",
     "prettier": "2.8.8",
-    "react-test-renderer": "17.0.2",
+    "react-test-renderer": "18.2.0",
     "rtlcss-webpack-plugin": "4.0.7",
     "semver": "7.5.0",
     "svgo": "3.0.2",
