@@ -12,7 +12,7 @@ exports[`ErrorScreen matches snapshot 1`] = `
     </h1>
     <p
       dangerouslySetInnerHTML={
-        Object {
+        {
           "__html": "The application failed",
         }
       }

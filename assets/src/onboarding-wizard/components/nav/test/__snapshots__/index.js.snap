@@ -26,7 +26,7 @@ exports[`Nav matches snapshot 1`] = `
             id="close-icon"
             maskUnits="userSpaceOnUse"
             style={
-              Object {
+              {
                 "maskType": "alpha",
               }
             }

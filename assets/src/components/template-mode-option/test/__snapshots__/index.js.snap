@@ -141,7 +141,7 @@ exports[`TemplateModeOption matches snapshot 1`] = `
           data-wp-c16t={true}
           data-wp-component="VisuallyHidden"
           style={
-            Object {
+            {
               "WebkitClipPath": "inset( 50% )",
               "border": 0,
               "clip": "rect(1px, 1px, 1px, 1px)",
@@ -404,7 +404,7 @@ exports[`TemplateModeOption matches snapshot 2`] = `
           data-wp-c16t={true}
           data-wp-component="VisuallyHidden"
           style={
-            Object {
+            {
               "WebkitClipPath": "inset( 50% )",
               "border": 0,
               "clip": "rect(1px, 1px, 1px, 1px)",
@@ -695,7 +695,7 @@ exports[`TemplateModeOption matches snapshot 3`] = `
           data-wp-c16t={true}
           data-wp-component="VisuallyHidden"
           style={
-            Object {
+            {
               "WebkitClipPath": "inset( 50% )",
               "border": 0,
               "clip": "rect(1px, 1px, 1px, 1px)",

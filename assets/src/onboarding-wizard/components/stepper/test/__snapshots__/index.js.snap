@@ -16,7 +16,7 @@ exports[`StepperBullet matches snaphnot when neither index nor active index are 
       id="mask-1"
       maskUnits="userSpaceOnUse"
       style={
-        Object {
+        {
           "maskType": "alpha",
         }
       }
@@ -67,7 +67,7 @@ exports[`StepperBullet matches snapshot when index is 0 and active index is some
       id="mask-0"
       maskUnits="userSpaceOnUse"
       style={
-        Object {
+        {
           "maskType": "alpha",
         }
       }
