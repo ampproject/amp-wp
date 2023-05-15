@@ -11,7 +11,7 @@ import {
 /**
  * WordPress dependencies
  */
-import { registerStore } from '@wordpress/data';
+import { createReduxStore, register } from '@wordpress/data';
 
 export const BLOCK_VALIDATION_STORE_KEY = 'amp/block-validation';
 
@@ -187,10 +187,13 @@ export function getStore(initialState) {
 }
 
 /**
- * Register the store for block validation.
+ * Create a store for block validation.
  *
  * @param {Object} initialState Initial store state.
  */
-export function createStore(initialState) {
-	registerStore(BLOCK_VALIDATION_STORE_KEY, getStore(initialState));
-}
+export const store = createReduxStore(
+	BLOCK_VALIDATION_STORE_KEY,
+	getStore(INITIAL_STATE)
+);
+
+register(store);
