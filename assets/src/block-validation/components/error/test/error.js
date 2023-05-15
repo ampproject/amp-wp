@@ -20,7 +20,7 @@ import { registerBlockType, createBlock } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { Error } from '../index';
-import { createStore } from '../../../store';
+import { store as blockValidationStore } from '../../../store';
 
 let pluginBlock, muPluginBlock, themeBlock, coreBlock, unknownBlock;
 
@@ -84,66 +84,65 @@ function createTestStoreAndBlocks() {
 		unknownBlock,
 	]);
 
-	createStore({
-		reviewLink: 'http://site.test/wp-admin',
-		validationErrors: [
-			{
-				clientId: pluginBlock.clientId,
-				code: 'DISALLOWED_TAG',
-				status: 3,
-				term_id: 12,
-				title: 'Invalid script: <code>jquery.js</code>',
-				error: {
-					type: 'js_error',
-					sources: [],
-				},
+	dispatch(blockValidationStore).setReviewLink('http://site.test/wp-admin');
+
+	dispatch(blockValidationStore).setValidationErrors([
+		{
+			clientId: pluginBlock.clientId,
+			code: 'DISALLOWED_TAG',
+			status: 3,
+			term_id: 12,
+			title: 'Invalid script: <code>jquery.js</code>',
+			error: {
+				type: 'js_error',
+				sources: [],
 			},
-			{
-				clientId: muPluginBlock.clientId,
-				code: 'DISALLOWED_TAG',
-				status: 3,
-				term_id: 12,
-				title: 'Invalid script: <code>jquery.js</code>',
-				error: {
-					type: 'js_error',
-					sources: [],
-				},
+		},
+		{
+			clientId: muPluginBlock.clientId,
+			code: 'DISALLOWED_TAG',
+			status: 3,
+			term_id: 12,
+			title: 'Invalid script: <code>jquery.js</code>',
+			error: {
+				type: 'js_error',
+				sources: [],
 			},
-			{
-				clientId: themeBlock.clientId,
-				code: 'DISALLOWED_TAG',
-				status: 3,
-				term_id: 12,
-				title: 'Invalid script: <code>jquery.js</code>',
-				error: {
-					type: 'js_error',
-					sources: [],
-				},
+		},
+		{
+			clientId: themeBlock.clientId,
+			code: 'DISALLOWED_TAG',
+			status: 3,
+			term_id: 12,
+			title: 'Invalid script: <code>jquery.js</code>',
+			error: {
+				type: 'js_error',
+				sources: [],
 			},
-			{
-				clientId: coreBlock.clientId,
-				code: 'DISALLOWED_TAG',
-				status: 3,
-				term_id: 12,
-				title: 'Invalid script: <code>jquery.js</code>',
-				error: {
-					type: 'js_error',
-					sources: [],
-				},
+		},
+		{
+			clientId: coreBlock.clientId,
+			code: 'DISALLOWED_TAG',
+			status: 3,
+			term_id: 12,
+			title: 'Invalid script: <code>jquery.js</code>',
+			error: {
+				type: 'js_error',
+				sources: [],
 			},
-			{
-				clientId: unknownBlock.clientId,
-				code: 'DISALLOWED_TAG',
-				status: 3,
-				term_id: 12,
-				title: 'Invalid script: <code>jquery.js</code>',
-				error: {
-					type: 'js_error',
-					sources: [],
-				},
+		},
+		{
+			clientId: unknownBlock.clientId,
+			code: 'DISALLOWED_TAG',
+			status: 3,
+			term_id: 12,
+			title: 'Invalid script: <code>jquery.js</code>',
+			error: {
+				type: 'js_error',
+				sources: [],
 			},
-		],
-	});
+		},
+	]);
 }
 
 function getTestBlock(type) {

@@ -18,7 +18,7 @@ import {
  * Internal dependencies
  */
 import { usePostDirtyStateChanges } from '../use-post-dirty-state-changes';
-import { BLOCK_VALIDATION_STORE_KEY, createStore } from '../../store';
+import { store as blockValidationStore } from '../../store';
 
 jest.mock('@wordpress/data/build/components/use-select', () => jest.fn());
 jest.mock('@wordpress/compose/build/hooks/use-debounce', () => (fn) => fn);
@@ -40,16 +40,12 @@ describe('usePostDirtyStateChanges', () => {
 		useSelect.mockImplementation(() => ({
 			getEditedPostContent,
 			isSavingOrPreviewingPost: false,
-			isPostDirty: select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty(),
+			isPostDirty: select(blockValidationStore).getIsPostDirty(),
 			...overrides,
 		}));
 	}
 
 	beforeAll(() => {
-		createStore({
-			isPostDirty: false,
-		});
-
 		register(
 			createReduxStore('test/use-post-dirty-state-updates', {
 				reducer: (state = {}) => ({ ...state }),
@@ -67,7 +63,7 @@ describe('usePostDirtyStateChanges', () => {
 
 		renderComponentContainingHook();
 
-		expect(select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty()).toBe(false);
+		expect(select(blockValidationStore).getIsPostDirty()).toBe(false);
 
 		// Change content - post should become dirty.
 		getEditedPostContent.mockReturnValue('foo');
@@ -76,7 +72,7 @@ describe('usePostDirtyStateChanges', () => {
 			dispatch('test/use-post-dirty-state-updates').change();
 		});
 
-		expect(select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty()).toBe(true);
+		expect(select(blockValidationStore).getIsPostDirty()).toBe(true);
 
 		// Save post - dirty state should get cleared.
 		setupUseSelect({
@@ -85,7 +81,7 @@ describe('usePostDirtyStateChanges', () => {
 
 		renderComponentContainingHook();
 
-		expect(select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty()).toBe(false);
+		expect(select(blockValidationStore).getIsPostDirty()).toBe(false);
 
 		// Change content - getEditedPostContent() should be called again
 		getEditedPostContent.mockReturnValue('baz');
@@ -99,6 +95,6 @@ describe('usePostDirtyStateChanges', () => {
 			dispatch('test/use-post-dirty-state-updates').change();
 		});
 
-		expect(select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty()).toBe(true);
+		expect(select(blockValidationStore).getIsPostDirty()).toBe(true);
 	});
 });

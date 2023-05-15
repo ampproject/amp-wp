@@ -6,95 +6,63 @@ import { dispatch, select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import {
-	BLOCK_VALIDATION_STORE_KEY,
-	createStore,
-	INITIAL_STATE,
-} from '../index';
+import { store as blockValidationStore } from '../index';
 import { rawValidationErrors } from './__data__/raw-validation-errors';
 
 describe('Block validation data store', () => {
-	beforeEach(() => {
-		createStore(INITIAL_STATE);
-	});
-
 	it('sets and selects state correctly', () => {
-		dispatch(BLOCK_VALIDATION_STORE_KEY).setIsShowingReviewed(true);
-		expect(select(BLOCK_VALIDATION_STORE_KEY).getIsShowingReviewed()).toBe(
-			true
-		);
-		dispatch(BLOCK_VALIDATION_STORE_KEY).setIsShowingReviewed(false);
-		expect(select(BLOCK_VALIDATION_STORE_KEY).getIsShowingReviewed()).toBe(
-			false
-		);
+		dispatch(blockValidationStore).setIsShowingReviewed(true);
+		expect(select(blockValidationStore).getIsShowingReviewed()).toBe(true);
+		dispatch(blockValidationStore).setIsShowingReviewed(false);
+		expect(select(blockValidationStore).getIsShowingReviewed()).toBe(false);
 
-		expect(select(BLOCK_VALIDATION_STORE_KEY).getMaybeIsPostDirty()).toBe(
-			false
-		);
-		dispatch(BLOCK_VALIDATION_STORE_KEY).setMaybeIsPostDirty(true);
-		expect(select(BLOCK_VALIDATION_STORE_KEY).getMaybeIsPostDirty()).toBe(
-			true
-		);
-		dispatch(BLOCK_VALIDATION_STORE_KEY).setMaybeIsPostDirty(false);
-		expect(select(BLOCK_VALIDATION_STORE_KEY).getMaybeIsPostDirty()).toBe(
-			false
-		);
+		expect(select(blockValidationStore).getMaybeIsPostDirty()).toBe(false);
+		dispatch(blockValidationStore).setMaybeIsPostDirty(true);
+		expect(select(blockValidationStore).getMaybeIsPostDirty()).toBe(true);
+		dispatch(blockValidationStore).setMaybeIsPostDirty(false);
+		expect(select(blockValidationStore).getMaybeIsPostDirty()).toBe(false);
 
 		expect(
-			select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getFetchingErrorsRequestErrorMessage()
+			select(blockValidationStore).getFetchingErrorsRequestErrorMessage()
 		).toBe('');
-		dispatch(
-			BLOCK_VALIDATION_STORE_KEY
-		).setFetchingErrorsRequestErrorMessage('Error message');
+		dispatch(blockValidationStore).setFetchingErrorsRequestErrorMessage(
+			'Error message'
+		);
 		expect(
-			select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getFetchingErrorsRequestErrorMessage()
+			select(blockValidationStore).getFetchingErrorsRequestErrorMessage()
 		).toBe('Error message');
 
-		dispatch(BLOCK_VALIDATION_STORE_KEY).setReviewLink(
+		dispatch(blockValidationStore).setReviewLink('http://example.com');
+		expect(select(blockValidationStore).getReviewLink()).toBe(
 			'http://example.com'
 		);
-		expect(select(BLOCK_VALIDATION_STORE_KEY).getReviewLink()).toBe(
-			'http://example.com'
-		);
 
-		expect(
-			select(BLOCK_VALIDATION_STORE_KEY).getAMPCompatibilityBroken()
-		).toBe(false);
-
-		dispatch(BLOCK_VALIDATION_STORE_KEY).setValidationErrors(
-			rawValidationErrors
-		);
-
-		expect(
-			select(BLOCK_VALIDATION_STORE_KEY).getAMPCompatibilityBroken()
-		).toBe(true);
-		expect(
-			select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
-		).toHaveLength(8);
-		expect(
-			select(BLOCK_VALIDATION_STORE_KEY).getReviewedValidationErrors()
-		).toHaveLength(3);
-		expect(
-			select(BLOCK_VALIDATION_STORE_KEY).getUnreviewedValidationErrors()
-		).toHaveLength(5);
-		expect(
-			select(BLOCK_VALIDATION_STORE_KEY).getKeptMarkupValidationErrors()
-		).toHaveLength(1);
-
-		expect(select(BLOCK_VALIDATION_STORE_KEY).getIsFetchingErrors()).toBe(
+		expect(select(blockValidationStore).getAMPCompatibilityBroken()).toBe(
 			false
 		);
-		dispatch(BLOCK_VALIDATION_STORE_KEY).setIsFetchingErrors(true);
-		expect(select(BLOCK_VALIDATION_STORE_KEY).getIsFetchingErrors()).toBe(
+
+		dispatch(blockValidationStore).setValidationErrors(rawValidationErrors);
+
+		expect(select(blockValidationStore).getAMPCompatibilityBroken()).toBe(
 			true
 		);
-		dispatch(BLOCK_VALIDATION_STORE_KEY).setIsFetchingErrors(false);
-		expect(select(BLOCK_VALIDATION_STORE_KEY).getIsFetchingErrors()).toBe(
-			false
+		expect(select(blockValidationStore).getValidationErrors()).toHaveLength(
+			8
 		);
+		expect(
+			select(blockValidationStore).getReviewedValidationErrors()
+		).toHaveLength(3);
+		expect(
+			select(blockValidationStore).getUnreviewedValidationErrors()
+		).toHaveLength(5);
+		expect(
+			select(blockValidationStore).getKeptMarkupValidationErrors()
+		).toHaveLength(1);
+
+		expect(select(blockValidationStore).getIsFetchingErrors()).toBe(false);
+		dispatch(blockValidationStore).setIsFetchingErrors(true);
+		expect(select(blockValidationStore).getIsFetchingErrors()).toBe(true);
+		dispatch(blockValidationStore).setIsFetchingErrors(false);
+		expect(select(blockValidationStore).getIsFetchingErrors()).toBe(false);
 	});
 });

@@ -15,7 +15,7 @@ import '@wordpress/block-editor'; // Block editor data store needed.
 /**
  * Internal dependencies
  */
-import { createStore } from '../../../store';
+import { store as blockValidationStore } from '../../../store';
 import { withAMPToolbarButton } from '../index';
 
 let block;
@@ -38,29 +38,18 @@ describe('withAMPToolbarButton: filtering with errors', () => {
 		block = createBlock(TEST_BLOCK, {});
 		dispatch('core/block-editor').insertBlock(block);
 
-		createStore({
-			reviewLink: 'http://review-link.test',
-			unreviewedValidationErrors: [
-				{
-					clientId: block.clientId,
-					code: 'DISALLOWED_TAG',
-					status: 3,
-					term_id: 12,
-					title: 'Invalid script: <code>jquery.js</code>',
-					type: 'js_error',
-				},
-			],
-			validationErrors: [
-				{
-					clientId: block.clientId,
-					code: 'DISALLOWED_TAG',
-					status: 3,
-					term_id: 12,
-					title: 'Invalid script: <code>jquery.js</code>',
-					type: 'js_error',
-				},
-			],
-		});
+		dispatch(blockValidationStore).setReviewLink('http://review-link.test');
+
+		dispatch(blockValidationStore).setValidationErrors([
+			{
+				clientId: block.clientId,
+				code: 'DISALLOWED_TAG',
+				status: 1,
+				term_id: 12,
+				title: 'Invalid script: <code>jquery.js</code>',
+				type: 'js_error',
+			},
+		]);
 	});
 
 	it('is filtered correctly with a class component', () => {
@@ -105,10 +94,9 @@ describe('withAMPToolbarButton: filtering without errors', () => {
 		block = createBlock(TEST_BLOCK, {});
 		dispatch('core/block-editor').insertBlock(block);
 
-		createStore({
-			reviewLink: 'http://review-link.test',
-			validationErrors: [],
-		});
+		dispatch(blockValidationStore).setReviewLink('http://review-link.test');
+
+		dispatch(blockValidationStore).setValidationErrors([]);
 	});
 
 	it('is not filtered with a class component and no errors', () => {

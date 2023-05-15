@@ -15,7 +15,7 @@ import {
 	maybeAddClientIdToValidationError,
 	useValidationErrorStateUpdates,
 } from '../use-validation-error-state-updates';
-import { BLOCK_VALIDATION_STORE_KEY, createStore } from '../../store';
+import { store as blockValidationStore } from '../../store';
 
 // This allows us to tweak the returned value on each test
 jest.mock('@wordpress/data/build/components/use-select', () => jest.fn());
@@ -60,12 +60,6 @@ describe('useValidationErrorStateUpdates', () => {
 		}));
 	}
 
-	beforeAll(() => {
-		createStore({
-			validationErrors: [],
-		});
-	});
-
 	it('does not trigger validation on an autosave', async () => {
 		// Initial render should trigger validation.
 		setupUseSelect({
@@ -77,13 +71,13 @@ describe('useValidationErrorStateUpdates', () => {
 
 		await waitFor(() => {
 			expect(
-				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+				select(blockValidationStore).getValidationErrors()
 			).toHaveLength(0);
 		});
 
 		await waitFor(() => {
 			expect(
-				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+				select(blockValidationStore).getValidationErrors()
 			).toHaveLength(0);
 		});
 	});
@@ -95,13 +89,13 @@ describe('useValidationErrorStateUpdates', () => {
 
 		await waitFor(() => {
 			expect(
-				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+				select(blockValidationStore).getValidationErrors()
 			).toHaveLength(0);
 		});
 
 		await waitFor(() => {
 			expect(
-				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+				select(blockValidationStore).getValidationErrors()
 			).toHaveLength(8);
 		});
 	});
@@ -118,7 +112,7 @@ describe('useValidationErrorStateUpdates', () => {
 
 		await waitFor(() => {
 			expect(
-				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+				select(blockValidationStore).getValidationErrors()
 			).toHaveLength(0);
 		});
 
@@ -134,7 +128,7 @@ describe('useValidationErrorStateUpdates', () => {
 
 		await waitFor(() => {
 			expect(
-				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+				select(blockValidationStore).getValidationErrors()
 			).toHaveLength(0);
 		});
 
@@ -151,7 +145,7 @@ describe('useValidationErrorStateUpdates', () => {
 
 		await waitFor(() => {
 			expect(
-				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+				select(blockValidationStore).getValidationErrors()
 			).toHaveLength(8);
 		});
 	});
