@@ -9,7 +9,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import AMPValidationErrorsKeptIcon from '../../../../images/amp-validation-errors-kept.svg';
-import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
+import { store as blockValidationStore } from '../../store';
 import { StatusIcon } from '../icon';
 import { SidebarNotification } from '../sidebar-notification';
 import { useErrorsFetchingStateChanges } from '../../hooks/use-errors-fetching-state-changes';
@@ -32,25 +32,25 @@ export default function AMPValidationStatusNotification() {
 		validationErrorCount,
 	} = useSelect(
 		(select) => ({
-			fetchingErrorsRequestErrorMessage: select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getFetchingErrorsRequestErrorMessage(),
+			fetchingErrorsRequestErrorMessage:
+				select(
+					blockValidationStore
+				).getFetchingErrorsRequestErrorMessage(),
 			isDraft:
 				['draft', 'auto-draft'].indexOf(
 					select('core/editor').getEditedPostAttribute('status')
 				) !== -1,
 			isEditedPostNew: select('core/editor').isEditedPostNew(),
-			keptMarkupValidationErrorCount: select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getKeptMarkupValidationErrors().length,
-			reviewLink: select(BLOCK_VALIDATION_STORE_KEY).getReviewLink(),
-			supportLink: select(BLOCK_VALIDATION_STORE_KEY).getSupportLink(),
-			unreviewedValidationErrorCount: select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getUnreviewedValidationErrors().length,
-			validationErrorCount: select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getValidationErrors().length,
+			keptMarkupValidationErrorCount:
+				select(blockValidationStore).getKeptMarkupValidationErrors()
+					.length,
+			reviewLink: select(blockValidationStore).getReviewLink(),
+			supportLink: select(blockValidationStore).getSupportLink(),
+			unreviewedValidationErrorCount:
+				select(blockValidationStore).getUnreviewedValidationErrors()
+					.length,
+			validationErrorCount:
+				select(blockValidationStore).getValidationErrors().length,
 		}),
 		[]
 	);

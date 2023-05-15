@@ -12,7 +12,7 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
+import { store as blockValidationStore } from '../../store';
 import { AMPToolbarButton } from './amp-toolbar-button';
 
 /**
@@ -28,9 +28,8 @@ function BlockEditWithToolbar(props) {
 	const count = useSelect(
 		(select) =>
 			(
-				select(
-					BLOCK_VALIDATION_STORE_KEY
-				).getUnreviewedValidationErrors() || []
+				select(blockValidationStore).getUnreviewedValidationErrors() ||
+				[]
 			).filter(
 				({ clientId: validationErrorClientId }) =>
 					clientId === validationErrorClientId

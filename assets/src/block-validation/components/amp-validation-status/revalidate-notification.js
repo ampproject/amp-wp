@@ -8,7 +8,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
+import { store as blockValidationStore } from '../../store';
 import BellIcon from '../../../../images/bell-icon.svg';
 import { SidebarNotification } from '../sidebar-notification';
 import { useErrorsFetchingStateChanges } from '../../hooks/use-errors-fetching-state-changes';
@@ -27,10 +27,9 @@ export default function AMPRevalidateNotification() {
 				['draft', 'auto-draft'].indexOf(
 					select('core/editor').getEditedPostAttribute('status')
 				) !== -1,
-			isPostDirty: select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty(),
-			maybeIsPostDirty: select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getMaybeIsPostDirty(),
+			isPostDirty: select(blockValidationStore).getIsPostDirty(),
+			maybeIsPostDirty:
+				select(blockValidationStore).getMaybeIsPostDirty(),
 		}),
 		[]
 	);

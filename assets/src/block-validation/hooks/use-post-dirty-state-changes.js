@@ -8,7 +8,7 @@ import { subscribe, useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY } from '../store';
+import { store as blockValidationStore } from '../store';
 
 const DELAY_MS = 500;
 
@@ -17,9 +17,8 @@ export function usePostDirtyStateChanges() {
 	const [updatedContent, setUpdatedContent] = useState();
 	const subscription = useRef(null);
 
-	const { setIsPostDirty, setMaybeIsPostDirty } = useDispatch(
-		BLOCK_VALIDATION_STORE_KEY
-	);
+	const { setIsPostDirty, setMaybeIsPostDirty } =
+		useDispatch(blockValidationStore);
 
 	const {
 		getEditedPostContent,
@@ -31,7 +30,7 @@ export function usePostDirtyStateChanges() {
 		(select) => ({
 			getEditedPostContent: select('core/editor').getEditedPostContent,
 			hasErrorsFromRemovedBlocks: Boolean(
-				select(BLOCK_VALIDATION_STORE_KEY)
+				select(blockValidationStore)
 					.getValidationErrors()
 					.find(
 						({ clientId }) =>
@@ -40,7 +39,7 @@ export function usePostDirtyStateChanges() {
 					)
 			),
 			hasActiveMetaboxes: select('core/edit-post').hasMetaBoxes(),
-			isPostDirty: select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty(),
+			isPostDirty: select(blockValidationStore).getIsPostDirty(),
 			isSavingOrPreviewingPost:
 				(select('core/editor').isSavingPost() &&
 					!select('core/editor').isAutosavingPost()) ||

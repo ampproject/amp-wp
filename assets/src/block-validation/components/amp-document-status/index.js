@@ -10,7 +10,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import AMPValidationErrorsKeptIcon from '../../../../images/amp-validation-errors-kept.svg';
 import BellIcon from '../../../../images/bell-icon.svg';
-import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
+import { store as blockValidationStore } from '../../store';
 import { StatusIcon } from '../icon';
 import { SidebarNotification } from '../sidebar-notification';
 import { useAMPDocumentToggle } from '../../hooks/use-amp-document-toggle';
@@ -37,19 +37,18 @@ export default function AMPDocumentStatusNotification() {
 		unreviewedValidationErrorCount,
 	} = useSelect(
 		(select) => ({
-			isPostDirty: select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty(),
-			maybeIsPostDirty: select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getMaybeIsPostDirty(),
-			keptMarkupValidationErrorCount: select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getKeptMarkupValidationErrors().length,
-			reviewedValidationErrorCount: select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getReviewedValidationErrors().length,
-			unreviewedValidationErrorCount: select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getUnreviewedValidationErrors().length,
+			isPostDirty: select(blockValidationStore).getIsPostDirty(),
+			maybeIsPostDirty:
+				select(blockValidationStore).getMaybeIsPostDirty(),
+			keptMarkupValidationErrorCount:
+				select(blockValidationStore).getKeptMarkupValidationErrors()
+					.length,
+			reviewedValidationErrorCount:
+				select(blockValidationStore).getReviewedValidationErrors()
+					.length,
+			unreviewedValidationErrorCount:
+				select(blockValidationStore).getUnreviewedValidationErrors()
+					.length,
 		}),
 		[]
 	);

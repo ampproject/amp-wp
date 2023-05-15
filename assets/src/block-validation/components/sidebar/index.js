@@ -12,30 +12,28 @@ import { __ } from '@wordpress/i18n';
 import './style.css';
 import AMPValidationStatus from '../amp-validation-status';
 import { Error } from '../error';
-import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
+import { store as blockValidationStore } from '../../store';
 
 /**
  * Editor sidebar.
  */
 export function Sidebar() {
-	const { setIsShowingReviewed } = useDispatch(BLOCK_VALIDATION_STORE_KEY);
+	const { setIsShowingReviewed } = useDispatch(blockValidationStore);
 
 	const { displayedErrors, hasReviewedValidationErrors, isShowingReviewed } =
 		useSelect((select) => {
-			const _isShowingReviewed = select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getIsShowingReviewed();
+			const _isShowingReviewed =
+				select(blockValidationStore).getIsShowingReviewed();
 
 			return {
 				displayedErrors: _isShowingReviewed
-					? select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+					? select(blockValidationStore).getValidationErrors()
 					: select(
-							BLOCK_VALIDATION_STORE_KEY
+							blockValidationStore
 					  ).getUnreviewedValidationErrors(),
 				hasReviewedValidationErrors:
-					select(
-						BLOCK_VALIDATION_STORE_KEY
-					).getReviewedValidationErrors()?.length > 0,
+					select(blockValidationStore).getReviewedValidationErrors()
+						?.length > 0,
 				isShowingReviewed: _isShowingReviewed,
 			};
 		}, []);

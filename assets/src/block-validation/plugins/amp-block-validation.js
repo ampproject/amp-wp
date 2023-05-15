@@ -8,7 +8,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY } from '../store';
+import { store as blockValidationStore } from '../store';
 import { MoreMenuIcon, ToolbarIcon } from '../components/icon';
 import { Sidebar } from '../components/sidebar';
 import { InvalidBlockOutline } from '../components/invalid-block-outline';
@@ -27,13 +27,10 @@ export const PLUGIN_ICON = MoreMenuIcon;
 export default function AMPBlockValidation() {
 	const { broken, errorCount } = useSelect(
 		(select) => ({
-			broken: select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getAMPCompatibilityBroken(),
+			broken: select(blockValidationStore).getAMPCompatibilityBroken(),
 			errorCount:
-				select(
-					BLOCK_VALIDATION_STORE_KEY
-				).getUnreviewedValidationErrors()?.length || 0,
+				select(blockValidationStore).getUnreviewedValidationErrors()
+					?.length || 0,
 		}),
 		[]
 	);
