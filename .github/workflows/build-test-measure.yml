@@ -331,6 +331,14 @@ jobs:
         env:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
+
+      # TODO: Remove it once node version in .nvmrc is updated to >=16.
+      - name: Setup Node
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: 16
+          cache: npm
+
       - name: Run E2E tests
         run: npm run test:e2e:ci
 
