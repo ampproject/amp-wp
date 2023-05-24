@@ -229,12 +229,6 @@ describe('Error', () => {
 				)
 			).not.toBeNull();
 
-			// container
-			// 	.querySelector(
-			// 		`.amp-error--${getErrorTypeClassName(status)} button`
-			// 	)
-			// 	.click();
-
 			fireEvent.click(
 				container.querySelector(
 					`.amp-error--${getErrorTypeClassName(status)} button`
