@@ -280,7 +280,7 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 		$content = str_replace( 'jpg.webp', '.jpg', $content );
 
 		// Remove lazy loading attribute.
-		$content = str_replace( 'loading="lazy" ', '', $content );
+		$content = preg_replace( '/\s+loading="lazy"/', '', $content );
 
 		$this->assertEquals(
 			$this->normalize( $expected ),
