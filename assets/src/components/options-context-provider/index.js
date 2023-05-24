@@ -13,6 +13,7 @@ import {
 	useRef,
 	useCallback,
 	useContext,
+	flushSync,
 } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
@@ -252,10 +253,14 @@ export function OptionsContextProvider({
 		}
 
 		setModifiedOptions({ ...modifiedOptions, ...updates });
-		setSavedOptions(updates);
 
-		setUpdates({});
-		setDidSaveOptions(true);
+		// Disable state update batching to make options status appear immediately.
+		flushSync(() => {
+			setSavedOptions(updates);
+			setUpdates({});
+			setDidSaveOptions(true);
+		});
+
 		setSavingOptions(false);
 	}, [
 		delaySave,

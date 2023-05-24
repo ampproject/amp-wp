@@ -20,7 +20,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.css';
-import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
+import { store as blockValidationStore } from '../../store';
 import { ErrorPanelTitle } from './error-panel-title';
 import { ErrorContent } from './error-content';
 
@@ -37,7 +37,7 @@ import { ErrorContent } from './error-content';
 export function Error({ clientId, error, status, term_id: termId, title }) {
 	const { selectBlock } = useDispatch('core/block-editor');
 	const reviewLink = useSelect(
-		(select) => select(BLOCK_VALIDATION_STORE_KEY).getReviewLink(),
+		(select) => select(blockValidationStore).getReviewLink(),
 		[]
 	);
 	const reviewed =

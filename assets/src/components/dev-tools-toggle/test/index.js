@@ -1,13 +1,8 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render, fireEvent } from '@testing-library/react';
 import { create } from 'react-test-renderer';
-
-/**
- * WordPress dependencies
- */
-import { render } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -17,19 +12,7 @@ import { UserContextProvider } from '../../user-context-provider';
 
 jest.mock('../../user-context-provider');
 
-let container;
-
 describe('DevToolsToggle', () => {
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
-	});
-
 	it('matches snapshot', () => {
 		const wrapper = create(
 			<UserContextProvider>
@@ -40,14 +23,12 @@ describe('DevToolsToggle', () => {
 	});
 
 	it('renders a loading spinner when a user data is fetched', () => {
-		act(() => {
-			render(
-				<UserContextProvider fetchingUser={true}>
-					<DevToolsToggle />
-				</UserContextProvider>,
-				container
-			);
-		});
+		const { container } = render(
+			<UserContextProvider fetchingUser={true}>
+				<DevToolsToggle />
+			</UserContextProvider>
+		);
+
 		expect(
 			container.querySelector('.amp-spinner-container')
 		).not.toBeNull();
@@ -63,29 +44,19 @@ describe('DevToolsToggle', () => {
 	});
 
 	it('can be toggled', () => {
-		act(() => {
-			render(
-				<UserContextProvider>
-					<DevToolsToggle />
-				</UserContextProvider>,
-				container
-			);
-		});
+		const { container } = render(
+			<UserContextProvider>
+				<DevToolsToggle />
+			</UserContextProvider>
+		);
+
 		expect(container.querySelector('input:checked')).toBeNull();
 
-		act(() => {
-			container
-				.querySelector('input')
-				.dispatchEvent(new global.MouseEvent('click'));
-		});
+		fireEvent(container.querySelector('input'), new MouseEvent('click'));
 
 		expect(container.querySelector('input:checked')).not.toBeNull();
 
-		act(() => {
-			container
-				.querySelector('input')
-				.dispatchEvent(new global.MouseEvent('click'));
-		});
+		fireEvent(container.querySelector('input'), new MouseEvent('click'));
 
 		expect(container.querySelector('input:checked')).toBeNull();
 	});

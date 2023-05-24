@@ -7,7 +7,7 @@ import { useMemo } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
+import { store as blockValidationStore } from '../../store';
 
 /**
  * Adds a style rule for all blocks with validation errors.
@@ -15,7 +15,7 @@ import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
 export function InvalidBlockOutline() {
 	const validationErrors = useSelect(
 		(select) =>
-			select(BLOCK_VALIDATION_STORE_KEY).getUnreviewedValidationErrors(),
+			select(blockValidationStore).getUnreviewedValidationErrors(),
 		[]
 	);
 

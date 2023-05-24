@@ -331,6 +331,14 @@ jobs:
         env:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
+
+      # TODO: Remove it once node version in .nvmrc is updated to >=16.
+      - name: Setup Node
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: 16
+          cache: npm
+
       - name: Run E2E tests
         run: npm run test:e2e:ci
 
@@ -372,6 +380,7 @@ jobs:
         include:
           - php: '8.0'
             wp: 'trunk'
+            multisite: true
             experimental: true
 
           - php: '8.1'
@@ -391,6 +400,7 @@ jobs:
             external-http: true
 
           - php: '7.4'
+            multisite: true
             wp: 'latest'
 
           - php: '7.4'
@@ -553,6 +563,14 @@ jobs:
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
+      - name: Run multisite tests
+        if: ${{ matrix.multisite == true && needs.pre-run.outputs.changed-php-count > 0 }}
+        run: vendor/bin/phpunit --verbose
+        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
+        env:
+          WP_TESTS_DIR: /tmp/wordpress-tests-lib
+          WP_MULTISITE: 1
+
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
         run: vendor/bin/phpunit --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
@@ -574,76 +592,6 @@ jobs:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           flags: php,unit
           fail_ci_if_error: true
-
-#-----------------------------------------------------------------------------------------------------------------------
-
-  unit-test-multisite-php:
-    name: 'Unit Tests Multisite: PHP 7.4, WP Latest'
-    needs: pre-run
-    runs-on: ubuntu-latest
-    if: needs.pre-run.outputs.changed-php-count > 0
-    continue-on-error: true
-    strategy:
-      matrix:
-        testsuite: ['default', 'external-http']
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Node
-        uses: actions/setup-node@v3.6.0
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Configure Composer cache
-        uses: actions/cache@v3.3.1
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Install Node dependencies
-        run: npm ci
-        env:
-          CI: true
-
-      - name: Install Composer dependencies
-        run: |
-          # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency.
-          composer remove --dev phpdocumentor/reflection
-          composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
-
-      # See https://github.com/wp-cli/wp-cli/issues/5484
-      - name: Remove conflicting Requests library
-        run: composer remove --dev --ignore-platform-reqs --no-interaction --no-scripts  roave/security-advisories wp-cli/export-command wp-cli/extension-command wp-cli/wp-cli wp-cli/wp-cli-tests
-
-      - name: Update PHPUnit
-        if: needs.pre-run.outputs.changed-php-count > 0
-        run: |
-          # We are using PHP 7.4 and WP Latest.
-          echo "Installing PHPUnit 9.3"
-          composer require --dev --ignore-platform-reqs phpunit/phpunit:"9.3.*" --with-dependencies
-
-      - name: Build plugin
-        run: npm run build:js
-
-      - name: Move amp-wp to amp
-        run: cp -r "$PWD" "/tmp/amp"
-
-      - name: Start wp-env
-        working-directory: /tmp/amp
-        run: npm run wp-env start
-
-      - name: Run multisite unit tests
-        working-directory: /tmp/amp
-        run: npm run test:php:multisite ${{ matrix.testsuite == 'external-http' && '-- --testsuite external-http' || '' }}
 
 #-----------------------------------------------------------------------------------------------------------------------
 

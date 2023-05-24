@@ -16,7 +16,7 @@ import { getQueryArg, isURL } from '@wordpress/url';
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY } from '../store';
+import { store as blockValidationStore } from '../store';
 
 /**
  * Attempts to associate a validation error with a block current in the editor.
@@ -85,7 +85,7 @@ export function useValidationErrorStateUpdates() {
 		setReviewLink,
 		setSupportLink,
 		setValidationErrors,
-	} = useDispatch(BLOCK_VALIDATION_STORE_KEY);
+	} = useDispatch(blockValidationStore);
 
 	const {
 		currentPostId,
@@ -108,9 +108,8 @@ export function useValidationErrorStateUpdates() {
 			isPreviewingPost: select('core/editor').isPreviewingPost(),
 			isSavingPost: select('core/editor').isSavingPost(),
 			previewLink: select('core/editor').getEditedPostPreviewLink(),
-			validationErrors: select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getValidationErrors(),
+			validationErrors:
+				select(blockValidationStore).getValidationErrors(),
 		}),
 		[]
 	);

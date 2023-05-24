@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
-
-/**
- * WordPress dependencies
- */
-import { render, unmountComponentAtNode } from '@wordpress/element';
+import { render } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -14,28 +9,12 @@ import { render, unmountComponentAtNode } from '@wordpress/element';
 import { SidebarNotificationsContainer } from '../index';
 
 describe('SidebarNotificationsContainer', () => {
-	let container;
-
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		unmountComponentAtNode(container);
-		container.remove();
-		container = null;
-	});
-
 	it('renders sidebar notifications container along with children', () => {
-		act(() => {
-			render(
-				<SidebarNotificationsContainer>
-					{'Foo'}
-				</SidebarNotificationsContainer>,
-				container
-			);
-		});
+		const { container } = render(
+			<SidebarNotificationsContainer>
+				{'Foo'}
+			</SidebarNotificationsContainer>
+		);
 
 		expect(
 			container.querySelector('.sidebar-notifications-container')

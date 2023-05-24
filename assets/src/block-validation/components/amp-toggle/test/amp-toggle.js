@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
-
-/**
- * WordPress dependencies
- */
-import { render, unmountComponentAtNode } from '@wordpress/element';
+import { render, fireEvent } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -19,8 +14,6 @@ jest.mock('../../../hooks/use-amp-document-toggle', () => ({
 }));
 
 describe('AMPToggle', () => {
-	let container;
-
 	const toggleAMP = jest.fn();
 
 	function setupHooks(overrides) {
@@ -33,15 +26,6 @@ describe('AMPToggle', () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		unmountComponentAtNode(container);
-		container.remove();
-		container = null;
 	});
 
 	it('renders a toggle that reacts to changes', () => {
@@ -49,9 +33,7 @@ describe('AMPToggle', () => {
 			isAMPEnabled: true,
 		});
 
-		act(() => {
-			render(<AMPToggle />, container);
-		});
+		const { container } = render(<AMPToggle />);
 
 		expect(
 			container.querySelector('input[type="checkbox"]')
@@ -60,7 +42,8 @@ describe('AMPToggle', () => {
 			true
 		);
 
-		container.querySelector('input[type="checkbox"]').click();
+		fireEvent.click(container.querySelector('input[type="checkbox"]'));
+
 		expect(toggleAMP).toHaveBeenCalledTimes(1);
 	});
 });

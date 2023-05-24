@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
-
-/**
- * WordPress dependencies
- */
-import { render, unmountComponentAtNode } from '@wordpress/element';
+import { render } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -18,8 +13,6 @@ import { useNormalizedThemesData } from '../use-normalized-themes-data';
 jest.mock('../index');
 
 describe('useNormalizedThemesData', () => {
-	let container = null;
-
 	function setup({ fetchingThemes, themes }) {
 		let returnValue;
 
@@ -28,33 +21,19 @@ describe('useNormalizedThemesData', () => {
 			return null;
 		}
 
-		act(() => {
-			render(
-				<ErrorContextProvider>
-					<ThemesContextProvider
-						fetchingThemes={fetchingThemes}
-						themes={themes}
-					>
-						<ComponentContainingHook />
-					</ThemesContextProvider>
-				</ErrorContextProvider>,
-				container
-			);
-		});
+		render(
+			<ErrorContextProvider>
+				<ThemesContextProvider
+					fetchingThemes={fetchingThemes}
+					themes={themes}
+				>
+					<ComponentContainingHook />
+				</ThemesContextProvider>
+			</ErrorContextProvider>
+		);
 
 		return returnValue;
 	}
-
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		unmountComponentAtNode(container);
-		container.remove();
-		container = null;
-	});
 
 	it('returns empty an object if themes are being fetched', () => {
 		const normalizedThemesData = setup({

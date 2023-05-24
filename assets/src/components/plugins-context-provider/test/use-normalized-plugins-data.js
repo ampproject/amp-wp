@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
-
-/**
- * WordPress dependencies
- */
-import { render, unmountComponentAtNode } from '@wordpress/element';
+import { render } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -18,8 +13,6 @@ import { useNormalizedPluginsData } from '../use-normalized-plugins-data';
 jest.mock('../index');
 
 describe('useNormalizedPluginsData', () => {
-	let container = null;
-
 	function setup({ fetchingPlugins, plugins }) {
 		let returnValue;
 
@@ -28,33 +21,19 @@ describe('useNormalizedPluginsData', () => {
 			return null;
 		}
 
-		act(() => {
-			render(
-				<ErrorContextProvider>
-					<PluginsContextProvider
-						fetchingPluging={fetchingPlugins}
-						plugins={plugins}
-					>
-						<ComponentContainingHook />
-					</PluginsContextProvider>
-				</ErrorContextProvider>,
-				container
-			);
-		});
+		render(
+			<ErrorContextProvider>
+				<PluginsContextProvider
+					fetchingPluging={fetchingPlugins}
+					plugins={plugins}
+				>
+					<ComponentContainingHook />
+				</PluginsContextProvider>
+			</ErrorContextProvider>
+		);
 
 		return returnValue;
 	}
-
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		unmountComponentAtNode(container);
-		container.remove();
-		container = null;
-	});
 
 	it('returns an empty object if plugins are being fetched', () => {
 		const normalizedPluginsData = setup({

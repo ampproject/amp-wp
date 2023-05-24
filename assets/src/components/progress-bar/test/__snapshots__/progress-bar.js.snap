@@ -14,7 +14,7 @@ exports[`ProgressBar matches the snapshot 1`] = `
     <div
       className="progress-bar__indicator"
       style={
-        Object {
+        {
           "transform": "translateX(-67%)",
           "transitionDuration": "800ms",
         }

@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render, fireEvent } from '@testing-library/react';
 
 /**
  * WordPress dependencies
  */
-import { render, unmountComponentAtNode } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
@@ -24,8 +23,6 @@ jest.mock('../../../hooks/use-errors-fetching-state-changes', () => ({
 }));
 
 describe('AMPRevalidateNotification', () => {
-	let container;
-
 	const autosave = jest.fn();
 	const savePost = jest.fn();
 
@@ -45,27 +42,16 @@ describe('AMPRevalidateNotification', () => {
 	});
 
 	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-
 		useErrorsFetchingStateChanges.mockImplementation(() => ({
 			isFetchingErrors: false,
 			fetchingErrorsMessage: '',
 		}));
 	});
 
-	afterEach(() => {
-		unmountComponentAtNode(container);
-		container.remove();
-		container = null;
-	});
-
 	it('does not render revalidate message if post is not dirty', () => {
 		setupUseSelect();
 
-		act(() => {
-			render(<AMPRevalidateNotification />, container);
-		});
+		const { container } = render(<AMPRevalidateNotification />);
 
 		expect(container.children).toHaveLength(0);
 	});
@@ -76,9 +62,7 @@ describe('AMPRevalidateNotification', () => {
 			fetchingErrorsMessage: 'Loading',
 		}));
 
-		act(() => {
-			render(<AMPRevalidateNotification />, container);
-		});
+		const { container } = render(<AMPRevalidateNotification />);
 
 		expect(
 			container.querySelector('.amp-spinner-container')
@@ -91,9 +75,7 @@ describe('AMPRevalidateNotification', () => {
 			isPostDirty: true,
 		});
 
-		act(() => {
-			render(<AMPRevalidateNotification />, container);
-		});
+		const { container } = render(<AMPRevalidateNotification />);
 
 		expect(container.innerHTML).toMatchSnapshot();
 		expect(container.children).toHaveLength(1);
@@ -103,7 +85,8 @@ describe('AMPRevalidateNotification', () => {
 			'Re-validate'
 		);
 
-		container.querySelector('button').click();
+		fireEvent.click(container.querySelector('button'));
+
 		expect(autosave).toHaveBeenCalledWith({ isPreview: true });
 	});
 
@@ -113,9 +96,7 @@ describe('AMPRevalidateNotification', () => {
 			isPostDirty: true,
 		});
 
-		act(() => {
-			render(<AMPRevalidateNotification />, container);
-		});
+		const { container } = render(<AMPRevalidateNotification />);
 
 		expect(container.innerHTML).toMatchSnapshot();
 		expect(container.innerHTML).toContain('has changed');
@@ -123,7 +104,8 @@ describe('AMPRevalidateNotification', () => {
 			'Save draft'
 		);
 
-		container.querySelector('button').click();
+		fireEvent.click(container.querySelector('button'));
+
 		expect(savePost).toHaveBeenCalledWith({ isPreview: true });
 	});
 
@@ -134,9 +116,7 @@ describe('AMPRevalidateNotification', () => {
 			maybeIsPostDirty: true,
 		});
 
-		act(() => {
-			render(<AMPRevalidateNotification />, container);
-		});
+		const { container } = render(<AMPRevalidateNotification />);
 
 		expect(container.innerHTML).toMatchSnapshot();
 		expect(container.children).toHaveLength(1);

@@ -33,7 +33,9 @@ exports[`RedirectToggle matches snapshot 1`] = `
           />
         </span>
         <label
-          className="components-toggle-control__label"
+          className="components-flex-item components-flex-block components-toggle-control__label css-14wzr73-View-Item-sx-Base-block e19lxcc00"
+          data-wp-c16t={true}
+          data-wp-component="FlexBlock"
           htmlFor="inspector-toggle-control-0"
         >
           <div

@@ -1,13 +1,8 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render, fireEvent } from '@testing-library/react';
 import { create } from 'react-test-renderer';
-
-/**
- * WordPress dependencies
- */
-import { render } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -17,19 +12,7 @@ import { OptionsContextProvider } from '../../options-context-provider';
 
 jest.mock('../../options-context-provider');
 
-let container;
-
 describe('RedirectToggle', () => {
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
-	});
-
 	it('matches snapshot', () => {
 		const wrapper = create(
 			<OptionsContextProvider>
@@ -40,30 +23,19 @@ describe('RedirectToggle', () => {
 	});
 
 	it('can be toggled', () => {
-		act(() => {
-			render(
-				<OptionsContextProvider>
-					<RedirectToggle />
-				</OptionsContextProvider>,
-				container
-			);
-		});
+		const { container } = render(
+			<OptionsContextProvider>
+				<RedirectToggle />
+			</OptionsContextProvider>
+		);
 
 		expect(container.querySelector('.is-checked')).not.toBeNull();
 
-		act(() => {
-			container
-				.querySelector('input')
-				.dispatchEvent(new global.MouseEvent('click'));
-		});
+		fireEvent(container.querySelector('input'), new MouseEvent('click'));
 
 		expect(container.querySelector('input:checked')).toBeNull();
 
-		act(() => {
-			container
-				.querySelector('input')
-				.dispatchEvent(new global.MouseEvent('click'));
-		});
+		fireEvent(container.querySelector('input'), new MouseEvent('click'));
 
 		expect(container.querySelector('.is-checked')).not.toBeNull();
 	});

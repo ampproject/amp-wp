@@ -12,7 +12,7 @@ exports[`ErrorScreen matches snapshot 1`] = `
     </h1>
     <p
       dangerouslySetInnerHTML={
-        Object {
+        {
           "__html": "The application failed",
         }
       }
@@ -36,7 +36,6 @@ exports[`ErrorScreen matches snapshot 1`] = `
         ReferenceError: foo is not defined
       </pre>
       <button
-        aria-describedby={null}
         className="components-button components-clipboard-button is-secondary is-small"
         onCopy={[Function]}
         type="button"

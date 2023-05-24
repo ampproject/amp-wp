@@ -1,32 +1,15 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render } from '@testing-library/react';
 import { create } from 'react-test-renderer';
-
-/**
- * WordPress dependencies
- */
-import { render } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { AMPSettingToggle } from '../';
 
-let container;
-
 describe('AMPSettingToggle', () => {
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
-	});
-
 	it('matches snapshots', () => {
 		let wrapper = create(
 			<AMPSettingToggle
@@ -49,36 +32,30 @@ describe('AMPSettingToggle', () => {
 	});
 
 	it('has correct elements and text', () => {
-		act(() => {
-			render(
-				<AMPSettingToggle
-					title="My title"
-					onChange={() => null}
-					checked={false}
-				>
-					{'children'}
-				</AMPSettingToggle>,
-				container
-			);
-		});
+		let { container } = render(
+			<AMPSettingToggle
+				title="My title"
+				onChange={() => null}
+				checked={false}
+			>
+				{'children'}
+			</AMPSettingToggle>
+		);
 
 		expect(container.querySelector('h3').textContent).toBe('My title');
 		expect(container.querySelector('p')).toBeNull();
 		expect(container.querySelector('input:checked')).toBeNull();
 
-		act(() => {
-			render(
-				<AMPSettingToggle
-					title="My title"
-					onChange={() => null}
-					checked={true}
-					text="My text"
-				>
-					{'children'}
-				</AMPSettingToggle>,
-				container
-			);
-		});
+		({ container } = render(
+			<AMPSettingToggle
+				title="My title"
+				onChange={() => null}
+				checked={true}
+				text="My text"
+			>
+				{'children'}
+			</AMPSettingToggle>
+		));
 
 		expect(container.querySelector('h3').textContent).toBe('My title');
 		expect(container.querySelector('p').textContent).toBe('My text');
@@ -86,27 +63,21 @@ describe('AMPSettingToggle', () => {
 	});
 
 	it('renders title if it is a valid element', () => {
-		act(() => {
-			render(
-				<AMPSettingToggle
-					title={<h6>{'My title'}</h6>}
-					onChange={() => null}
-					checked={false}
-				/>,
-				container
-			);
-		});
+		const { container } = render(
+			<AMPSettingToggle
+				title={<h6>{'My title'}</h6>}
+				onChange={() => null}
+				checked={false}
+			/>
+		);
 
 		expect(container.querySelector('h6').textContent).toBe('My title');
 	});
 
 	it('does not render title if nothing is passed', () => {
-		act(() => {
-			render(
-				<AMPSettingToggle onChange={() => null} checked={false} />,
-				container
-			);
-		});
+		const { container } = render(
+			<AMPSettingToggle onChange={() => null} checked={false} />
+		);
 
 		expect(container.querySelector('h3')).toBeNull();
 	});

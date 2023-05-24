@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render, act, fireEvent } from '@testing-library/react';
 import { noop } from 'lodash';
 import {
 	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
@@ -13,7 +13,6 @@ import {
 /**
  * WordPress dependencies
  */
-import { render } from '@wordpress/element';
 import { dispatch, select } from '@wordpress/data';
 import { registerBlockType, createBlock } from '@wordpress/blocks';
 
@@ -21,9 +20,9 @@ import { registerBlockType, createBlock } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { Error } from '../index';
-import { createStore } from '../../../store';
+import { store as blockValidationStore } from '../../../store';
 
-let container, pluginBlock, muPluginBlock, themeBlock, coreBlock, unknownBlock;
+let pluginBlock, muPluginBlock, themeBlock, coreBlock, unknownBlock;
 
 const TEST_PLUGIN_BLOCK = 'my-plugin/test-block';
 const TEST_MU_PLUGIN_BLOCK = 'my-mu-plugin/test-block';
@@ -85,66 +84,65 @@ function createTestStoreAndBlocks() {
 		unknownBlock,
 	]);
 
-	createStore({
-		reviewLink: 'http://site.test/wp-admin',
-		validationErrors: [
-			{
-				clientId: pluginBlock.clientId,
-				code: 'DISALLOWED_TAG',
-				status: 3,
-				term_id: 12,
-				title: 'Invalid script: <code>jquery.js</code>',
-				error: {
-					type: 'js_error',
-					sources: [],
-				},
+	dispatch(blockValidationStore).setReviewLink('http://site.test/wp-admin');
+
+	dispatch(blockValidationStore).setValidationErrors([
+		{
+			clientId: pluginBlock.clientId,
+			code: 'DISALLOWED_TAG',
+			status: 3,
+			term_id: 12,
+			title: 'Invalid script: <code>jquery.js</code>',
+			error: {
+				type: 'js_error',
+				sources: [],
 			},
-			{
-				clientId: muPluginBlock.clientId,
-				code: 'DISALLOWED_TAG',
-				status: 3,
-				term_id: 12,
-				title: 'Invalid script: <code>jquery.js</code>',
-				error: {
-					type: 'js_error',
-					sources: [],
-				},
+		},
+		{
+			clientId: muPluginBlock.clientId,
+			code: 'DISALLOWED_TAG',
+			status: 3,
+			term_id: 12,
+			title: 'Invalid script: <code>jquery.js</code>',
+			error: {
+				type: 'js_error',
+				sources: [],
 			},
-			{
-				clientId: themeBlock.clientId,
-				code: 'DISALLOWED_TAG',
-				status: 3,
-				term_id: 12,
-				title: 'Invalid script: <code>jquery.js</code>',
-				error: {
-					type: 'js_error',
-					sources: [],
-				},
+		},
+		{
+			clientId: themeBlock.clientId,
+			code: 'DISALLOWED_TAG',
+			status: 3,
+			term_id: 12,
+			title: 'Invalid script: <code>jquery.js</code>',
+			error: {
+				type: 'js_error',
+				sources: [],
 			},
-			{
-				clientId: coreBlock.clientId,
-				code: 'DISALLOWED_TAG',
-				status: 3,
-				term_id: 12,
-				title: 'Invalid script: <code>jquery.js</code>',
-				error: {
-					type: 'js_error',
-					sources: [],
-				},
+		},
+		{
+			clientId: coreBlock.clientId,
+			code: 'DISALLOWED_TAG',
+			status: 3,
+			term_id: 12,
+			title: 'Invalid script: <code>jquery.js</code>',
+			error: {
+				type: 'js_error',
+				sources: [],
 			},
-			{
-				clientId: unknownBlock.clientId,
-				code: 'DISALLOWED_TAG',
-				status: 3,
-				term_id: 12,
-				title: 'Invalid script: <code>jquery.js</code>',
-				error: {
-					type: 'js_error',
-					sources: [],
-				},
+		},
+		{
+			clientId: unknownBlock.clientId,
+			code: 'DISALLOWED_TAG',
+			status: 3,
+			term_id: 12,
+			title: 'Invalid script: <code>jquery.js</code>',
+			error: {
+				type: 'js_error',
+				sources: [],
 			},
-		],
-	});
+		},
+	]);
 }
 
 function getTestBlock(type) {
@@ -194,16 +192,6 @@ describe('Error', () => {
 		createTestStoreAndBlocks();
 	});
 
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
-	});
-
 	it.each(
 		[
 			VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
@@ -224,9 +212,7 @@ describe('Error', () => {
 	)(
 		'errors with no associated blocks work correctly',
 		(status, ErrorComponent) => {
-			act(() => {
-				render(<ErrorComponent />, container);
-			});
+			const { container } = render(<ErrorComponent />);
 
 			expect(container.firstChild.classList).toContain('amp-error');
 			expect(
@@ -243,11 +229,12 @@ describe('Error', () => {
 				)
 			).not.toBeNull();
 
-			container
-				.querySelector(
+			fireEvent.click(
+				container.querySelector(
 					`.amp-error--${getErrorTypeClassName(status)} button`
 				)
-				.click();
+			);
+
 			expect(
 				container.querySelector('.amp-error__block-type-icon')
 			).toBeNull();
@@ -281,9 +268,7 @@ describe('Error', () => {
 	)(
 		'errors with associated blocks work correctly',
 		(status, ErrorComponent) => {
-			act(() => {
-				render(<ErrorComponent />, container);
-			});
+			const { container } = render(<ErrorComponent />);
 
 			expect(container.firstChild.classList).toContain('amp-error');
 			expect(
@@ -300,11 +285,12 @@ describe('Error', () => {
 				)
 			).not.toBeNull();
 
-			container
-				.querySelector(
+			fireEvent.click(
+				container.querySelector(
 					`.amp-error--${getErrorTypeClassName(status)} button`
 				)
-				.click();
+			);
+
 			expect(
 				container.querySelector('.amp-error__block-type-icon')
 			).not.toBeNull();
@@ -341,8 +327,9 @@ describe('Error', () => {
 				pluginBlock.clientId,
 				false
 			);
-			render(<ErrorComponent />, container);
 		});
+
+		const { container } = render(<ErrorComponent />);
 
 		expect(container.firstChild.classList).toContain('amp-error');
 		expect(
@@ -356,7 +343,8 @@ describe('Error', () => {
 			container.querySelector('.amp-error--removed button')
 		).not.toBeNull();
 
-		container.querySelector('.amp-error--removed button').click();
+		fireEvent.click(container.querySelector('.amp-error--removed button'));
+
 		expect(
 			container.querySelector('.amp-error__block-type-icon')
 		).toBeNull();
@@ -368,33 +356,20 @@ describe('Error', () => {
 });
 
 describe('ErrorTypeIcon', () => {
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
-	});
-
 	it.each([
 		'js_error',
 		'html_attribute_error',
 		'html_element_error',
 		'css_error',
 	])('shows the correct error icon', (errorType) => {
-		act(() => {
-			render(
-				<Error
-					status={3}
-					term_id={12}
-					title="My test error"
-					error={{ type: errorType, sources: [] }}
-				/>,
-				container
-			);
-		});
+		const { container } = render(
+			<Error
+				status={3}
+				term_id={12}
+				title="My test error"
+				error={{ type: errorType, sources: [] }}
+			/>
+		);
 
 		expect(
 			container.querySelector(
@@ -404,17 +379,14 @@ describe('ErrorTypeIcon', () => {
 	});
 
 	it('shows no error icon for unknown error type', () => {
-		act(() => {
-			render(
-				<Error
-					status={3}
-					term_id={12}
-					title="My test error"
-					error={{ type: 'unknown_error', sources: [] }}
-				/>,
-				container
-			);
-		});
+		const { container } = render(
+			<Error
+				status={3}
+				term_id={12}
+				title="My test error"
+				error={{ type: 'unknown_error', sources: [] }}
+			/>
+		);
 
 		expect(
 			container.querySelector('svg[class^=amp-error__error-type-icon]')
@@ -425,16 +397,6 @@ describe('ErrorTypeIcon', () => {
 describe('ErrorContent', () => {
 	beforeAll(() => {
 		createTestStoreAndBlocks();
-	});
-
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
 	});
 
 	/* eslint-disable jest/no-conditional-in-test */
@@ -456,18 +418,17 @@ describe('ErrorContent', () => {
 		(testBlockSource, status) => {
 			const clientId = getTestBlock(testBlockSource);
 
-			render(
+			const { container } = render(
 				<Error
 					clientId={clientId}
 					status={status}
 					term_id={12}
 					title="My test error"
 					error={{ type: 'js_error', sources: [] }}
-				/>,
-				container
+				/>
 			);
 
-			container.querySelector(`.components-button`).click();
+			fireEvent.click(container.querySelector(`.components-button`));
 
 			expect(container.innerHTML).toContain('Markup status');
 
@@ -540,7 +501,10 @@ describe('ErrorContent', () => {
 					: 'Kept'
 			);
 
-			container.querySelector('.amp-error__select-block').click();
+			fireEvent.click(
+				container.querySelector('.amp-error__select-block')
+			);
+
 			expect(
 				select('core/block-editor').getSelectedBlock().clientId
 			).toBe(clientId);

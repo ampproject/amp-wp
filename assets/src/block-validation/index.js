@@ -7,10 +7,7 @@ import { registerPlugin } from '@wordpress/plugins';
 /**
  * Internal dependencies
  */
-import { INITIAL_STATE, createStore } from './store';
 import { withAMPToolbarButton } from './components/with-amp-toolbar-button';
-
-createStore(INITIAL_STATE);
 
 const plugins = require.context('./plugins', true, /.*\.js$/);
 

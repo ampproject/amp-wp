@@ -22,7 +22,7 @@ import {
  */
 import domReady from '@wordpress/dom-ready';
 import {
-	render,
+	createRoot,
 	useContext,
 	useState,
 	useEffect,
@@ -426,16 +426,15 @@ domReady(() => {
 	errorHandler = (event) => {
 		// Handle only own errors.
 		if (event.filename && /amp-settings(\.min)?\.js/.test(event.filename)) {
-			render(<ErrorScreen error={event.error} />, root);
+			createRoot(root).render(<ErrorScreen error={event.error} />);
 		}
 	};
 
 	global.addEventListener('error', errorHandler);
 
-	render(
+	createRoot(root).render(
 		<Providers>
 			<Root appRoot={root} />
-		</Providers>,
-		root
+		</Providers>
 	);
 });

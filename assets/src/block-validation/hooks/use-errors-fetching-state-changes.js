@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY } from '../store';
+import { store as blockValidationStore } from '../store';
 
 /**
  * Custom hook providing loading message when validation errors are fetched.
@@ -21,9 +21,8 @@ export function useErrorsFetchingStateChanges() {
 	const { isEditedPostNew, isFetchingErrors } = useSelect(
 		(select) => ({
 			isEditedPostNew: select('core/editor').isEditedPostNew(),
-			isFetchingErrors: select(
-				BLOCK_VALIDATION_STORE_KEY
-			).getIsFetchingErrors(),
+			isFetchingErrors:
+				select(blockValidationStore).getIsFetchingErrors(),
 		}),
 		[]
 	);

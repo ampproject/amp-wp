@@ -28,7 +28,7 @@ exports[`AMPNotice matches snapshots 1`] = `
         id="mask-notice-success"
         maskUnits="userSpaceOnUse"
         style={
-          Object {
+          {
             "maskType": "alpha",
           }
         }

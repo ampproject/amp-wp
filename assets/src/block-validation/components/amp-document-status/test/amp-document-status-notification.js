@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render, fireEvent } from '@testing-library/react';
 
 /**
  * WordPress dependencies
  */
-import { render, unmountComponentAtNode } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
@@ -28,8 +27,6 @@ jest.mock('../../../hooks/use-errors-fetching-state-changes', () => ({
 }));
 
 describe('AMPDocumentStatusNotification', () => {
-	let container;
-
 	const openGeneralSidebar = jest.fn();
 	const closePublishSidebar = jest.fn();
 
@@ -65,18 +62,6 @@ describe('AMPDocumentStatusNotification', () => {
 		}));
 	});
 
-	beforeEach(() => {
-		// jest.clearAllMocks();
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		unmountComponentAtNode(container);
-		container.remove();
-		container = null;
-	});
-
 	it('renders only a toggle if AMP is disabled', () => {
 		setupHooks(
 			{},
@@ -86,9 +71,7 @@ describe('AMPDocumentStatusNotification', () => {
 			}
 		);
 
-		act(() => {
-			render(<AMPDocumentStatusNotification />, container);
-		});
+		const { container } = render(<AMPDocumentStatusNotification />);
 
 		expect(container.children).toHaveLength(1);
 		expect(container.innerHTML).toContain('Enable AMP');
@@ -103,9 +86,7 @@ describe('AMPDocumentStatusNotification', () => {
 			}
 		);
 
-		act(() => {
-			render(<AMPDocumentStatusNotification />, container);
-		});
+		const { container } = render(<AMPDocumentStatusNotification />);
 
 		expect(container.innerHTML).toContain('Enable AMP');
 		expect(
@@ -119,9 +100,7 @@ describe('AMPDocumentStatusNotification', () => {
 			isPostDirty: true,
 		});
 
-		act(() => {
-			render(<AMPDocumentStatusNotification />, container);
-		});
+		let { container } = render(<AMPDocumentStatusNotification />);
 
 		expect(container.innerHTML).toContain('Enable AMP');
 		expect(container.innerHTML).toContain('Content has changed.');
@@ -133,14 +112,13 @@ describe('AMPDocumentStatusNotification', () => {
 			maybeIsPostDirty: true,
 		});
 
-		act(() => {
-			render(<AMPDocumentStatusNotification />, container);
-		});
+		({ container } = render(<AMPDocumentStatusNotification />));
 
 		expect(container.innerHTML).toContain('Content may have changed.');
 
 		// Simulate button click.
-		container.querySelector('button').click();
+		fireEvent.click(container.querySelector('button'));
+
 		expect(openGeneralSidebar).toHaveBeenCalledTimes(1);
 		expect(closePublishSidebar).toHaveBeenCalledTimes(1);
 	});
@@ -150,9 +128,7 @@ describe('AMPDocumentStatusNotification', () => {
 			keptMarkupValidationErrorCount: 3,
 		});
 
-		act(() => {
-			render(<AMPDocumentStatusNotification />, container);
-		});
+		const { container } = render(<AMPDocumentStatusNotification />);
 
 		expect(container.innerHTML).toContain('Enable AMP');
 		expect(container.innerHTML).toContain(
@@ -169,9 +145,7 @@ describe('AMPDocumentStatusNotification', () => {
 			unreviewedValidationErrorCount: 1,
 		});
 
-		act(() => {
-			render(<AMPDocumentStatusNotification />, container);
-		});
+		const { container } = render(<AMPDocumentStatusNotification />);
 
 		expect(container.innerHTML).toContain('Enable AMP');
 		expect(container.innerHTML).toContain(
@@ -186,9 +160,7 @@ describe('AMPDocumentStatusNotification', () => {
 	it('renders a correct message if there are no errors', () => {
 		setupHooks();
 
-		act(() => {
-			render(<AMPDocumentStatusNotification />, container);
-		});
+		const { container } = render(<AMPDocumentStatusNotification />);
 
 		expect(container.innerHTML).toContain('Enable AMP');
 		expect(container.innerHTML).toContain(

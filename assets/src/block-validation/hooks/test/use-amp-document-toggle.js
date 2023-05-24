@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render, fireEvent } from '@testing-library/react';
 
 /**
  * WordPress dependencies
  */
-import { render, unmountComponentAtNode } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
@@ -20,8 +19,6 @@ jest.mock('@wordpress/data/build/components/use-dispatch/use-dispatch', () =>
 );
 
 describe('useAMPDocumentToggle', () => {
-	let container = null;
-
 	const editPost = jest.fn();
 
 	function ComponentContainingHook() {
@@ -37,50 +34,34 @@ describe('useAMPDocumentToggle', () => {
 	function setupAndRender(isAMPEnabled) {
 		useSelect.mockReturnValue(isAMPEnabled);
 
-		render(<ComponentContainingHook />, container);
+		return render(<ComponentContainingHook />);
 	}
 
 	beforeAll(() => {
 		useDispatch.mockImplementation(() => ({ editPost }));
 	});
 
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		unmountComponentAtNode(container);
-		container.remove();
-		container = null;
-	});
-
 	it('returns AMP document enable state', () => {
-		act(() => {
-			setupAndRender(false);
-		});
+		let { container } = setupAndRender(false);
 		expect(container.querySelector('button').textContent).toBe('disabled');
 
-		act(() => {
-			setupAndRender(true);
-		});
+		({ container } = setupAndRender(true));
+
 		expect(container.querySelector('button').textContent).toBe('enabled');
 	});
 
 	it('toggleAMP disables AMP is it was enabled', () => {
-		act(() => {
-			setupAndRender(true);
-			container.querySelector('button').click();
-		});
+		const { container } = setupAndRender(true);
+
+		fireEvent.click(container.querySelector('button'));
 
 		expect(editPost).toHaveBeenCalledWith({ amp_enabled: false });
 	});
 
 	it('toggleAMP enables AMP is it was disabled', () => {
-		act(() => {
-			setupAndRender(false);
-			container.querySelector('button').click();
-		});
+		const { container } = setupAndRender(false);
+
+		fireEvent.click(container.querySelector('button'));
 
 		expect(editPost).toHaveBeenCalledWith({ amp_enabled: true });
 	});

@@ -14,7 +14,7 @@ import {
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { render } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -94,16 +94,15 @@ domReady(() => {
 			event.filename &&
 			/amp-site-scan-notice(\.min)?\.js/.test(event.filename)
 		) {
-			render(<ErrorScreen error={event.error} />, root);
+			createRoot(root).render(<ErrorScreen error={event.error} />);
 		}
 	};
 
 	global.addEventListener('error', errorHandler);
 
-	render(
+	createRoot(root).render(
 		<Providers>
 			<SiteScanNotice />
-		</Providers>,
-		root
+		</Providers>
 	);
 });
