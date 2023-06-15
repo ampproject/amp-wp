@@ -161,6 +161,24 @@ abstract class AMP_Base_Embed_Handler {
 	}
 
 	/**
+	 * Unwrap `<p>` element based on passed child tag name.
+	 *
+	 * @since 2.4.2
+	 *
+	 * @param Document $dom            Document.
+	 * @param string   $child_tag_name Child tag name.
+	 */
+	protected function unwrap_p_element_by_child_tag_name( $dom, $child_tag_name ) {
+		$nodes = $dom->xpath->query( "//p/{$child_tag_name}" );
+
+		if ( $nodes->length && $nodes instanceof DOMNodeList ) {
+			foreach ( $nodes as $node ) {
+				$this->unwrap_p_element( $node );
+			}
+		}
+	}
+
+	/**
 	 * Removes the node's nearest `<script>` sibling with a `src` attribute containing the base `src` URL provided.
 	 *
 	 * @since 2.1
