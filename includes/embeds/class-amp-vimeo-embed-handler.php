@@ -5,6 +5,9 @@
  * @package AMP
  */
 
+use AmpProject\Extension;
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Vimeo_Embed_Handler
  *
@@ -129,6 +132,18 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 				'height'       => $this->args['height'],
 			]
 		);
+	}
+
+	/**
+	 * Sanitize raw embeds.
+	 *
+	 * @param Document $dom Document.
+	 *
+	 * @return void
+	 */
+	public function sanitize_raw_embeds( Document $dom ) {
+		// If there were any previous embeds in the DOM that were wrapped by `wpautop()`, unwrap them.
+		$this->unwrap_p_element_by_child_tag_name( $dom, Extension::VIMEO );
 	}
 
 	/**

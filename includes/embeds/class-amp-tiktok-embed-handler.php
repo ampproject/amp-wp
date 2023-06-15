@@ -45,6 +45,7 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		foreach ( $nodes as $node ) {
 			$this->make_embed_amp_compatible( $node );
+			$this->unwrap_p_element( $node );
 		}
 	}
 
