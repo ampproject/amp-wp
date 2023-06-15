@@ -150,7 +150,7 @@ abstract class AMP_Base_Embed_Handler {
 		if (
 			$parent_node instanceof DOMElement
 			&&
-			'p' === $parent_node->tagName
+			Tag::P === $parent_node->tagName
 			&&
 			false === $parent_node->hasAttributes()
 			&&
