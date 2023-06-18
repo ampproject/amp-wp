@@ -57,7 +57,7 @@
     "@wordpress/dependency-extraction-webpack-plugin": "4.18.0",
     "@wordpress/e2e-test-utils": "10.6.0",
     "@wordpress/edit-post": "7.12.0",
-    "@wordpress/env": "8.1.0",
+    "@wordpress/env": "8.1.1",
     "@wordpress/eslint-plugin": "14.8.0",
     "@wordpress/hooks": "3.35.0",
     "@wordpress/jest-puppeteer-axe": "6.6.0",
