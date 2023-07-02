@@ -92,7 +92,7 @@
     "postcss": "8.4.24",
     "postcss-import": "15.1.0",
     "postcss-nested": "6.0.1",
-    "postcss-preset-env": "8.4.1",
+    "postcss-preset-env": "8.5.1",
     "prettier": "2.8.8",
     "react-test-renderer": "18.2.0",
     "rtlcss-webpack-plugin": "4.0.7",
