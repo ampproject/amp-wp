@@ -279,7 +279,7 @@ blockquote p:last-child {
 .amp-wp-article-featured-image {
 	margin: 0 0 1em;
 }
-.amp-wp-article-featured-image img {
+.amp-wp-article-featured-image img:not(amp-img) {
 	max-width: 100%;
 	height: auto;
 	margin: 0 auto;
