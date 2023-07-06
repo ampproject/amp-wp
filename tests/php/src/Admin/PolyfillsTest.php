@@ -85,11 +85,11 @@ class PolyfillsTest extends TestCase {
 
 		// These should pass in WP < 5.6.
 		$this->assertTrue( wp_script_is( 'lodash', 'registered' ) );
-		$this->assertStringContainsString( '_.noConflict();', wp_scripts()->print_inline_script( 'lodash', 'after', false ) );
+		$this->assertStringContainsString( '_.noConflict();', self::get_inline_script( 'lodash', 'after' ) );
 
 		$this->assertTrue( wp_script_is( 'wp-api-fetch', 'registered' ) );
-		$this->assertStringContainsString( 'createRootURLMiddleware', wp_scripts()->print_inline_script( 'wp-api-fetch', 'after', false ) );
-		$this->assertStringContainsString( 'createNonceMiddleware', wp_scripts()->print_inline_script( 'wp-api-fetch', 'after', false ) );
+		$this->assertStringContainsString( 'createRootURLMiddleware', self::get_inline_script( 'wp-api-fetch', 'after' ) );
+		$this->assertStringContainsString( 'createNonceMiddleware', self::get_inline_script( 'wp-api-fetch', 'after' ) );
 
 		$this->assertTrue( wp_script_is( 'wp-hooks', 'registered' ) );
 		$this->assertTrue( wp_script_is( 'wp-i18n', 'registered' ) );
@@ -98,5 +98,22 @@ class PolyfillsTest extends TestCase {
 		$this->assertTrue( wp_script_is( 'wp-url', 'registered' ) );
 
 		$this->assertTrue( wp_style_is( 'wp-components', 'registered' ) );
+	}
+
+	/**
+	 * Get inline script.
+	 *
+	 * @param string $handle Script handle.
+	 * @param string $position Script position.
+	 * @param bool   $display Whether to display the script.
+	 *
+	 * @return string
+	 */
+	public static function get_inline_script( $handle, $position = 'after', $display = false ) {
+		if ( method_exists( wp_scripts(), 'get_inline_script_tag' ) ) {
+			return wp_scripts()->get_inline_script_tag( $handle, $position );
+		} else {
+			return wp_scripts()->print_inline_script( $handle, $position, $display );
+		}
 	}
 }
