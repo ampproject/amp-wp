@@ -111,7 +111,13 @@ class PolyfillsTest extends TestCase {
 	 */
 	public static function get_inline_script( $handle, $position = 'after', $display = false ) {
 		if ( method_exists( wp_scripts(), 'get_inline_script_tag' ) ) {
-			return wp_scripts()->get_inline_script_tag( $handle, $position );
+			$script = wp_scripts()->get_inline_script_tag( $handle, $position );
+
+			if ( ! $script ) {
+				return false;
+			}
+
+			return $script;
 		} else {
 			return wp_scripts()->print_inline_script( $handle, $position, $display );
 		}
