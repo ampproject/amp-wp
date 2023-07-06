@@ -86,6 +86,8 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 			);
 			$overflow_element->textContent = __( 'See more', 'amp' );
 			$amp_element->appendChild( $overflow_element );
+
+			/** @var DOMElement $placeholder */
 			$placeholder->setAttribute( Attribute::PLACEHOLDER, '' );
 			$amp_element->appendChild( $placeholder );
 

@@ -569,6 +569,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		foreach ( $dom->xpath->query( '//div[ @class = "textwidget" ]' ) as $text_widget ) {
 			// Restore the width/height attributes which were preserved in preserve_widget_text_element_dimensions.
 			foreach ( $dom->xpath->query( sprintf( './/*[ @%s or @%s ]', self::AMP_PRESERVED_WIDTH_ATTRIBUTE_NAME, self::AMP_PRESERVED_HEIGHT_ATTRIBUTE_NAME ), $text_widget ) as $element ) {
+				/** @var DOMElement $element */
 				if ( $element->hasAttribute( self::AMP_PRESERVED_WIDTH_ATTRIBUTE_NAME ) ) {
 					$element->setAttribute( Attribute::WIDTH, $element->getAttribute( self::AMP_PRESERVED_WIDTH_ATTRIBUTE_NAME ) );
 					$element->removeAttribute( self::AMP_PRESERVED_WIDTH_ATTRIBUTE_NAME );
@@ -586,6 +587,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			 * responsive so this is built-in. Note also the style rule for .wp-video in amp-default.css.
 			 */
 			foreach ( $dom->xpath->query( './/div[ @class = "wp-video" and @style ]', $text_widget ) as $element ) {
+				/** @var DOMElement $element */
 				$element->removeAttribute( 'style' );
 			}
 		}
