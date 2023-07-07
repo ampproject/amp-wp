@@ -8,6 +8,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\WithBlockEditorSupport;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\Admin\PolyfillsTest;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Editor\EditorSupport */
 final class EditorSupportTest extends TestCase {
@@ -71,7 +72,7 @@ final class EditorSupportTest extends TestCase {
 	/** @covers ::maybe_show_notice() */
 	public function test_dont_show_notice_if_no_screen_defined() {
 		$this->instance->maybe_show_notice();
-		$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
+		$this->assertFalse( PolyfillsTest::get_inline_script( 'wp-edit-post', 'after' ) );
 	}
 
 	/** @covers ::maybe_show_notice() */
@@ -79,7 +80,7 @@ final class EditorSupportTest extends TestCase {
 		$this->setup_environment( true, false );
 
 		$this->instance->maybe_show_notice();
-		$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
+		$this->assertFalse( PolyfillsTest::get_inline_script( 'wp-edit-post', 'after' ) );
 	}
 
 	/** @covers ::maybe_show_notice() */
@@ -92,11 +93,11 @@ final class EditorSupportTest extends TestCase {
 
 		$this->instance->maybe_show_notice();
 		if ( $this->instance->is_current_screen_block_editor_for_amp_enabled_post_type() ) {
-			$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
+			$this->assertFalse( PolyfillsTest::get_inline_script( 'wp-edit-post', 'after' ) );
 		} else {
 			$this->assertStringContainsString(
 				'AMP functionality is not available',
-				wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false )
+				PolyfillsTest::get_inline_script( 'wp-edit-post', 'after' )
 			);
 		}
 	}
@@ -108,7 +109,7 @@ final class EditorSupportTest extends TestCase {
 
 		$this->instance->maybe_show_notice();
 
-		$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
+		$this->assertFalse( PolyfillsTest::get_inline_script( 'wp-edit-post', 'after' ) );
 	}
 
 	/** @covers ::maybe_show_notice() */
@@ -125,7 +126,7 @@ final class EditorSupportTest extends TestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$this->instance->maybe_show_notice();
-		$inline_script = wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false );
+		$inline_script = PolyfillsTest::get_inline_script( 'wp-edit-post', 'after' );
 		$this->assertStringContainsString( 'AMP functionality is not available', $inline_script );
 	}
 }

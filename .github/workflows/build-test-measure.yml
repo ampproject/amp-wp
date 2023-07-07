@@ -158,6 +158,36 @@ jobs:
 
 #-----------------------------------------------------------------------------------------------------------------------
 
+  normalize-composer:
+    name: 'Normalize composer.json'
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-php-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+
+      - name: Get composer-normalize.phar
+        run: |
+          wget https://github.com/ergebnis/composer-normalize/releases/latest/download/composer-normalize.phar
+          chmod +x composer-normalize.phar
+
+      - name: Validate composer.json
+        run: composer --no-interaction validate --no-check-all
+
+      - name: Normalize composer.json
+        run: |
+          composer config --no-interaction --no-plugins allow-plugins.ergebnis/composer-normalize true
+          ./composer-normalize.phar --dry-run
+
+#-----------------------------------------------------------------------------------------------------------------------
+
   lint-php:
     name: 'Lint: PHP'
     needs: pre-run
@@ -189,17 +219,8 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
 
-      - name: Validate composer.json
-        run: composer --no-interaction validate --no-check-all
-
       - name: Detect coding standard violations (PHPCS)
         run: vendor/bin/phpcs -q --report=checkstyle --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 | cs2pr --graceful-warnings
-
-      - name: Normalize composer.json
-        run: |
-          composer config --no-interaction --no-plugins allow-plugins.ergebnis/composer-normalize true
-          composer require --no-interaction --dev ergebnis/composer-normalize --ignore-platform-reqs
-          composer --no-interaction normalize --dry-run
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -362,12 +383,13 @@ jobs:
       mysql:
         image: mariadb:latest
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-          MYSQL_ROOT_PASSWORD:
-          MYSQL_DATABASE: wordpress_test
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+          MARIADB_DATABASE: wordpress_test
+          MARIADB_MYSQL_LOCALHOST_USER: 1
+          MARIADB_MYSQL_LOCALHOST_GRANTS: USAGE
         ports:
           - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="healthcheck.sh --su-mysql --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
     continue-on-error: ${{ matrix.experimental == true }}
     strategy:
       fail-fast: false
@@ -606,12 +628,13 @@ jobs:
       mysql:
         image: mariadb:latest
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-          MYSQL_ROOT_PASSWORD:
-          MYSQL_DATABASE: wordpress_test
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+          MARIADB_DATABASE: wordpress_test
+          MARIADB_MYSQL_LOCALHOST_USER: 1
+          MARIADB_MYSQL_LOCALHOST_GRANTS: USAGE
         ports:
           - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="healthcheck.sh --su-mysql --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
     continue-on-error: ${{ matrix.experimental == true }}
     strategy:
       fail-fast: false
