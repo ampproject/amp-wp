@@ -579,9 +579,10 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 * @return bool False if `wp_get_global_settings()` not exists or theme.json not found, true otherwise.
 	 */
 	private function theme_has_theme_json() {
-		if ( function_exists( 'wp_theme_has_theme_json' ) ) {
-			return wp_theme_has_theme_json();
-		}
+		// @TODO: Uncomment this once `wp_theme_has_theme_json()` caching is fixed.
+		// if ( function_exists( 'wp_theme_has_theme_json' ) ) {
+		// return wp_theme_has_theme_json();
+		// }
 
 		static $theme_has_support = null;
 
@@ -605,13 +606,20 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			return $theme_has_support;
 		}
 
-		// Does the theme have its own theme.json?
-		$theme_has_support = is_readable( get_stylesheet_directory() . '/theme.json' );
+		$stylesheet_directory = get_stylesheet_directory();
+		$template_directory   = get_template_directory();
 
-		// Look up the parent if the child does not have a theme.json.
-		if ( ! $theme_has_support ) {
-			$theme_has_support = is_readable( get_template_directory() . '/theme.json' );
+		// This is the same as get_theme_file_path(), which isn't available in load-styles.php context.
+		if ( $stylesheet_directory !== $template_directory && file_exists( $stylesheet_directory . '/theme.json' ) ) {
+			$path = $stylesheet_directory . '/theme.json';
+		} else {
+			$path = $template_directory . '/theme.json';
 		}
+
+		/** This filter is documented in wp-includes/link-template.php */
+		$path = apply_filters( 'theme_file_path', $path, 'theme.json' );
+
+		$theme_has_support = file_exists( $path );
 
 		return $theme_has_support;
 	}
