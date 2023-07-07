@@ -105,11 +105,10 @@ class PolyfillsTest extends TestCase {
 	 *
 	 * @param string $handle Script handle.
 	 * @param string $position Script position.
-	 * @param bool   $display Whether to display the script.
 	 *
 	 * @return string
 	 */
-	public static function get_inline_script( $handle, $position = 'after', $display = false ) {
+	public static function get_inline_script( $handle, $position = 'after' ) {
 		if ( method_exists( wp_scripts(), 'get_inline_script_tag' ) ) {
 			$script = wp_scripts()->get_inline_script_tag( $handle, $position );
 
@@ -119,7 +118,7 @@ class PolyfillsTest extends TestCase {
 
 			return $script;
 		} else {
-			return wp_scripts()->print_inline_script( $handle, $position, $display );
+			return wp_scripts()->print_inline_script( $handle, $position, false );
 		}
 	}
 }
