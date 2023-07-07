@@ -579,39 +579,48 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 * @return bool False if `wp_get_global_settings()` not exists or theme.json not found, true otherwise.
 	 */
 	private function theme_has_theme_json() {
-		if ( function_exists( 'wp_theme_has_theme_json' ) ) {
-			return wp_theme_has_theme_json();
-		}
+		// @TODO: Uncomment this once `wp_theme_has_theme_json()` caching is fixed.
+		// if ( function_exists( 'wp_theme_has_theme_json' ) ) {
+		// return wp_theme_has_theme_json();
+		// }
 
-		static $theme_has_support = null;
+		static $theme_has_support         = null;
+		static $prev_stylesheet_directory = null;
+		static $prev_template_directory   = null;
+
+		$stylesheet_directory = get_stylesheet_directory();
+		$template_directory   = get_template_directory();
+
+		// Make sure that the cached $theme_has_support value is reset when the theme changes.
+		if ( null !== $theme_has_support && (
+				$stylesheet_directory !== $prev_stylesheet_directory ||
+				$template_directory !== $prev_template_directory
+			) ) {
+			$theme_has_support = null;
+		}
+		$prev_stylesheet_directory = $stylesheet_directory;
+		$prev_template_directory   = $template_directory;
 
 		if (
 			null !== $theme_has_support &&
-
-			/*
-			* Ignore static cache when `WP_DEBUG` is enabled. Why? To avoid interfering with
-			* the theme developer's workflow.
-			*
-			* @todo Replace `WP_DEBUG` once an "in development mode" check is available in Core.
-			*/
-			! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) &&
-
-			/*
-			* Ignore cache when automated test suites are running. Why? To ensure
-			* the static cache is reset between each test.
-			*/
-			! ( defined( 'WP_RUN_CORE_TESTS' ) && WP_RUN_CORE_TESTS )
+			// Ignore static cache when the development mode is set to 'theme', to avoid interfering with
+			// the theme developer's workflow.
+			( function_exists( 'wp_get_development_mode' ) && wp_get_development_mode() !== 'theme' )
 		) {
 			return $theme_has_support;
 		}
 
-		// Does the theme have its own theme.json?
-		$theme_has_support = is_readable( get_stylesheet_directory() . '/theme.json' );
-
-		// Look up the parent if the child does not have a theme.json.
-		if ( ! $theme_has_support ) {
-			$theme_has_support = is_readable( get_template_directory() . '/theme.json' );
+		// This is the same as get_theme_file_path(), which isn't available in load-styles.php context.
+		if ( $stylesheet_directory !== $template_directory && file_exists( $stylesheet_directory . '/theme.json' ) ) {
+			$path = $stylesheet_directory . '/theme.json';
+		} else {
+			$path = $template_directory . '/theme.json';
 		}
+
+		/** This filter is documented in wp-includes/link-template.php */
+		$path = apply_filters( 'theme_file_path', $path, 'theme.json' );
+
+		$theme_has_support = file_exists( $path );
 
 		return $theme_has_support;
 	}

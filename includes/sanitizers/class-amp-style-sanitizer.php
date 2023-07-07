@@ -1017,6 +1017,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		} else {
 			foreach ( $styled_elements as $element ) {
+				/** @var DOMElement $element */
 				$attr = $element->getAttributeNode( Attribute::STYLE );
 				if ( $attr && preg_match( '/!\s*important/i', $attr->value ) ) {
 					ValidationExemption::mark_node_as_px_verified( $attr );
