@@ -5,6 +5,7 @@
 
 use Yoast\WPTestUtils\WPIntegration;
 
+define( 'WP_DEVELOPMENT_MODE', 'theme' );
 define( 'TESTS_PLUGIN_DIR', dirname( dirname( __DIR__ ) ) );
 
 // When run in wp-env context, set the test config file path.
