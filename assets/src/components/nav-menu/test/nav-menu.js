@@ -60,7 +60,24 @@ describe('NavMenu', () => {
 		const handler = jest.fn();
 
 		const { container } = render(
-			<NavMenu links={links} onClick={handler} />
+			// Pass empty URLs to avoid `Error: Not implemented: navigation (except hash changes)` in tests.
+			// This is due to the JSDOM limitation to not support navigation.
+			// Since we're not testing onClick event and not testing navigation, we can safely pass empty URLs.
+			<NavMenu
+				links={[
+					{
+						url: '',
+						label: 'Foo',
+						isActive: false,
+					},
+					{
+						url: '',
+						label: 'Bar',
+						isActive: true,
+					},
+				]}
+				onClick={handler}
+			/>
 		);
 
 		fireEvent.click(container.querySelector('a'));
@@ -69,6 +86,10 @@ describe('NavMenu', () => {
 
 		const [event, link] = handler.mock.calls[0];
 		expect(event.type).toBe('click');
-		expect(link).toBe(links[0]);
+		expect(link).toStrictEqual({
+			url: '',
+			label: 'Foo',
+			isActive: false,
+		});
 	});
 });
