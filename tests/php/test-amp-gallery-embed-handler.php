@@ -282,6 +282,9 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 		// Remove lazy loading attribute.
 		$content = preg_replace( '/\s+loading="lazy"/', '', $content );
 
+		// Remove fetchpriority attribute.
+		$content = preg_replace( '/\s+fetchpriority="high"/', '', $content );
+
 		$this->assertEquals(
 			$this->normalize( $expected ),
 			$this->normalize( $content )

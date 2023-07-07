@@ -21,8 +21,8 @@ export function NavMenu({ links = [], onClick }) {
 	return (
 		<Selectable ElementName="nav" className="nav-menu">
 			<ul className="nav-menu__list">
-				{links.map((link) => (
-					<li key={link.url} className="nav-menu__item">
+				{links.map((link, index) => (
+					<li key={`${link.url}-${index}`} className="nav-menu__item">
 						<a
 							className={classnames('nav-menu__link', {
 								'nav-menu__link--active': link.isActive,
