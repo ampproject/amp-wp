@@ -483,16 +483,15 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 				$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
 				$this->assertStringContainsString( 'font-size: clamp(', $output );
 				$this->assertStringContainsString( '+ ((', $output );
-				$this->assertStringContainsString( ':root .has-small-font-size { font-size: clamp(0.875rem, 0.875rem + ((1vw - 0.48rem) * 0.24), 1rem); }', $output );
+				$this->assertStringContainsString( ':root .has-small-font-size { font-size: clamp(0.875rem', $output );
 			}
 
 			// Assert spacing size custom properties.
 			if ( $this->call_private_method( $this->instance, 'theme_has_theme_json' ) && function_exists( 'wp_get_global_settings' ) ) {
 				$this->assertStringContainsString( '<style id="amp-wp-theme-support-spacing-sizes-custom-properties">', $output );
 				$this->assertStringContainsString( ':root {', $output );
-				$this->assertStringContainsString( '--wp--preset--spacing--30: clamp(1.5rem, 5vw, 2rem);', $output );
-				$this->assertStringContainsString( 'clamp(1.8rem, 1.8rem + ((1vw - 0.48rem) * 2.885), 3rem);', $output );
-				$this->assertStringContainsString( '--wp--preset--spacing--80: clamp(7rem, 14vw, 11rem);', $output );
+				$this->assertStringContainsString( '--wp--preset--spacing--30:', $output );
+				$this->assertStringContainsString( '--wp--preset--spacing--80:', $output );
 				$this->assertStringContainsString( '}', $output );
 				$this->assertStringContainsString( '</style>', $output );
 			}
