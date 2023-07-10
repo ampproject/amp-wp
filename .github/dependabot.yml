@@ -17,13 +17,14 @@ updates:
     time: "17:00"
     timezone: America/Los_Angeles
   open-pull-requests-limit: 10
+  groups:
+    wordpress-packages:
+      patterns:
+        - "@wordpress/*"
   ignore:
-  # Cannot upgrade until @wordpress/element supports react v17.
+  # Need to be updated based on `@wordpress/element` react peer dependency version.
   - dependency-name: react
-    versions:
-    - ">= 17"
-  # Updates are handled via the `gutenberg-packages-update` GHA workflow.
-  - dependency-name: "@wordpress/*"
+  - dependency-name: react-dom
 
 # Config for GitHub Actions.
 - package-ecosystem: github-actions
