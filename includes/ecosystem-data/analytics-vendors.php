@@ -158,7 +158,7 @@ return array (
   29 => 
   array (
     'value' => 'googleanalytics',
-    'label' => 'Google Analytics',
+    'label' => 'Google Analytics (Legacy)',
   ),
   30 => 
   array (
