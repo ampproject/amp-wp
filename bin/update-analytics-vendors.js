@@ -168,7 +168,13 @@ class UpdateAnalyticsVendors {
 
 		if (this.vendors) {
 			this.vendors = Object.entries(this.vendors).map(
-				([value, label]) => ({ value, label })
+				([value, label]) => {
+					if ('googleanalytics' === value) {
+						label = 'Google Analytics (Legacy)';
+					}
+
+					return { value, label };
+				}
 			);
 
 			// Sort vendors by label.

@@ -189,7 +189,7 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 		$this->assertIndexedArrayContains(
 			[
 				'adobeanalytics:Adobe Analytics',
-				'googleanalytics:Google Analytics',
+				'googleanalytics:Google Analytics (Legacy)',
 				'gtag:gtag',
 			],
 			$pairs
