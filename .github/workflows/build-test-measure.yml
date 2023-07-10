@@ -176,6 +176,19 @@ jobs:
       - name: Get composer-normalize.phar
         run: |
           wget https://github.com/ergebnis/composer-normalize/releases/latest/download/composer-normalize.phar
+
+          # Check if phar is actually downloaded.
+          if [ ! -f composer-normalize.phar ]; then
+            sleep 5
+            wget https://github.com/ergebnis/composer-normalize/releases/latest/download/composer-normalize.phar
+          fi
+
+          # If not downloaded, exit with error this time.
+          if [ ! -f composer-normalize.phar ]; then
+            echo "::error::Failed to download composer-normalize.phar"
+            exit 1
+          fi
+
           chmod +x composer-normalize.phar
 
       - name: Validate composer.json
