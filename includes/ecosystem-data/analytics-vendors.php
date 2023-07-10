@@ -158,7 +158,7 @@ return array (
   29 => 
   array (
     'value' => 'googleanalytics',
-    'label' => 'Google Analytics',
+    'label' => 'Google Analytics (Legacy)',
   ),
   30 => 
   array (
@@ -272,195 +272,200 @@ return array (
   ),
   52 => 
   array (
+    'value' => 'neodata',
+    'label' => 'Neodata',
+  ),
+  53 => 
+  array (
     'value' => 'newrelic',
     'label' => 'New Relic',
   ),
-  53 => 
+  54 => 
   array (
     'value' => 'nielsen',
     'label' => 'Nielsen',
   ),
-  54 => 
+  55 => 
   array (
     'value' => 'nielsen-marketing-cloud',
     'label' => 'Nielsen Marketing Cloud',
   ),
-  55 => 
+  56 => 
   array (
     'value' => 'oewa',
     'label' => 'OEWA',
   ),
-  56 => 
+  57 => 
   array (
     'value' => 'oewadirect',
     'label' => 'oewadirect',
   ),
-  57 => 
+  58 => 
   array (
     'value' => 'oracleInfinityAnalytics',
     'label' => 'Oracle Infinity Analytics',
   ),
-  58 => 
+  59 => 
   array (
     'value' => 'parsely',
     'label' => 'Parsely',
   ),
-  59 => 
+  60 => 
   array (
     'value' => 'permutive',
     'label' => 'Permutive',
   ),
-  60 => 
+  61 => 
   array (
     'value' => 'permutive-ampscript',
     'label' => 'Permutive-ampscript',
   ),
-  61 => 
+  62 => 
   array (
     'value' => 'piano',
     'label' => 'Piano',
   ),
-  62 => 
+  63 => 
   array (
     'value' => 'pinpoll',
     'label' => 'Pinpoll',
   ),
-  63 => 
+  64 => 
   array (
     'value' => 'piStats',
     'label' => 'Pistats',
   ),
-  64 => 
+  65 => 
   array (
     'value' => 'ppasanalytics',
     'label' => 'Piwik PRO Analytics Suite',
   ),
-  65 => 
+  66 => 
   array (
     'value' => 'pressboard',
     'label' => 'Pressboard',
   ),
-  66 => 
+  67 => 
   array (
     'value' => 'quantcast',
     'label' => 'Quantcast Measurement',
   ),
-  67 => 
+  68 => 
   array (
     'value' => 'rakam',
     'label' => 'Rakam',
   ),
-  68 => 
+  69 => 
   array (
     'value' => 'top100',
     'label' => 'Rambler/TOP-100',
   ),
-  69 => 
+  70 => 
   array (
     'value' => 'reppublika',
     'label' => 'reppublika',
   ),
-  70 => 
+  71 => 
   array (
     'value' => 'retargetly',
     'label' => 'Retargetly',
   ),
-  71 => 
+  72 => 
   array (
     'value' => 'rudderstack',
     'label' => 'RudderStack',
   ),
-  72 => 
+  73 => 
   array (
     'value' => 'segment',
     'label' => 'Segment',
   ),
-  73 => 
+  74 => 
   array (
     'value' => 'sensorsanalytics',
     'label' => 'SensorsData',
   ),
-  74 => 
+  75 => 
   array (
     'value' => 'shinystat',
     'label' => 'ShinyStat',
   ),
-  75 => 
+  76 => 
   array (
     'value' => 'snowplow',
     'label' => 'Snowplow Analytics',
   ),
-  76 => 
+  77 => 
   array (
     'value' => 'snowplow_v2',
     'label' => 'Snowplow Analytics (v2)',
   ),
-  77 => 
+  78 => 
   array (
     'value' => 'mpulse',
     'label' => 'SOASTA mPulse',
   ),
-  78 => 
+  79 => 
   array (
     'value' => 'subscriptions-propensity',
     'label' => 'subscriptions-propensity',
   ),
-  79 => 
+  80 => 
   array (
     'value' => 'taboola',
     'label' => 'Taboola',
   ),
-  80 => 
+  81 => 
   array (
     'value' => 'tail',
     'label' => 'Tail',
   ),
-  81 => 
+  82 => 
   array (
     'value' => 'teaanalytics',
     'label' => 'TEA Analytics',
   ),
-  82 => 
+  83 => 
   array (
     'value' => 'tealiumcollect',
     'label' => 'Tealium Collect',
   ),
-  83 => 
+  84 => 
   array (
     'value' => 'topmailru',
     'label' => 'Top.Mail.Ru',
   ),
-  84 => 
+  85 => 
   array (
     'value' => 'treasuredata',
     'label' => 'Treasure Data',
   ),
-  85 => 
+  86 => 
   array (
     'value' => 'umenganalytics',
     'label' => 'Umeng+ Analytics',
   ),
-  86 => 
+  87 => 
   array (
     'value' => 'upscore',
     'label' => 'Upscore',
   ),
-  87 => 
+  88 => 
   array (
     'value' => 'vponanalytics',
     'label' => 'Vpon Analytics',
   ),
-  88 => 
+  89 => 
   array (
     'value' => 'webengage',
     'label' => 'Webengage',
   ),
-  89 => 
+  90 => 
   array (
     'value' => 'webtrekk_v2',
     'label' => 'Webtrekk',
   ),
-  90 => 
+  91 => 
   array (
     'value' => 'metrika',
     'label' => 'Yandex Metrica',
