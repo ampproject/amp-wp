@@ -31,6 +31,25 @@ const GOOGLE_ANALYTICS_NOTICE = createInterpolateElement(
 	}
 );
 
+const GOOGLE_ANALYTICS_DEPRECATION_NOTICE = createInterpolateElement(
+	__(
+		'The <Code>googleanalytics</Code> type is obsolete as Google Analytics has switched to use gtag in the transition from Universal Analytics (UA) to GA4. Please use gtag instead. Learn more about <GA4AMP>GA4 in AMP</GA4AMP>.',
+		'amp'
+	),
+	{
+		/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
+		GA4AMP: (
+			<a
+				href="https://support.google.com/analytics/topic/13706307?hl=en&ref_topic=9303319&sjid=7478006548081699185-NA"
+				target="_blank"
+				rel="noreferrer"
+			/>
+		),
+		Code: <code />,
+		/* eslint-enable jsx-a11y/anchor-has-content */
+	}
+);
+
 export default {
 	'': {
 		sample: '{}',
@@ -175,6 +194,7 @@ export default {
 	},
 	[GOOGLE_ANALYTICS_VENDOR]: {
 		notice: GOOGLE_ANALYTICS_NOTICE,
+		warning: GOOGLE_ANALYTICS_DEPRECATION_NOTICE,
 		sample: JSON.stringify(
 			{
 				vars: {
