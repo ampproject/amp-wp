@@ -27,7 +27,11 @@ import {
  * Internal dependencies
  */
 import { Options } from '../components/options-context-provider';
-import { AMPNotice, NOTICE_SIZE_SMALL } from '../components/amp-notice';
+import {
+	AMPNotice,
+	NOTICE_SIZE_SMALL,
+	NOTICE_TYPE_WARNING,
+} from '../components/amp-notice';
 import vendorConfigs from './vendor-configs';
 
 const GOOGLE_ANALYTICS_VENDOR = 'googleanalytics';
@@ -157,6 +161,15 @@ function AnalyticsEntry({
 				{vendorConfigs[type]?.notice && (
 					<AMPNotice size={NOTICE_SIZE_SMALL}>
 						<span>{vendorConfigs[type].notice}</span>
+					</AMPNotice>
+				)}
+
+				{vendorConfigs[type]?.warning && (
+					<AMPNotice
+						size={NOTICE_SIZE_SMALL}
+						type={NOTICE_TYPE_WARNING}
+					>
+						<span>{vendorConfigs[type].warning}</span>
 					</AMPNotice>
 				)}
 
