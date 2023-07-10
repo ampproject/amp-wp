@@ -19,21 +19,19 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/oembed-infogram/assets/icon.svg?rev=2831317',
-      '2x' => 'https://ps.w.org/oembed-infogram/assets/icon-256x256.png?rev=2831317',
       'svg' => 'https://ps.w.org/oembed-infogram/assets/icon.svg?rev=2831317',
     ),
     'wporg' => true,
   ),
   1 => 
   array (
-    'name' => 'SEOPress, on-site SEO',
+    'name' => 'SEOPress &#8211; On-site SEO',
     'slug' => 'wp-seopress',
     'homepage' => 'https://www.seopress.org/',
     'short_description' => 'SEOPress, a simple, fast and powerful all in one SEO plugin for WordPress. Rank higher in search engines, fully white label. Now with AI.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/wp-seopress/assets/icon.svg?rev=2606872',
-      '2x' => 'https://ps.w.org/wp-seopress/assets/icon-256x256.png?rev=2606863',
       'svg' => 'https://ps.w.org/wp-seopress/assets/icon.svg?rev=2606872',
     ),
     'wporg' => true,
@@ -46,7 +44,7 @@ return array (
     'short_description' => 'Super Web Share helps to easily add native share prompt to your website for easy page/post sharing in less than a minute.',
     'icons' => 
     array (
-      '1x' => 'https://ps.w.org/super-web-share/assets/icon-128x128.png?rev=1966238',
+      '1x' => 'https://ps.w.org/super-web-share/assets/icon-128x128.png?rev=2896325',
     ),
     'wporg' => true,
   ),
@@ -84,8 +82,8 @@ return array (
     'short_description' => 'This plugin allows you to insert social icons in any widget area.',
     'icons' => 
     array (
-      '1x' => 'https://ps.w.org/simple-social-icons/assets/icon-128x128.png?rev=1335655',
-      '2x' => 'https://ps.w.org/simple-social-icons/assets/icon-256x256.png?rev=1335655',
+      '1x' => 'https://ps.w.org/simple-social-icons/assets/icon.svg?rev=2917674',
+      'svg' => 'https://ps.w.org/simple-social-icons/assets/icon.svg?rev=2917674',
     ),
     'wporg' => true,
   ),
@@ -98,7 +96,6 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/onesignal-free-web-push-notifications/assets/icon.svg?rev=1669089',
-      '2x' => 'https://ps.w.org/onesignal-free-web-push-notifications/assets/icon-256x256.png?rev=1669089',
       'svg' => 'https://ps.w.org/onesignal-free-web-push-notifications/assets/icon.svg?rev=1669089',
     ),
     'wporg' => true,
@@ -137,7 +134,6 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/jetpack-boost/assets/icon.svg?rev=2818794',
-      '2x' => 'https://ps.w.org/jetpack-boost/assets/icon-256x256.png?rev=2818794',
       'svg' => 'https://ps.w.org/jetpack-boost/assets/icon.svg?rev=2818794',
     ),
     'wporg' => true,
@@ -146,7 +142,7 @@ return array (
   array (
     'name' => 'Podcast Player &#8211; Your Podcasting Companion',
     'slug' => 'podcast-player',
-    'homepage' => 'https://vedathemes.com/podcast-player/',
+    'homepage' => 'https://easypodcastpro.com',
     'short_description' => 'Showcase your podcast only using podcasting feed url. Use widget, shortcode or editor block to display podcast player anywhere on your site.',
     'icons' => 
     array (
@@ -192,7 +188,6 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/twentig/assets/icon.svg?rev=2569439',
-      '2x' => 'https://ps.w.org/twentig/assets/icon-256x256.png?rev=2569439',
       'svg' => 'https://ps.w.org/twentig/assets/icon.svg?rev=2569439',
     ),
     'wporg' => true,
@@ -202,7 +197,7 @@ return array (
     'name' => 'Custom Post Type UI',
     'slug' => 'custom-post-type-ui',
     'homepage' => 'https://github.com/WebDevStudios/custom-post-type-ui/',
-    'short_description' => 'Admin UI for creating custom post types and custom taxonomies for WordPress',
+    'short_description' => 'Admin UI for creating custom content types like post types and taxonomies',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/custom-post-type-ui/assets/icon-128x128.png?rev=2744389',
@@ -270,7 +265,6 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/breadcrumb-navxt/assets/icon.svg?rev=1927103',
-      '2x' => 'https://ps.w.org/breadcrumb-navxt/assets/icon-256x256.png?rev=2410525',
       'svg' => 'https://ps.w.org/breadcrumb-navxt/assets/icon.svg?rev=1927103',
     ),
     'wporg' => true,
@@ -293,7 +287,7 @@ return array (
     'name' => 'Slim SEO &#8211; Fast &amp; Automated WordPress SEO Plugin',
     'slug' => 'slim-seo',
     'homepage' => 'https://wpslimseo.com',
-    'short_description' => 'A full-featured SEO plugin for WordPress that&#039;s lightweight, blazing fast with minimum configuration. No bloats&hellip;',
+    'short_description' => 'A full-featured SEO plugin for WordPress that&#039;s lightweight, blazing fast with minimum configuration. No bloats and just works!',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/slim-seo/assets/icon.svg?rev=2005049',
@@ -349,7 +343,6 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/page-views-count/assets/icon.svg?rev=986301',
-      '2x' => 'https://ps.w.org/page-views-count/assets/icon-256x256.png?rev=986301',
       'svg' => 'https://ps.w.org/page-views-count/assets/icon.svg?rev=986301',
     ),
     'wporg' => true,
@@ -378,7 +371,6 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/newspack-newsletters/assets/icon.svg?rev=2475195',
-      '2x' => 'https://ps.w.org/newspack-newsletters/assets/icon-256x256.png?rev=2475195',
       'svg' => 'https://ps.w.org/newspack-newsletters/assets/icon.svg?rev=2475195',
     ),
     'wporg' => true,
@@ -392,7 +384,6 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/web-stories/assets/icon.svg?rev=2386543',
-      '2x' => 'https://ps.w.org/web-stories/assets/icon-256x256.png?rev=2386543',
       'svg' => 'https://ps.w.org/web-stories/assets/icon.svg?rev=2386543',
     ),
     'wporg' => true,
@@ -402,11 +393,10 @@ return array (
     'name' => 'Jetpack &#8211; WP Security, Backup, Speed, &amp; Growth',
     'slug' => 'jetpack',
     'homepage' => 'https://jetpack.com',
-    'short_description' => 'Improve your WP security with powerful one-click tools like backup and malware scan. Get essential free tools including stats, CDN and social sharing.',
+    'short_description' => 'Improve your WP security with powerful one-click tools like backup, WAF, and malware scan. Get essential free tools including stats, CDN and social sh &hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/jetpack/assets/icon.svg?rev=2819237',
-      '2x' => 'https://ps.w.org/jetpack/assets/icon-256x256.png?rev=2819237',
       'svg' => 'https://ps.w.org/jetpack/assets/icon.svg?rev=2819237',
     ),
     'wporg' => true,
@@ -416,7 +406,7 @@ return array (
     'name' => 'Easy Notification Bar',
     'slug' => 'easy-notification-bar',
     'homepage' => 'https://wordpress.org/plugins/easy-notification-bar/',
-    'short_description' => 'Easily add a custom top bar notification message to on your site with live customization&hellip;',
+    'short_description' => 'Easily add a custom top bar notification message to on your site with live customization options via the WordPress customizer.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/easy-notification-bar/assets/icon-128x128.png?rev=2515988',
@@ -432,8 +422,8 @@ return array (
     'short_description' => 'Antispam plugin with a sophisticated tool set for effective day to day comment and trackback spam-fighting. Build with data protection and privacy in  &hellip;',
     'icons' => 
     array (
-      '1x' => 'https://ps.w.org/antispam-bee/assets/icon-128x128.png?rev=977629',
-      '2x' => 'https://ps.w.org/antispam-bee/assets/icon-256x256.png?rev=977629',
+      '1x' => 'https://ps.w.org/antispam-bee/assets/icon-128x128.png?rev=2898402',
+      '2x' => 'https://ps.w.org/antispam-bee/assets/icon-256x256.png?rev=2898402',
     ),
     'wporg' => true,
   ),
@@ -446,7 +436,6 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/simpletoc/assets/icon.svg?rev=2796116',
-      '2x' => 'https://ps.w.org/simpletoc/assets/icon-256x256.png?rev=2796116',
       'svg' => 'https://ps.w.org/simpletoc/assets/icon.svg?rev=2796116',
     ),
     'wporg' => true,
@@ -495,7 +484,7 @@ return array (
     'name' => 'Simple Author Box',
     'slug' => 'simple-author-box',
     'homepage' => 'https://wpauthorbox.com/',
-    'short_description' => 'Add a responsive author box with social icons to any post. Great author box for&hellip;',
+    'short_description' => 'Add a responsive author box with social icons to any post. Great author box for any site!',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/simple-author-box/assets/icon-128x128.jpg?rev=1821054',
@@ -546,11 +535,10 @@ return array (
     'name' => 'All in One SEO – Best WordPress SEO Plugin – Easily Improve SEO Rankings &amp; Increase Traffic',
     'slug' => 'all-in-one-seo-pack',
     'homepage' => 'https://aioseo.com/',
-    'short_description' => '🤩 The original WordPress SEO plugin. Improve your WordPress SEO rankings and traffic with our comprehensive SEO tools and smart SEO optimizations! 🚀',
+    'short_description' => 'The original WordPress SEO plugin. Improve your WordPress SEO rankings and traffic with our comprehensive SEO tools and smart SEO optimizations!',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/all-in-one-seo-pack/assets/icon.svg?rev=2443290',
-      '2x' => 'https://ps.w.org/all-in-one-seo-pack/assets/icon-256x256.png?rev=2443290',
       'svg' => 'https://ps.w.org/all-in-one-seo-pack/assets/icon.svg?rev=2443290',
     ),
     'wporg' => true,
@@ -564,7 +552,6 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/weglot/assets/icon.svg?rev=2814196',
-      '2x' => 'https://ps.w.org/weglot/assets/icon-256x256.png?rev=2814196',
       'svg' => 'https://ps.w.org/weglot/assets/icon.svg?rev=2814196',
     ),
     'wporg' => true,
@@ -573,12 +560,11 @@ return array (
   array (
     'name' => 'Rank Math SEO',
     'slug' => 'seo-by-rank-math',
-    'homepage' => 'https://s.rankmath.com/home',
+    'homepage' => 'https://rankmath.com/',
     'short_description' => 'Rank Math SEO is the Best WordPress SEO plugin combines the features of many SEO tools in a single package &amp; helps you multiply your SEO traffic.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/seo-by-rank-math/assets/icon.svg?rev=2848340',
-      '2x' => 'https://ps.w.org/seo-by-rank-math/assets/icon-256x256.png?rev=2848340',
       'svg' => 'https://ps.w.org/seo-by-rank-math/assets/icon.svg?rev=2848340',
     ),
     'wporg' => true,
@@ -658,7 +644,6 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/iframely/assets/icon.svg?rev=2686906',
-      '2x' => 'https://ps.w.org/iframely/assets/icon-256x256.png?rev=2686906',
       'svg' => 'https://ps.w.org/iframely/assets/icon.svg?rev=2686906',
     ),
     'wporg' => true,
@@ -668,11 +653,10 @@ return array (
     'name' => 'Pym.js Embeds',
     'slug' => 'pym-shortcode',
     'homepage' => 'https://github.com/INN/pym-shortcode',
-    'short_description' => 'A WordPress block and shortcode for embedding iframes that are responsive horizontally and vertically, using&hellip;',
+    'short_description' => 'A WordPress block and shortcode for embedding iframes that are responsive horizontally and vertically, using the NPR Visuals Team&#039;s Pym.js.',
     'icons' => 
     array (
-      '1x' => 'https://ps.w.org/pym-shortcode/assets/icon.svg?rev=1944461',
-      'svg' => 'https://ps.w.org/pym-shortcode/assets/icon.svg?rev=1944461',
+      'default' => 'https://s.w.org/plugins/geopattern-icon/pym-shortcode_27c2f2.svg',
     ),
     'wporg' => true,
   ),
@@ -685,7 +669,6 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/pwa/assets/icon.svg?rev=1908485',
-      '2x' => 'https://ps.w.org/pwa/assets/icon-256x256.png?rev=1908485',
       'svg' => 'https://ps.w.org/pwa/assets/icon.svg?rev=1908485',
     ),
     'wporg' => true,
@@ -749,11 +732,10 @@ return array (
     'name' => 'Syntax-highlighting Code Block (with Server-side Rendering)',
     'slug' => 'syntax-highlighting-code-block',
     'homepage' => 'https://github.com/westonruter/syntax-highlighting-code-block',
-    'short_description' => 'Extending the Code block with syntax highlighting rendered on the server, thus being AMP-compatible and&hellip;',
+    'short_description' => 'Extending the Code block with syntax highlighting rendered on the server, thus being AMP-compatible and having faster frontend performance.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/syntax-highlighting-code-block/assets/icon.svg?rev=2131108',
-      '2x' => 'https://ps.w.org/syntax-highlighting-code-block/assets/icon-256x256.png?rev=2131108',
       'svg' => 'https://ps.w.org/syntax-highlighting-code-block/assets/icon.svg?rev=2131108',
     ),
     'wporg' => true,
@@ -763,11 +745,10 @@ return array (
     'name' => 'Contact Form by WPForms &#8211; Drag &amp; Drop Form Builder for WordPress',
     'slug' => 'wpforms-lite',
     'homepage' => 'https://wpforms.com',
-    'short_description' => 'The best WordPress contact form plugin. Drag &amp; Drop online form builder that helps you create beautiful contact forms + custom forms in minutes.',
+    'short_description' => 'The best WordPress contact form plugin. Drag &amp; Drop online form builder to create beautiful contact forms, payment forms, &amp; other custom forms &hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/wpforms-lite/assets/icon.svg?rev=2574198',
-      '2x' => 'https://ps.w.org/wpforms-lite/assets/icon-256x256.png?rev=2574201',
       'svg' => 'https://ps.w.org/wpforms-lite/assets/icon.svg?rev=2574198',
     ),
     'wporg' => true,
@@ -781,7 +762,6 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/google-analytics-for-wordpress/assets/icon.svg?rev=1598927',
-      '2x' => 'https://ps.w.org/google-analytics-for-wordpress/assets/icon-256x256.png?rev=1598927',
       'svg' => 'https://ps.w.org/google-analytics-for-wordpress/assets/icon.svg?rev=1598927',
     ),
     'wporg' => true,
@@ -801,7 +781,7 @@ return array (
   ),
   59 => 
   array (
-    'name' => 'Akismet Spam Protection',
+    'name' => 'Akismet Anti-Spam: Spam Protection',
     'slug' => 'akismet',
     'homepage' => 'https://akismet.com/',
     'short_description' => 'The best anti-spam protection to block spam comments and spam in a contact form. The most trusted antispam solution for WordPress and WooCommerce.',
@@ -827,16 +807,18 @@ return array (
   ),
   61 => 
   array (
-    'name' => 'WordPress Share Buttons Plugin – AddThis',
-    'slug' => 'addthis',
+    'name' => 'AddThis Social Sharing',
+    'slug' => 'addthis-social-sharing',
     'homepage' => 'https://wordpress.org/plugins/addthis/',
-    'short_description' => 'Now compatible with the AMP Plugin! Free Share Buttons from AddThis. Share to Messenger, WhatsApp, Facebook, Twitter, Pinterest and many more.',
+    'short_description' => '<p>AddThis is known for a full suite of website tools including beautifully crafted and simple share buttons.</p>
+',
     'icons' => 
     array (
-      '1x' => 'https://ps.w.org/addthis/assets/icon-128x128.png?rev=1223867',
-      '2x' => 'https://ps.w.org/addthis/assets/icon-256x256.png?rev=1223867',
+      '1x' => 'https://amp-wp.org/wp-content/uploads/2018/12/AddThis-banner-285x160.jpg',
+      '2x' => 'https://amp-wp.org/wp-content/uploads/2018/12/AddThis-banner-372x209.jpg',
+      'svg' => '',
     ),
-    'wporg' => true,
+    'wporg' => false,
   ),
   62 => 
   array (
@@ -846,8 +828,8 @@ return array (
     'short_description' => 'Scale your ecommerce business with WordPress on the front-end and BigCommerce on the back end. Free up server resources from things like catalog manag &hellip;',
     'icons' => 
     array (
-      '1x' => 'https://ps.w.org/bigcommerce/assets/icon-256x256.png?rev=2141502',
-      '2x' => 'https://ps.w.org/bigcommerce/assets/icon-256x256.png?rev=2141502',
+      '1x' => 'https://ps.w.org/bigcommerce/assets/icon-256x256.png?rev=2860929',
+      '2x' => 'https://ps.w.org/bigcommerce/assets/icon-256x256.png?rev=2860929',
     ),
     'wporg' => true,
   ),
@@ -860,7 +842,6 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/wordpress-seo/assets/icon.svg?rev=2363699',
-      '2x' => 'https://ps.w.org/wordpress-seo/assets/icon-256x256.png?rev=2643727',
       'svg' => 'https://ps.w.org/wordpress-seo/assets/icon.svg?rev=2363699',
     ),
     'wporg' => true,
@@ -883,11 +864,10 @@ return array (
     'name' => 'A no-code page builder for beautiful performance-based content',
     'slug' => 'setka-editor',
     'homepage' => 'https://editor.setka.io/',
-    'short_description' => 'A&nbsp;WordPress plugin to&nbsp;design beautiful performance-based content. Rated as&nbsp;a&nbsp;Top-10 solution for Content Experience and Content Creation&hellip;',
+    'short_description' => 'A&nbsp;WordPress plugin to&nbsp;design beautiful performance-based content. Rated as&nbsp;a&nbsp;Top-10 solution for Content Experience and Content Creation on&nbsp;G2 Crowd.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/setka-editor/assets/icon.svg?rev=2408232',
-      '2x' => 'https://ps.w.org/setka-editor/assets/icon-256x256.png?rev=2408232',
       'svg' => 'https://ps.w.org/setka-editor/assets/icon.svg?rev=2408232',
     ),
     'wporg' => true,
