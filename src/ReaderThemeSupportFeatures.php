@@ -592,9 +592,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 
 			/*
 			* Ignore static cache when `WP_DEBUG` is enabled. Why? To avoid interfering with
-			* the theme developer's workflow.
-			*
-			* @todo Replace `WP_DEBUG` once an "in development mode" check is available in Core.
+			* the theme developer's workflow. Note that core uses a newer wp_get_development_mode() check.
 			*/
 			! ( defined( 'WP_DEBUG' ) && WP_DEBUG )
 		) {
