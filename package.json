@@ -148,7 +148,6 @@
     "test:php:coverage": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/amp/ vendor/bin/phpunit --coverage-html /var/www/html/wp-content/plugins/amp/coverage",
     "test:php:multisite": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/amp/ env WP_MULTISITE=1 vendor/bin/phpunit",
     "test:php:xdebug": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/amp/ env PHP_IDE_CONFIG=serverName=localhost vendor/bin/phpunit",
-    "test:php:help": "npm run test:php --args='--help'",
     "update-wordpress-packages": "npm i $(npm outdated --parseable | cut -d':' -f 4 | grep @wordpress)",
     "update-analytics-vendors": "node ./bin/update-analytics-vendors.js",
     "update-ecosystem-files": "node ./bin/update-extension-files.js",
