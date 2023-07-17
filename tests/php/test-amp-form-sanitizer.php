@@ -262,7 +262,9 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 		}
 
 		// Normalize across different testing environments where WP_TESTS_DOMAIN varies.
-		$current_origin = '//' . WP_TESTS_DOMAIN;
+		$test_domain    = WP_TESTS_DOMAIN;
+		$test_domain    = strtok( $test_domain, ':' ); // In wp-env, the WP_TESTS_DOMAIN constant can erroneously include the port: 'localhost:8889'.
+		$current_origin = '//' . $test_domain;
 		if ( isset( $_SERVER['SERVER_PORT'] ) && ! in_array( (string) $_SERVER['SERVER_PORT'], [ '80', '443' ], true ) ) {
 			$current_origin .= ':' . $_SERVER['SERVER_PORT'];
 		}
