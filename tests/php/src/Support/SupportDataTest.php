@@ -53,6 +53,9 @@ class SupportDataTest extends DependencyInjectedTestCase {
 			$this->previous_ini_config[ $key ] = ini_get( $key );
 		}
 
+		ini_set( 'log_errors', 1 ); // phpcs:ignore WordPress.PHP.IniSet.log_errors_Blacklisted, WordPress.PHP.IniSet.Risky
+		ini_set( 'error_log', $this->temp_filename() ); // phpcs:ignore WordPress.PHP.IniSet.log_errors_Blacklisted, WordPress.PHP.IniSet.Risky
+
 		$this->add_home_url_loopback_request_mocking();
 	}
 
@@ -323,18 +326,14 @@ class SupportDataTest extends DependencyInjectedTestCase {
 	 * @covers ::get_error_log()
 	 */
 	public function test_get_error_log() {
-
 		$instance = new SupportData( [] );
 		$output   = $instance->get_error_log();
 
+		$log_path = ini_get( 'error_log' );
 		$this->assertArrayHasKey( 'log_errors', $output );
 		$this->assertArrayHasKey( 'contents', $output );
 
-		$log_path = $this->temp_filename();
 		$this->assertTrue( is_writable( $log_path ) );
-
-		ini_set( 'log_errors', 1 ); // phpcs:ignore WordPress.PHP.IniSet.log_errors_Blacklisted, WordPress.PHP.IniSet.Risky
-		ini_set( 'error_log', $log_path ); // phpcs:ignore WordPress.PHP.IniSet.log_errors_Blacklisted, WordPress.PHP.IniSet.Risky
 
 		$input_content    = '';
 		$expected_content = '';
