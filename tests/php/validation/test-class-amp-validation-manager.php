@@ -1930,6 +1930,14 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			];
 		}
 
+		if ( function_exists( 'gutenberg_trim_footnotes' ) ) {
+			$sources[] = [
+				'type'     => 'plugin',
+				'name'     => 'gutenberg',
+				'function' => 'gutenberg_trim_footnotes',
+			];
+		}
+
 		$sources = array_merge(
 			$sources,
 			[
