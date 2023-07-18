@@ -66,6 +66,14 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
+		/*
+		 * Disable interactivity API on core/navigation block.
+		 * Currently this support is added by Gutenberg plugin, but it will be a part of WP 6.3 as well.
+		 *
+		 * @TODO: Need to revisit once Interactivity API is landed in WP Core.
+		*/
+		add_filter( 'gutenberg_should_block_use_interactivity_api', '__return_false' );
+
 		add_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0, 2 );
 		add_filter( 'widget_text_content', [ $this, 'preserve_widget_text_element_dimensions' ], PHP_INT_MAX );
 	}
