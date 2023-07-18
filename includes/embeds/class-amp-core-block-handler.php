@@ -82,6 +82,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
+		remove_filter( 'gutenberg_should_block_use_interactivity_api', '__return_false' );
 		remove_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0 );
 		remove_filter( 'widget_text_content', [ $this, 'preserve_widget_text_element_dimensions' ], PHP_INT_MAX );
 	}
