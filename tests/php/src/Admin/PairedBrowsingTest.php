@@ -163,6 +163,8 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 		// Check that init_client() was called.
 		$this->assertEquals( 102, has_action( 'admin_bar_menu', [ $this->instance, 'add_admin_bar_menu_item' ] ) );
 		$this->assertTrue( wp_script_is( 'amp-paired-browsing-client' ) );
+		$this->assertTrue( wp_script_is( 'wp-dom-ready' ) );
+
 		$printed_scripts = get_echo( 'wp_print_scripts' );
 		$this->assertStringContainsString( DevMode::DEV_MODE_ATTRIBUTE, $printed_scripts );
 		$this->assertStringContainsString( 'ampPairedBrowsingClientData', $printed_scripts );
