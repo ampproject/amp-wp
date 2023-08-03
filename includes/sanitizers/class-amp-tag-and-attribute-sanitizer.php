@@ -2471,7 +2471,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$prev_sibling = $node->previousElementSibling;
-		while ( $prev_sibling !== null ) {
+		while ( null !== $prev_sibling) {
 			$this->remove_invalid_child(
 				$prev_sibling,
 				[
@@ -2484,7 +2484,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$next_sibling = $node->nextElementSibling;
-		while ( $next_sibling !== null ) {
+		while ( null !== $next_sibling) {
 			$this->remove_invalid_child(
 				$next_sibling,
 				[
