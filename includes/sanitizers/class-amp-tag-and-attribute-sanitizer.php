@@ -2471,13 +2471,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$prev_sibling = $node->previousSibling;
-		while ( null !== $prev_sibling) {
+		while ( null !== $prev_sibling ) {
 			if ( XML_COMMENT_NODE !== $prev_sibling->nodeType ) {
 				$this->remove_invalid_child(
 					$prev_sibling,
 					[
-						'code' => self::DISALLOWED_SIBLING_TAG,
-						'sibling' => $node->nodeName,
+						'code' =>   self::DISALLOWED_SIBLING_TAG,
+						'sibling'   => $node->nodeName,
 						'spec_name' => $spec_name,
 					]
 				);
@@ -2486,13 +2486,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$next_sibling = $node->nextSibling;
-		while ( null !== $next_sibling) {
+		while ( null !== $next_sibling ) {
 			if ( XML_COMMENT_NODE !== $next_sibling->nodeType ) {
 				$this->remove_invalid_child(
 					$next_sibling,
 					[
-						'code' => self::DISALLOWED_SIBLING_TAG,
-						'sibling' => $node->nodeName,
+						'code'      => self::DISALLOWED_SIBLING_TAG,
+						'sibling'   => $node->nodeName,
 						'spec_name' => $spec_name,
 					]
 				);
