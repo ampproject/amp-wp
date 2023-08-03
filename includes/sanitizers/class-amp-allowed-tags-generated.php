@@ -5477,6 +5477,37 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-redbull-player' => array(
+			array(
+				'attr_spec_list' => array(
+					'data-param-videoid' => array(
+						'mandatory' => true,
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							2,
+							3,
+							4,
+							6,
+							7,
+							8,
+							9,
+						),
+					),
+					'requires_extension' => array(
+						'amp-redbull-player',
+					),
+				),
+			),
+		),
 		'amp-reddit' => array(
 			array(
 				'attr_spec_list' => array(
@@ -18956,6 +18987,37 @@ class AMP_Allowed_Tags_Generated {
 					'extension_spec' => array(
 						'latest' => '0.1',
 						'name' => 'amp-recaptcha-input',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'latest' => '0.1',
+						'name' => 'amp-redbull-player',
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
