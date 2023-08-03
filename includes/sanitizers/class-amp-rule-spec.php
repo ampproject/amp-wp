@@ -37,6 +37,7 @@ abstract class AMP_Rule_Spec {
 	const MANDATORY_PARENT    = 'mandatory_parent';
 	const DESCENDANT_TAG_LIST = 'descendant_tag_list';
 	const CHILD_TAGS          = 'child_tags';
+	const SIBLINGS_DISALLOWED = 'siblings_disallowed';
 
 	/*
 	 * HTML Element Attribute rule names

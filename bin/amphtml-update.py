@@ -411,8 +411,8 @@ def ParseRules(repo_directory, out_dir):
 				satisfies = script_tag['tag_spec']['satisfies']
 			else:
 				satisfies = extension
-			if satisfies in extension_specs_by_satisfies:
-				raise Exception( 'Duplicate extension script that satisfies %s.' % satisfies )
+# 			if satisfies in extension_specs_by_satisfies:
+# 				raise Exception( 'Duplicate extension script that satisfies %s.' % satisfies )
 
 			extension_specs_by_satisfies[satisfies] = script_tag['tag_spec']['extension_spec']
 
@@ -468,11 +468,10 @@ def ParseRules(repo_directory, out_dir):
 			tag['tag_spec']['requires_extension'] = requires_extension_versions
 
 	extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.extensions.json' ) ) )
-	bento_extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.bento.json' ) ) )
 
 	latest_versions = json.load( open( latest_extensions_file_path ) )
 	extensions_versions = dict()
-	for extension in extensions + bento_extensions:
+	for extension in extensions:
 		if '-impl' in extension['name'] or '-polyfill' in extension['name']:
 			continue
 
@@ -798,6 +797,9 @@ def GetTagRules(tag_spec):
 
 	if tag_spec.HasField('unique_warning'):
 		tag_rules['unique_warning'] = tag_spec.unique_warning
+
+	if tag_spec.HasField('siblings_disallowed'):
+		tag_rules['siblings_disallowed'] = tag_spec.siblings_disallowed
 
 	if tag_spec.HasField('child_tags'):
 		child_tags = collections.defaultdict( lambda: [] )
