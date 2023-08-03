@@ -411,8 +411,8 @@ def ParseRules(repo_directory, out_dir):
 				satisfies = script_tag['tag_spec']['satisfies']
 			else:
 				satisfies = extension
-# 			if satisfies in extension_specs_by_satisfies:
-# 				raise Exception( 'Duplicate extension script that satisfies %s.' % satisfies )
+			if satisfies in extension_specs_by_satisfies:
+				raise Exception( 'Duplicate extension script that satisfies %s.' % satisfies )
 
 			extension_specs_by_satisfies[satisfies] = script_tag['tag_spec']['extension_spec']
 
