@@ -2470,30 +2470,34 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$prev_sibling = $node->previousElementSibling;
+		$prev_sibling = $node->previousSibling;
 		while ( null !== $prev_sibling) {
-			$this->remove_invalid_child(
-				$prev_sibling,
-				[
-					'code'      => self::DISALLOWED_SIBLING_TAG,
-					'sibling'   => $node->nodeName,
-					'spec_name' => $spec_name,
-				]
-			);
-			$prev_sibling = $prev_sibling->previousElementSibling;
+			if ( XML_COMMENT_NODE !== $prev_sibling->nodeType ) {
+				$this->remove_invalid_child(
+					$prev_sibling,
+					[
+						'code' => self::DISALLOWED_SIBLING_TAG,
+						'sibling' => $node->nodeName,
+						'spec_name' => $spec_name,
+					]
+				);
+			}
+			$prev_sibling = $prev_sibling->previousSibling;
 		}
 
-		$next_sibling = $node->nextElementSibling;
+		$next_sibling = $node->nextSibling;
 		while ( null !== $next_sibling) {
-			$this->remove_invalid_child(
-				$next_sibling,
-				[
-					'code'      => self::DISALLOWED_SIBLING_TAG,
-					'sibling'   => $node->nodeName,
-					'spec_name' => $spec_name,
-				]
-			);
-			$next_sibling = $next_sibling->nextElementSibling;
+			if ( XML_COMMENT_NODE !== $next_sibling->nodeType ) {
+				$this->remove_invalid_child(
+					$next_sibling,
+					[
+						'code' => self::DISALLOWED_SIBLING_TAG,
+						'sibling' => $node->nodeName,
+						'spec_name' => $spec_name,
+					]
+				);
+			}
+			$next_sibling = $next_sibling->nextSibling;
 		}
 	}
 
