@@ -2466,7 +2466,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string     $spec_name Spec name.
 	 */
 	private function remove_disallowed_siblings( DOMElement $node, $spec_name ) {
-		if ( ! $node->previousSibling || ! $node->nextSibling ) {
+		if ( ! $node->previousSibling && ! $node->nextSibling ) {
 			return;
 		}
 
