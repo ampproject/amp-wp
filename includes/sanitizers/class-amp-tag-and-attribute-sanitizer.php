@@ -2472,7 +2472,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		$prev_sibling = $node->previousSibling;
 		while ( null !== $prev_sibling ) {
-			if ( XML_COMMENT_NODE !== $prev_sibling->nodeType ) {
+			if ( ! ( $prev_sibling instanceof Element ) ) {
 				$this->remove_invalid_child(
 					$prev_sibling,
 					[
@@ -2487,7 +2487,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		$next_sibling = $node->nextSibling;
 		while ( null !== $next_sibling ) {
-			if ( XML_COMMENT_NODE !== $next_sibling->nodeType ) {
+			if ( ! ( $next_sibling instanceof Element ) ) {
 				$this->remove_invalid_child(
 					$next_sibling,
 					[
