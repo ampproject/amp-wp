@@ -468,10 +468,11 @@ def ParseRules(repo_directory, out_dir):
 			tag['tag_spec']['requires_extension'] = requires_extension_versions
 
 	extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.extensions.json' ) ) )
+	bento_extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.bento.json' ) ) )
 
 	latest_versions = json.load( open( latest_extensions_file_path ) )
 	extensions_versions = dict()
-	for extension in extensions:
+	for extension in extensions + bento_extensions:
 		if '-impl' in extension['name'] or '-polyfill' in extension['name']:
 			continue
 
