@@ -2476,7 +2476,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$this->remove_invalid_child(
 					$prev_sibling,
 					[
-						'code' =>   self::DISALLOWED_SIBLING_TAG,
+						'code'      => self::DISALLOWED_SIBLING_TAG,
 						'sibling'   => $node->nodeName,
 						'spec_name' => $spec_name,
 					]
