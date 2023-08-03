@@ -2472,6 +2472,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		$prev_sibling = $node->previousSibling;
 		while ( null !== $prev_sibling ) {
+			$prev_prev_sibling = $prev_sibling->previousSibling;
 			if ( $prev_sibling instanceof Element ) {
 				$this->remove_invalid_child(
 					$prev_sibling,
@@ -2482,11 +2483,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					]
 				);
 			}
-			$prev_sibling = $prev_sibling->previousSibling;
+			$prev_sibling = $prev_prev_sibling;
 		}
 
 		$next_sibling = $node->nextSibling;
 		while ( null !== $next_sibling ) {
+			$next_next_sibling = $next_sibling->nextSibling;
 			if ( $next_sibling instanceof Element ) {
 				$this->remove_invalid_child(
 					$next_sibling,
@@ -2497,7 +2499,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					]
 				);
 			}
-			$next_sibling = $next_sibling->nextSibling;
+			$next_sibling = $next_next_sibling;
 		}
 	}
 
