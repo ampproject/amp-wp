@@ -45,6 +45,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const DISALLOWED_CHILD_TAG                 = 'DISALLOWED_CHILD_TAG';
 	const DISALLOWED_DESCENDANT_TAG            = 'DISALLOWED_DESCENDANT_TAG';
 	const DISALLOWED_FIRST_CHILD_TAG           = 'DISALLOWED_FIRST_CHILD_TAG';
+	const DISALLOWED_SIBLING_TAG               = 'DISALLOWED_SIBLING_TAG';
 	const DISALLOWED_PROCESSING_INSTRUCTION    = 'DISALLOWED_PROCESSING_INSTRUCTION';
 	const DISALLOWED_PROPERTY_IN_ATTR_VALUE    = 'DISALLOWED_PROPERTY_IN_ATTR_VALUE';
 	const DISALLOWED_RELATIVE_URL              = 'DISALLOWED_RELATIVE_URL';
@@ -747,6 +748,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! empty( $allowed_tags ) ) {
 				$this->remove_disallowed_descendants( $node, $allowed_tags, $this->get_spec_name( $node, $tag_spec ) );
 			}
+		}
+
+		// If the node disallows any siblings, remove them.
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::SIBLINGS_DISALLOWED ] ) ) {
+			$this->remove_disallowed_siblings( $node, $this->get_spec_name( $node, $tag_spec ) );
 		}
 
 		// After attributes have been sanitized (and potentially removed), if mandatory attribute(s) are missing, remove the element.
@@ -2450,6 +2456,46 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} else {
 				$this->remove_disallowed_descendants( $child_element, $allowed_descendants, $spec_name );
 			}
+		}
+	}
+
+	/**
+	 * Loop through node's siblings and remove them.
+	 *
+	 * @param DOMElement $node      Node.
+	 * @param string     $spec_name Spec name.
+	 */
+	private function remove_disallowed_siblings( DOMElement $node, $spec_name ) {
+		$prev_sibling = $node->previousSibling;
+		while ( null !== $prev_sibling ) {
+			$prev_prev_sibling = $prev_sibling->previousSibling;
+			if ( $prev_sibling instanceof Element ) {
+				$this->remove_invalid_child(
+					$prev_sibling,
+					[
+						'code'      => self::DISALLOWED_SIBLING_TAG,
+						'sibling'   => $node->nodeName,
+						'spec_name' => $spec_name,
+					]
+				);
+			}
+			$prev_sibling = $prev_prev_sibling;
+		}
+
+		$next_sibling = $node->nextSibling;
+		while ( null !== $next_sibling ) {
+			$next_next_sibling = $next_sibling->nextSibling;
+			if ( $next_sibling instanceof Element ) {
+				$this->remove_invalid_child(
+					$next_sibling,
+					[
+						'code'      => self::DISALLOWED_SIBLING_TAG,
+						'sibling'   => $node->nodeName,
+						'spec_name' => $spec_name,
+					]
+				);
+			}
+			$next_sibling = $next_next_sibling;
 		}
 	}
 

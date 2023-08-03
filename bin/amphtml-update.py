@@ -799,6 +799,9 @@ def GetTagRules(tag_spec):
 	if tag_spec.HasField('unique_warning'):
 		tag_rules['unique_warning'] = tag_spec.unique_warning
 
+	if tag_spec.HasField('siblings_disallowed'):
+		tag_rules['siblings_disallowed'] = tag_spec.siblings_disallowed
+
 	if tag_spec.HasField('child_tags'):
 		child_tags = collections.defaultdict( lambda: [] )
 		for field in tag_spec.child_tags.ListFields():

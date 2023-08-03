@@ -1397,6 +1397,48 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				[ 'amp-sidebar', 'amp-story' ],
 			],
 
+			'amp_story_with_disallowed_sibling'            => [
+				str_replace(
+					[ "\n", "\t" ],
+					'',
+					'
+						<b id="disallowed-before1"></b>
+						<i id="disallowed-before2"></i>
+						<amp-story standalone="standalone" title="Stories in AMP - Hello World" publisher="AMP Project" publisher-logo-src="https://ampbyexample.com/favicons/coast-228x228.png" poster-portrait-src="https://ampbyexample.com/img/story_dog2_portrait.jpg">
+							<amp-story-page id="cover">
+								<amp-story-grid-layer template="fill">
+									<h1>Hello World</h1>
+									<p>This is the cover page of this story.</p>
+								</amp-story-grid-layer>
+							</amp-story-page>
+						</amp-story>
+						<span id="disallowed-after1"></span>
+						<div id="disallowed-after2"></div>
+					'
+				),
+				str_replace(
+					[ "\n", "\t" ],
+					'',
+					'
+						<amp-story standalone="standalone" title="Stories in AMP - Hello World" publisher="AMP Project" publisher-logo-src="https://ampbyexample.com/favicons/coast-228x228.png" poster-portrait-src="https://ampbyexample.com/img/story_dog2_portrait.jpg">
+							<amp-story-page id="cover">
+								<amp-story-grid-layer template="fill">
+									<h1>Hello World</h1>
+									<p>This is the cover page of this story.</p>
+								</amp-story-grid-layer>
+							</amp-story-page>
+						</amp-story>
+					'
+				),
+				[ 'amp-story' ],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_SIBLING_TAG,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_SIBLING_TAG,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_SIBLING_TAG,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_SIBLING_TAG,
+				],
+			],
+
 			'amp_sidebar_with_autoscroll'                  => [
 				str_replace(
 					[ "\n", "\t" ],
