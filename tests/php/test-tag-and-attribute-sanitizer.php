@@ -1397,7 +1397,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				[ 'amp-sidebar', 'amp-story' ],
 			],
 
-			'amp_story_with_disallowed_sibling'          => [
+			'amp_story_with_disallowed_sibling'            => [
 				str_replace(
 					[ "\n", "\t" ],
 					'',

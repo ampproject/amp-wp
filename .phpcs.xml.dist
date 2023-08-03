@@ -87,6 +87,8 @@
 				<element value="DEFAULT_WIDTH"/>
 				<element value="DEFAULT_HEIGHT"/>
 				<element value="ampElements"/>
+				<element value="previousElementSibling"/>
+				<element value="nextElementSibling"/>
 			</property>
 		</properties>
 	</rule>
