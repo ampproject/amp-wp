@@ -55,7 +55,8 @@ BlockEditWithToolbar.propTypes = {
  * Filters the block edit function of all blocks.
  */
 export const withAMPToolbarButton = createHigherOrderComponent(
-	(BlockEdit) => (props) =>
-		<BlockEditWithToolbar {...props} BlockEdit={BlockEdit} />,
+	(BlockEdit) => (props) => (
+		<BlockEditWithToolbar {...props} BlockEdit={BlockEdit} />
+	),
 	'BlockEditWithAMPToolbar'
 );

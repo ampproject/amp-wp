@@ -61,12 +61,11 @@ export function SetupWizard({ closeLink, finishLink, appRoot }) {
 	}, [fetchScannableUrls]);
 
 	const PageComponentWithSideEffects = useMemo(
-		() => () =>
-			(
-				<PageComponentSideEffects>
-					<PageComponent />
-				</PageComponentSideEffects>
-			),
+		() => () => (
+			<PageComponentSideEffects>
+				<PageComponent />
+			</PageComponentSideEffects>
+		),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[PageComponent]
 	);
