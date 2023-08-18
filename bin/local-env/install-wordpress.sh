@@ -108,10 +108,7 @@ wp plugin activate amp --quiet
 
 # Install & activate Gutenberg plugin.
 echo -e $(status_message "Installing and activating Gutenberg plugin...")
-
-# @TODO: Remove it once Gutnberg 16.3 is released.
-# wp plugin install gutenberg --activate --force --quiet
-wp plugin activate gutenberg --quiet
+wp plugin install gutenberg --activate --force --quiet
 
 # Set pretty permalinks.
 echo -e $(status_message "Setting permalink structure...")

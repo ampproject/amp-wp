@@ -15,11 +15,6 @@ cd "$(dirname "$0")/../.."
 # Check whether Composer installed
 . "$(dirname "$0")/install-composer.sh"
 
-# @TODO: Remove it once Gutnberg 16.3 is released.
-rm -rf /tmp/gutenberg /tmp/gutenberg.zip
-wget https://amp-wp.org/wp-content/uploads/2023/07/gutenberg.zip -O /tmp/gutenberg.zip
-unzip /tmp/gutenberg.zip -d /tmp/gutenberg
-
 # Check whether Docker is installed and running
 . "$(dirname "$0")/launch-containers.sh"
 
