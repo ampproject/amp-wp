@@ -55,7 +55,7 @@
     "@wordpress/browserslist-config": "5.20.0",
     "@wordpress/data": "9.7.0",
     "@wordpress/dependency-extraction-webpack-plugin": "4.20.0",
-    "@wordpress/e2e-test-utils": "10.8.0",
+    "@wordpress/e2e-test-utils": "10.11.0",
     "@wordpress/edit-post": "7.14.0",
     "@wordpress/env": "8.3.0",
     "@wordpress/eslint-plugin": "14.10.0",
