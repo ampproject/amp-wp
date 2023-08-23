@@ -39,7 +39,7 @@ class AMP_Crowdsignal_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function filter_embed_oembed_html( $cache, $url, $attr ) {
 		$parsed_url = wp_parse_url( $url );
-		if ( empty( $parsed_url['host'] ) || empty( $parsed_url['path'] ) || ! preg_match( '#(^|\.)(?P<host>polldaddy\.com|crowdsignal\.com|survey\.fm|poll\.fm)#', $parsed_url['host'], $matches ) ) {
+		if ( empty( $parsed_url['host'] ) || empty( $parsed_url['path'] ) || ! preg_match( '#(^|\.)(?P<host>polldaddy\.com|poll\.fm|crowdsignal\.com|survey\.fm|poll\.fm)#', $parsed_url['host'], $matches ) ) {
 			return $cache;
 		}
 

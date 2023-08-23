@@ -6,6 +6,9 @@
  * @since 1.0
  */
 
+use AmpProject\Extension;
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Imgur_Embed_Handler
  *
@@ -71,6 +74,18 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 			);
 		}
 		return $return;
+	}
+
+	/**
+	 * Sanitize raw embeds.
+	 *
+	 * @param Document $dom Document.
+	 *
+	 * @return void
+	 */
+	public function sanitize_raw_embeds( Document $dom ) {
+		// If there were any previous embeds in the DOM that were wrapped by `wpautop()`, unwrap them.
+		$this->unwrap_p_element_by_child_tag_name( $dom, Extension::IMGUR );
 	}
 
 	/**

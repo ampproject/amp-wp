@@ -161,6 +161,8 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return void
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
+		// If there were any previous embeds in the DOM that were wrapped by `wpautop()`, unwrap them.
+		$this->unwrap_p_element_by_child_tag_name( $dom, Extension::YOUTUBE );
 
 		$query_segments = array_map(
 			static function ( $domain ) {

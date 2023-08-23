@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\Extension;
 use AmpProject\Dom\Document;
 
 /**
@@ -114,12 +115,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
 		// If there were any previous embeds in the DOM that were wrapped by `wpautop()`, unwrap them.
-		$embed_nodes = $dom->xpath->query( "//p/{$this->amp_tag}" );
-		if ( $embed_nodes->length ) {
-			foreach ( $embed_nodes as $embed_node ) {
-				$this->unwrap_p_element( $embed_node );
-			}
-		}
+		$this->unwrap_p_element_by_child_tag_name( $dom, Extension::FACEBOOK );
 
 		$nodes     = $dom->getElementsByTagName( $this->sanitize_tag );
 		$num_nodes = $nodes->length;
