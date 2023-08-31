@@ -129,6 +129,11 @@ class AMP_Allowed_Tags_Generated {
 			'ul',
 			'use',
 		),
+		'amp-story-audio-sticker-allowed-descendants' => array(
+			'amp-img',
+			'div',
+			'span',
+		),
 		'amp-story-bookend-allowed-descendants' => array(
 			'script',
 		),
@@ -264,6 +269,9 @@ class AMP_Allowed_Tags_Generated {
 			'amp-render',
 			'amp-state',
 			'amp-story-360',
+			'amp-story-audio-sticker',
+			'amp-story-audio-sticker-pretap',
+			'amp-story-audio-sticker-posttap',
 			'amp-story-auto-analytics',
 			'amp-story-captions',
 			'amp-story-interactive-binary-poll',
@@ -6323,6 +6331,83 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory_parent' => 'amp-story-page',
 					'requires_extension' => array(
 						'amp-story',
+					),
+				),
+			),
+		),
+		'amp-story-audio-sticker' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+					'size' => array(
+						'value' => array(
+							'small',
+							'large',
+						),
+					),
+					'sticker' => array(
+						'value' => array(
+							'headphone-cat',
+							'tape-player',
+							'loud-speaker',
+							'audio-cloud',
+						),
+					),
+					'sticker-style' => array(
+						'value' => array(
+							'outline',
+							'dropshadow',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							5,
+						),
+					),
+					'mandatory_parent' => 'amp-story-grid-layer',
+					'requires_extension' => array(
+						'amp-story-audio-sticker',
+					),
+				),
+			),
+		),
+		'amp-story-audio-sticker-posttap' => array(
+			array(
+				'attr_spec_list' => array(),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							5,
+						),
+					),
+					'descendant_tag_list' => 'amp-story-audio-sticker-allowed-descendants',
+					'mandatory_parent' => 'amp-story-audio-sticker',
+					'requires_extension' => array(
+						'amp-story-audio-sticker',
+					),
+				),
+			),
+		),
+		'amp-story-audio-sticker-pretap' => array(
+			array(
+				'attr_spec_list' => array(),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							5,
+						),
+					),
+					'descendant_tag_list' => 'amp-story-audio-sticker-allowed-descendants',
+					'mandatory_parent' => 'amp-story-audio-sticker',
+					'requires_extension' => array(
+						'amp-story-audio-sticker',
 					),
 				),
 			),
