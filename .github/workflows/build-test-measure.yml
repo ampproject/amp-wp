@@ -550,6 +550,7 @@ jobs:
             composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/php-token-stream:^3.1.3 --with-dependencies
           elif [[ $PHP_VERSION == "7.3" || $PHP_VERSION == "7.4" || $PHP_VERSION == "8.0" ]]; then
             echo "Installing PHPUnit 9.3"
+            composer update --ignore-platform-reqs --no-interaction --no-scripts yoast/phpunit-polyfills --with-dependencies
             composer require --dev --ignore-platform-reqs phpunit/phpunit:"9.3.*" --with-dependencies
           elif [[ $WP_VERSION == "latest" || $WP_VERSION == "trunk" || $PHP_VERSION == "8.1" || $PHP_VERSION == "8.2" ]]; then
             echo "Installing latest version of PHPUnit"
