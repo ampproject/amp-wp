@@ -108,10 +108,7 @@ wp plugin activate amp --quiet
 
 # Install & activate Gutenberg plugin.
 echo -e $(status_message "Installing and activating Gutenberg plugin...")
-
-# @TODO: Remove it once Gutnberg 16.3 is released.
-# wp plugin install gutenberg --activate --force --quiet
-wp plugin activate gutenberg --quiet
+wp plugin install gutenberg --activate --force --quiet
 
 # Set pretty permalinks.
 echo -e $(status_message "Setting permalink structure...")
@@ -119,14 +116,17 @@ wp rewrite structure '%postname%' --hard --quiet
 
 # Configure site constants.
 echo -e $(status_message "Configuring site constants...")
-
-# @TODO: Remove this once WP 6.3 is released.
-wp config delete WP_DEBUG
-
-# Log WP_DEBUG value.
 WP_DEBUG_CURRENT=$(wp config get --type=constant --format=json WP_DEBUG | tr -d '\r')
-echo -e $(status_message "WP_DEBUG: $WP_DEBUG_CURRENT...")
 
-# Log SCRIPT_DEBUG value.
+if [ "$WP_DEBUG" != $WP_DEBUG_CURRENT ]; then
+	wp config set WP_DEBUG $WP_DEBUG --raw --type=constant --quiet
+	WP_DEBUG_RESULT=$(wp config get --type=constant --format=json WP_DEBUG | tr -d '\r')
+	echo -e $(status_message "WP_DEBUG: $WP_DEBUG_RESULT...")
+fi
+
 SCRIPT_DEBUG_CURRENT=$(wp config get --type=constant --format=json SCRIPT_DEBUG | tr -d '\r')
-echo -e $(status_message "SCRIPT_DEBUG: $SCRIPT_DEBUG_CURRENT...")
+if [ "$SCRIPT_DEBUG" != $SCRIPT_DEBUG_CURRENT ]; then
+	wp config set SCRIPT_DEBUG $SCRIPT_DEBUG --raw --type=constant --quiet
+	SCRIPT_DEBUG_RESULT=$(wp config get --type=constant --format=json SCRIPT_DEBUG | tr -d '\r')
+	echo -e $(status_message "SCRIPT_DEBUG: $SCRIPT_DEBUG_RESULT...")
+fi
