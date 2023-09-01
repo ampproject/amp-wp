@@ -227,7 +227,7 @@ export const getSelectMediaFrame = (ToolbarSelect) => {
 		 *
 		 * @param {Object} toolbar
 		 * @param {Object} [options={}]
-		 * @this wp.media.controller.Region
+		 * @this {wp.media.controller.Region}
 		 */
 		createSelectToolbar(toolbar, options) {
 			options = options || this.options.button || {};
