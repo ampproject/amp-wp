@@ -19,7 +19,7 @@ HOST_PORT=$(dc port $CONTAINER 80 | awk -F : '{printf $2}')
 
 # Wait until the WordPress site is responding to requests.
 echo -en $(status_message "Attempting to connect to WordPress...")
-until $(curl -L http://localhost:$HOST_PORT -so - 2>&1 | grep -q "WordPress"); do
+until $(curl -L http://127.0.0.1:$HOST_PORT -so - 2>&1 | grep -q "WordPress"); do
     echo -n '.'
     sleep 5
 done
@@ -52,7 +52,7 @@ fi
 
 # Install WordPress.
 echo -e $(status_message "Installing WordPress...")
-wp core install --title="$SITE_TITLE" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:$HOST_PORT  --quiet
+wp core install --title="$SITE_TITLE" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://127.0.0.1:$HOST_PORT  --quiet
 
 # Create additional users.
 echo -e $(status_message "Creating additional users...")
@@ -92,9 +92,9 @@ fi
 # If the 'wordpress' volume wasn't during the down/up earlier, but the post port has changed, we need to update it.
 echo -e $(status_message "Checking the site's url...")
 CURRENT_URL=$(wp option get siteurl)
-if [ "$CURRENT_URL" != "http://localhost:$HOST_PORT" ]; then
-	wp option update home "http://localhost:$HOST_PORT" --quiet
-	wp option update siteurl "http://localhost:$HOST_PORT" --quiet
+if [ "$CURRENT_URL" != "http://127.0.0.1:$HOST_PORT" ]; then
+	wp option update home "http://127.0.0.1:$HOST_PORT" --quiet
+	wp option update siteurl "http://127.0.0.1:$HOST_PORT" --quiet
 fi
 
 # Install a dummy favicon to avoid 404 errors.
