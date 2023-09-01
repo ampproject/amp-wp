@@ -104,7 +104,7 @@ export default (InitialMediaUpload, minImageDimensions) => {
 				'toolbar:create:featured-image',
 				function (toolbar) {
 					/**
-					 * @this wp.media.view.MediaFrame.Select
+					 * @this {wp.media.view.MediaFrame.Select}
 					 */
 					this.createSelectToolbar(toolbar, {
 						text: wp.media.view.l10n.setFeaturedImage,
