@@ -115,6 +115,9 @@ module.exports = {
 				'jest/prefer-inline-snapshots': 'off',
 				'jest/prefer-snapshot-hint': 'off',
 				'jest/no-untyped-mock-factory': 'off',
+				// Disabling because we are not using typescript.
+				// @see <https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/unbound-method.md>
+				'jest/unbound-method': 'off',
 			},
 		},
 		{
@@ -134,6 +137,7 @@ module.exports = {
 				'jest/no-hooks': 'off',
 				'jest/prefer-expect-assertions': 'off',
 				'jest/prefer-inline-snapshots': 'off',
+				'jest/unbound-method': 'off',
 			},
 		},
 		{
