@@ -1,3 +1,11 @@
+/**
+ * WordPress dependencies
+ */
+const jsdocConfig = require('@wordpress/eslint-plugin/configs/jsdoc');
+
+// Extend jsdoc defined types.
+jsdocConfig.rules['jsdoc/no-undefined-types'][1].definedTypes.push('Backbone');
+
 module.exports = {
 	root: true,
 	extends: [
@@ -90,6 +98,8 @@ module.exports = {
 			},
 		],
 		'jsdoc/check-indentation': 'error',
+		'jsdoc/no-undefined-types':
+			jsdocConfig.rules['jsdoc/no-undefined-types'],
 		'@wordpress/dependency-group': 'error',
 		'@wordpress/react-no-unsafe-timeout': 'error',
 	},
