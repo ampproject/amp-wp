@@ -998,6 +998,12 @@ function amp_register_default_scripts( $wp_scripts ) {
 			$version = $extension_spec['latest'];
 		}
 
+		// Skip registering the amp-gfycat extension.
+		// @TODO: Remove this once the amp-gfycat extension is removed from spec.
+		if ( 'amp-gfycat' === $extension_name ) {
+			continue;
+		}
+
 		$src = sprintf(
 			'https://cdn.ampproject.org/v0/%s-%s.js',
 			$extension_name,
