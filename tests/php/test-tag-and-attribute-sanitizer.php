@@ -965,12 +965,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				[ 'amp-form' ],
 			],
 
-			'gfycat'                                       => [
-				'<amp-gfycat data-gfyid="BareSecondaryFlamingo" width="225" height="400"></amp-gfycat>',
-				'<amp-gfycat data-gfyid="BareSecondaryFlamingo" width="225" height="400"></amp-gfycat>',
-				[ 'amp-gfycat' ],
-			],
-
 			'h2'                                           => [
 				'<h2>Example Text</h2>',
 			],
