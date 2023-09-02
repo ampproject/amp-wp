@@ -346,7 +346,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'amp-brightcove',
 		'amp-dailymotion',
 		'amp-delight-player',
-		'amp-gfycat',
 		'amp-ima-video',
 		'amp-mowplayer',
 		'amp-nexxtv-player',
