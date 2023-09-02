@@ -1408,7 +1408,6 @@ function amp_get_content_embed_handlers( $post = null ) {
 			AMP_TikTok_Embed_Handler::class       => [],
 			AMP_Tumblr_Embed_Handler::class       => [],
 			AMP_Gallery_Embed_Handler::class      => [],
-			AMP_Gfycat_Embed_Handler::class       => [],
 			AMP_Imgur_Embed_Handler::class        => [],
 			AMP_Scribd_Embed_Handler::class       => [],
 			AMP_WordPress_Embed_Handler::class    => [],
