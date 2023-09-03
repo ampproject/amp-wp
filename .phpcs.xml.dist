@@ -8,9 +8,9 @@
 	<exclude-pattern>tests/php/static-analysis-stubs/*</exclude-pattern>
 
 	<rule ref="WordPress-Core">
-		<exclude name="Generic.Arrays.DisallowShortArraySyntax" />
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax" />
 		<exclude name="Generic.Commenting.DocComment.MissingShort" />
-		<exclude name="WordPress.PHP.DisallowShortTernary" />
+		<exclude name="Universal.Operators.DisallowShortTernary" />
 	</rule>
 
 	<rule ref="WordPress-Docs">
