@@ -6,6 +6,7 @@
 
 	<!-- Exclude stub files as they are auto-generated -->
 	<exclude-pattern>tests/php/static-analysis-stubs/*</exclude-pattern>
+	<exclude-pattern>includes/ecosystem-data/*</exclude-pattern>
 
 	<rule ref="WordPress-Core">
 		<exclude name="Universal.Arrays.DisallowShortArraySyntax" />
@@ -67,7 +68,7 @@
 	</rule>
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
 		<properties>
-			<property name="customPropertiesWhitelist" type="array">
+			<property name="allowed_custom_properties" type="array">
 				<element value="childNodes"/>
 				<element value="tagName"/>
 				<element value="textContent"/>
