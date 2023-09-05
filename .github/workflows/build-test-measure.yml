@@ -496,6 +496,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
+      - name: Install Composer dependencies
+        if: needs.pre-run.outputs.changed-php-count > 0
+        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+
       - name: Install Node dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
         run: npm ci
