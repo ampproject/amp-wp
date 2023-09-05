@@ -393,7 +393,6 @@ jobs:
       matrix:
         php: ['8.0']
         wp: ['latest']
-        phpunit: ['9.3']
         external-http: [false]
         install-pwa-plugin: [true]
         coverage: [false]
@@ -410,30 +409,37 @@ jobs:
 
           - php: '8.0'
             wp: 'trunk'
+            phpunit: '9.3'
             multisite: true
             experimental: true
 
           - php: '8.0'
             wp: 'latest'
+            phpunit: '9.3'
             coverage: true
 
           - php: '8.0'
             wp: 'latest'
+            phpunit: '9.3'
             external-http: true
 
           - php: '7.4'
+            wp: 'latest'
+            phpunit: '9.3'
             multisite: true
-            wp: 'latest'
 
           - php: '7.4'
             wp: 'latest'
+            phpunit: '9.3'
             external-http: true
 
           - php: '7.4'
             wp: '5.3'
+            phpunit: '9.3'
 
           - php: '7.4'
             wp: '5.3'
+            phpunit: '9.3'
             external-http: true
 
     steps:
