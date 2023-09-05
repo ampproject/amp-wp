@@ -88,10 +88,6 @@
       }
     },
     "patches": {
-      "phpunit/phpunit-mock-objects": {
-        "Fix ReflectionParameter warnings on PHP 8": "patches/phpunit-mock-objects.patch",
-        "Remove 'match' keyword from uses <https://github.com/sebastianbergmann/phpunit/issues/4373>": "patches/remove-match-keyword.patch"
-      },
       "sabberworm/php-css-parser": {
         "1. Validate name-start code points for identifier <https://github.com/westonruter/PHP-CSS-Parser/pull/2>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/cc791ad...westonruter:PHP-CSS-Parser:fix/malformed-identifier-without-tests.diff",
         "2. Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/cc791ad...westonruter:PHP-CSS-Parser:fix/selector-comma-parsing-without-tests.diff",
