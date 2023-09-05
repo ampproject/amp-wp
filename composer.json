@@ -5,7 +5,7 @@
   "type": "wordpress-plugin",
   "homepage": "https://github.com/ampproject/amp-wp",
   "require": {
-    "php": "^7.0 || ^8.0",
+    "php": ">=7.4 || ^8.0",
     "ext-curl": "*",
     "ext-date": "*",
     "ext-dom": "*",
@@ -74,7 +74,7 @@
       "dealerdirect/phpcodesniffer-composer-installer": true
     },
     "platform": {
-      "php": "7.2"
+      "php": "7.4"
     },
     "sort-packages": true
   },
