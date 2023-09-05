@@ -998,6 +998,12 @@ function amp_register_default_scripts( $wp_scripts ) {
 			$version = $extension_spec['latest'];
 		}
 
+		// Skip registering the amp-gfycat extension.
+		// @TODO: Remove this once the amp-gfycat extension is removed from spec.
+		if ( 'amp-gfycat' === $extension_name ) {
+			continue;
+		}
+
 		$src = sprintf(
 			'https://cdn.ampproject.org/v0/%s-%s.js',
 			$extension_name,
@@ -1408,7 +1414,6 @@ function amp_get_content_embed_handlers( $post = null ) {
 			AMP_TikTok_Embed_Handler::class       => [],
 			AMP_Tumblr_Embed_Handler::class       => [],
 			AMP_Gallery_Embed_Handler::class      => [],
-			AMP_Gfycat_Embed_Handler::class       => [],
 			AMP_Imgur_Embed_Handler::class        => [],
 			AMP_Scribd_Embed_Handler::class       => [],
 			AMP_WordPress_Embed_Handler::class    => [],
