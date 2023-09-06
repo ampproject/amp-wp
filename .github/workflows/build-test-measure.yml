@@ -500,6 +500,15 @@ jobs:
         if: needs.pre-run.outputs.changed-php-count > 0
         run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
 
+        # Since locally installed PHPUnit classes are loaded into the classmap, running tests with globally
+        # installed PHPUnit requires removing locally installed PHPUnit. Additionally, using the workflow matrix
+        # makes it simple for us to maintain different PHPUnit versions for various PHP versions.
+      - name: Remove locally installed PHPUnit
+        if: needs.pre-run.outputs.changed-php-count > 0
+        run: |
+          rm -rf vendor/phpunit
+          composer dump-autoload -o
+
       - name: Install Node dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
         run: npm ci
