@@ -569,7 +569,9 @@ jobs:
 
       - name: Run external HTTP tests
         if: ${{ matrix.external-http == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: vendor/bin/phpunit --testsuite external-http
+        run: |
+          phpunit --version
+          phpunit --testsuite external-http --verbose
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
