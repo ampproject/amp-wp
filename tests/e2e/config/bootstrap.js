@@ -296,8 +296,10 @@ beforeAll(async () => {
 	await trashAllPosts();
 	await createTestData();
 	await cleanUpSettings();
-	await page.setDefaultNavigationTimeout(10000);
-	await page.setDefaultTimeout(10000);
+
+	// Keep navigation timeout high since CI resources can be slow.
+	await page.setDefaultNavigationTimeout(20000);
+	await page.setDefaultTimeout(20000);
 });
 
 // eslint-disable-next-line jest/require-top-level-describe
