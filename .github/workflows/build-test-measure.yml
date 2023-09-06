@@ -435,11 +435,11 @@ jobs:
 
           - php: '7.4'
             wp: '5.3'
-            phpunit: '9.3'
+            phpunit: '7'
 
           - php: '7.4'
             wp: '5.3'
-            phpunit: '9.3'
+            phpunit: '7'
             external-http: true
 
     steps:
