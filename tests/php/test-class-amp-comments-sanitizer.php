@@ -218,7 +218,7 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 			$this->assertInstanceOf( Element::class, $span );
 			$this->assertTrue( $span->hasAttribute( Amp::BIND_DATA_ATTR_PREFIX . 'text' ) );
 
-			$comment_reply_links = $dom->xpath->query( '//a[ @data-commentid and @data-postid and @data-replyto and @data-respondelement and contains( @class, "comment-reply-link" ) ]' );
+			$comment_reply_links = $dom->xpath->query( '//a[ @data-commentid and @data-postid and @data-respondelement and contains( @class, "comment-reply-link" ) ]' );
 			$this->assertGreaterThan( 0, $comment_reply_links->length );
 			foreach ( $comment_reply_links as $comment_reply_link ) {
 				/** @var Element $comment_reply_link */

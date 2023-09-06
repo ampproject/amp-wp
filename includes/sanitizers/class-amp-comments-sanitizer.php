@@ -218,7 +218,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Update comment reply links to set the reply state.
-		$comment_reply_links = $this->dom->xpath->query( '//a[ @data-commentid and @data-postid and @data-replyto and @data-respondelement and contains( @class, "comment-reply-link" ) ]' );
+		$comment_reply_links = $this->dom->xpath->query( '//a[ @data-commentid and @data-postid and @data-respondelement and contains( @class, "comment-reply-link" ) ]' );
 		foreach ( $comment_reply_links as $comment_reply_link ) {
 			/** @var Element $comment_reply_link */
 
