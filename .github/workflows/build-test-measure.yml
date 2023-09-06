@@ -628,7 +628,7 @@ jobs:
             wp: 'latest'
 
           - php: '7.4'
-            wp: '5.4'
+            wp: '5.3'
 
     steps:
       - name: Checkout
