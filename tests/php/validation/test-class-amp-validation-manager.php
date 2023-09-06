@@ -343,8 +343,8 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$died = false;
 		add_filter(
 			'wp_die_ajax_handler',
-			function() use ( &$died ) {
-				return function() use ( &$died ) {
+			function () use ( &$died ) {
+				return function () use ( &$died ) {
 					$died = true;
 				};
 			}
@@ -745,7 +745,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$node = $this->node;
 		add_filter(
 			'amp_validation_error',
-			static function( $error, $context ) use ( $node, $that ) {
+			static function ( $error, $context ) use ( $node, $that ) {
 				$error['filtered'] = true;
 				$that->assertEquals( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG, $error['code'] );
 				$that->assertSame( $node, $context['node'] );
@@ -1215,8 +1215,10 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 			'wp_editor_has_scripts_attributed'           => [
 				function () {
-					if ( version_compare( get_bloginfo( 'version' ), '5.2', '<=' ) ) {
-						$this->markTestSkipped( 'The script ID attribute was only added to inline scripts in WP 5.2.' );
+					if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
+						// @see <https://github.com/WordPress/wordpress-develop/commit/d241ab3b55b06fed59e7ea03318e9f872399b390>
+						//@see <https://github.com/WordPress/wordpress-develop/commit/d241ab3b55b06fed59e7ea03318e9f872399b390>
+						$this->markTestSkipped( 'The script ID attribute with before, after and extra was only added to scripts in WP 5.5.' );
 					}
 
 					add_action(
@@ -1247,7 +1249,48 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 						$amp_source_count = 0;
 						foreach ( $sources as $source ) {
 							if ( 'plugin' === $source['type'] && 'amp' === $source['name'] ) {
-								$amp_source_count++;
+								++$amp_source_count;
+							}
+						}
+						$this->assertGreaterThanOrEqual( 1, $amp_source_count );
+					}
+				},
+			],
+			'wp_editor_has_scripts_attributed_on_old_wp_versions' => [
+				function () {
+					if ( version_compare( get_bloginfo( 'version' ), '5.5', '>' ) ) {
+						// @see <https://github.com/WordPress/wordpress-develop/commit/d241ab3b55b06fed59e7ea03318e9f872399b390>
+						//@see <https://github.com/WordPress/wordpress-develop/commit/d241ab3b55b06fed59e7ea03318e9f872399b390>
+						$this->markTestSkipped( 'The script ID attribute with before, after and extra was only added to scripts in WP 5.5.' );
+					}
+
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_add_inline_script( 'jquery-core', '/*After before-jquery*/', 'before' );
+							wp_add_inline_script( 'jquery-core', '/*After after-jquery*/', 'after' );
+						}
+					);
+					add_action(
+						'wp_body_open',
+						static function () {
+							wp_editor( '', 'content' );
+						}
+					);
+				},
+				[
+					'//script[ @id = "jquery-core-js" ]',
+					'//script[ @id = "wp-dom-ready-js" ]',
+					'//script[ @id = "quicktags-js" ]',
+					'//script[ contains( text(), "window.wpActiveEditor" ) ]',
+				],
+				function ( ...$sources_sets ) {
+					$this->assertCount( 4, $sources_sets );
+					foreach ( $sources_sets as $sources ) {
+						$amp_source_count = 0;
+						foreach ( $sources as $source ) {
+							if ( 'plugin' === $source['type'] && 'amp' === $source['name'] ) {
+								++$amp_source_count;
 							}
 						}
 						$this->assertGreaterThanOrEqual( 1, $amp_source_count );
@@ -1561,7 +1604,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::add_validation_error_sourcing();
 
 		$increment_var_by_ref = function ( &$number ) {
-			$number++;
+			++$number;
 			echo "<output>$number</output>"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		};
 
@@ -1682,14 +1725,14 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$handle_outer_action = null;
 
 		// Ensure that nested actions output the expected stack, and that has_action() works as expected in spite of the function wrapping.
-		$handle_outer_action = function() use ( &$handle_outer_action, &$handle_inner_action ) {
+		$handle_outer_action = function () use ( &$handle_outer_action, &$handle_inner_action ) {
 			$this->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
 			$this->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 			do_action( 'inner_action' );
 			$this->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 		};
 		$outer_reflection    = new ReflectionFunction( $handle_outer_action );
-		$handle_inner_action = function() use ( &$handle_outer_action, &$handle_inner_action ) {
+		$handle_inner_action = function () use ( &$handle_outer_action, &$handle_inner_action ) {
 			$this->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
 			$this->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 			echo '<b>Hello</b>';
@@ -1786,7 +1829,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		}
 
 		AMP_Validation_Manager::add_validation_error_sourcing();
-		$shortcode_fallback = static function() {
+		$shortcode_fallback = static function () {
 			return '<b>test</b>';
 		};
 		add_shortcode(
@@ -2061,7 +2104,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	public function test_action_wrapped_callback() {
 		$test_string     = "<b class='\nfoo\nbar\n'>Cool!</b>";
 		$action_callback = [
-			'function'      => static function() use ( $test_string ) {
+			'function'      => static function () use ( $test_string ) {
 				echo $test_string; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			},
 			'accepted_args' => 1,
@@ -2776,7 +2819,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		// Test headers absent.
 		self::factory()->post->create();
-		$filter = static function() {
+		$filter = static function () {
 			return [
 				'body'    => '',
 				'headers' => [],
@@ -2803,7 +2846,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			'id'   => 123,
 		];
 		$stylesheets = [ [ 'CSS!' ] ];
-		$filter        = function( $pre, $r, $url ) use ( $validation_errors, $php_error, $queried_object, $stylesheets, $after_matter ) {
+		$filter        = function ( $pre, $r, $url ) use ( $validation_errors, $php_error, $queried_object, $stylesheets, $after_matter ) {
 			$url_query_vars = [];
 			parse_str( wp_parse_url( $url, PHP_URL_QUERY ), $url_query_vars );
 			$this->assertArrayHasKey( AMP_Validation_Manager::VALIDATE_QUERY_VAR, $url_query_vars );
@@ -2880,7 +2923,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers AMP_Validation_Manager::validate_url()
 	 */
 	public function test_validate_url_for_redirect_to_another_site() {
-		$filter = static function() {
+		$filter = static function () {
 			return [
 				'response' => [
 					'code'    => 301,
