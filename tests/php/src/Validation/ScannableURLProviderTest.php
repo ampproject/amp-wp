@@ -15,7 +15,8 @@ use WP_Query;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\ScannableURLProvider */
 final class ScannableURLProviderTest extends TestCase {
-	use PrivateAccess, ValidationRequestMocking;
+	use PrivateAccess;
+	use ValidationRequestMocking;
 
 	/**
 	 * Validation URL provider instance to use.
@@ -425,9 +426,21 @@ final class ScannableURLProviderTest extends TestCase {
 				);
 			}
 
+			$post = self::factory()->post->create();
+
+			// `wp_pattern_category` is a special taxonomy that is registered for categorizing patterns.
+			// It is only associated with the `wp_block` post type, so we need to create a `wp_block` post.
+			if ( 'wp_pattern_category' === $taxonomy ) {
+				$post = self::factory()->post->create(
+					[
+						'post_type' => 'wp_block',
+					]
+				);
+			}
+
 			// Terms need to be associated with a post in order to be returned in get_terms().
 			$result = wp_set_post_terms(
-				self::factory()->post->create(),
+				$post,
 				$terms_for_current_taxonomy,
 				$taxonomy
 			);
