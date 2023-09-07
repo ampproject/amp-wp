@@ -397,6 +397,11 @@ jobs:
         install-pwa-plugin: [true]
         coverage: [false]
         include:
+          - php: '8.3'
+            wp: 'trunk'
+            phpunit: '9.6'
+            experimental: true
+
           - php: '8.2'
             wp: 'trunk'
             phpunit: '9.6'
@@ -405,13 +410,11 @@ jobs:
           - php: '8.1'
             wp: 'trunk'
             phpunit: '9.6'
-            experimental: true
 
           - php: '8.0'
             wp: 'trunk'
             phpunit: '9.3'
             multisite: true
-            experimental: true
 
           - php: '8.0'
             wp: 'latest'
@@ -608,23 +611,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # @TODO: Revisit this if we want to enable code coverage for feature tests.
         coverage: [false]
         php: ['7.4']
         wp: ['latest']
         include:
+          - php: '8.3'
+            wp: 'trunk'
+            experimental: true
+
           - php: '8.2'
             wp: 'trunk'
             experimental: true
 
           - php: '8.1'
             wp: 'trunk'
-            experimental: true
 
           - php: '8.0'
-            wp: 'latest'
-
-          # @TODO: Enable code coverage for feature tests if codecov supports it.
-          - php: '7.4'
             wp: 'latest'
 
           - php: '7.4'
