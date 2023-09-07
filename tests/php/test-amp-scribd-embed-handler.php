@@ -77,7 +77,7 @@ class AMP_Scribd_Embed_Handler_Test extends TestCase {
 	 * @return array
 	 */
 	public function get_conversion_data() {
-		$data = [
+		return [
 			'no_embed'       => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
@@ -88,13 +88,6 @@ class AMP_Scribd_Embed_Handler_Test extends TestCase {
 				'<p><iframe title="Synthesis of Knowledge: Effects of Fire and Thinning Treatments on Understory Vegetation in Dry U.S. Forests" class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="500" height="750" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
 			],
 		];
-
-		$data['document_embed'] = [
-			$this->scribd_doc_url . PHP_EOL,
-			'<p><iframe class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="500" height="750" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
-		];
-
-		return $data;
 	}
 
 	/**
