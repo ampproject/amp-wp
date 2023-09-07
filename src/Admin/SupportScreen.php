@@ -37,7 +37,7 @@ class SupportScreen implements Conditional, Delayed, Service, Registerable {
 	 *
 	 * @var string
 	 */
-	const WP_MIN_VERSION = '5.2';
+	const WP_MIN_VERSION = '5.3';
 
 	/**
 	 * Injector.
@@ -86,7 +86,6 @@ class SupportScreen implements Conditional, Delayed, Service, Registerable {
 		$this->parent_menu_slug = $options_menu->get_menu_slug();
 
 		$this->google_fonts = $google_fonts;
-
 	}
 
 	/**
@@ -173,7 +172,6 @@ class SupportScreen implements Conditional, Delayed, Service, Registerable {
 			[ $this, 'render_screen' ],
 			10
 		);
-
 	}
 
 	/**

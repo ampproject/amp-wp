@@ -180,7 +180,7 @@ function amp_init() {
 
 	add_action(
 		'rest_api_init',
-		static function() {
+		static function () {
 			$reader_themes = new ReaderThemes();
 
 			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
@@ -1927,13 +1927,8 @@ function amp_get_schemaorg_metadata() {
 
 	$queried_object = get_queried_object();
 	if ( $queried_object instanceof WP_Post ) {
-		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.3', '>=' ) ) {
-			$date_published = mysql2date( 'c', $queried_object->post_date, false );
-			$date_modified  = mysql2date( 'c', $queried_object->post_modified, false );
-		} else {
-			$date_published = mysql2date( 'c', $queried_object->post_date_gmt, false );
-			$date_modified  = mysql2date( 'c', $queried_object->post_modified_gmt, false );
-		}
+		$date_published = mysql2date( 'c', $queried_object->post_date, false );
+		$date_modified  = mysql2date( 'c', $queried_object->post_modified, false );
 
 		$metadata = array_merge(
 			$metadata,

@@ -89,13 +89,10 @@ class AMP_Scribd_Embed_Handler_Test extends TestCase {
 			],
 		];
 
-		// Prior to 5.1, there was no 'title' attribute on an iframe.
-		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.1', '<' ) ) {
-			$data['document_embed'] = [
-				$this->scribd_doc_url . PHP_EOL,
-				'<p><iframe class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="500" height="750" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
-			];
-		}
+		$data['document_embed'] = [
+			$this->scribd_doc_url . PHP_EOL,
+			'<p><iframe class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="500" height="750" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
+		];
 
 		return $data;
 	}

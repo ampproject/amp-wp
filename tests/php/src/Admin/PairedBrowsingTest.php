@@ -149,8 +149,6 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 	 * @covers ::init_client()
 	 */
 	public function test_init_frontend_client() {
-		$this->maybe_skip_test();
-
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$post = self::factory()->post->create_and_get();
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
@@ -236,8 +234,6 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 
 	/** @covers ::filter_template_include_for_app() */
 	public function test_filter_template_include_for_app_when_allowed() {
-		$this->maybe_skip_test();
-
 		$include_path = $this->instance->filter_template_include_for_app();
 		$this->assertTrue( wp_style_is( 'amp-paired-browsing-app' ) );
 		$this->assertTrue( wp_script_is( 'amp-paired-browsing-app' ) );
@@ -250,14 +246,5 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 		$this->assertStringContainsString( 'amp-paired-browsing-app.js', $template );
 		$this->assertStringContainsString( 'ampPairedBrowsingAppData', $template );
 		$this->assertStringContainsString( 'ampPairedBrowsingQueryVar', $template );
-	}
-
-	/**
-	 * Skip tests when wp-url and wp-dom-ready are not available.
-	 */
-	public function maybe_skip_test() {
-		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			$this->markTestSkipped( 'Skipping test as PairedBrowsing can\'t be tested due to lack of wp-dom-ready and wp-url scripts in WP < 5.0' );
-		}
 	}
 }

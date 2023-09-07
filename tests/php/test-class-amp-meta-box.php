@@ -551,10 +551,6 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 	public function test_get_amp_blocks_in_use() {
 		global $post;
 
-		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			$this->markTestSkipped();
-		}
-
 		$post = self::factory()->post->create_and_get(
 			[
 				'post_content' => '

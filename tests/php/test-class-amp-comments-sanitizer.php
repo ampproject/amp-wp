@@ -123,10 +123,6 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	 * @covers ::get_comment_reply_script()
 	 */
 	public function test_ampify_threaded_comments( $ampify_comment_threading, $comments_form_has_action_xhr, $expect_ampify_comment_threading, $comment_reply_script_present ) {
-		if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
-			$this->markTestSkipped( 'Skipping because the script ID attribute was added in WP 5.2.' );
-		}
-
 		update_option( 'thread_comments', '1' );
 		setup_postdata( get_the_ID() );
 		$dom = $this->get_document_with_comments( get_the_ID(), false, $comment_reply_script_present );

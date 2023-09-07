@@ -656,9 +656,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		if ( ! function_exists( 'do_blocks' ) ) {
 			$this->markTestSkipped( 'Gutenberg not active.' );
 		}
-		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			$this->markTestSkipped( 'Gutenberg for WP < 5.0 is not supported.' );
-		}
 
 		$priority = has_filter( 'the_content', 'do_blocks' );
 		$this->assertNotFalse( $priority );
@@ -1426,9 +1423,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		if ( ! function_exists( 'do_blocks' ) ) {
 			$this->markTestSkipped( 'Gutenberg not active.' );
 		}
-		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			$this->markTestSkipped( 'Gutenberg for WP < 5.0 is not supported.' );
-		}
 
 		global $post;
 		$post = self::factory()->post->create_and_get();
@@ -1839,7 +1833,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$filtered_content = apply_filters( 'the_content', 'before[test]after' );
 
-		if ( version_compare( get_bloginfo( 'version' ), '5.0', '>=' ) && has_filter( 'the_content', 'do_blocks' ) ) {
+		if ( has_filter( 'the_content', 'do_blocks' ) ) {
 			$sources = [
 				[
 					'type'     => 'core',
@@ -2974,8 +2968,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	public function test_enqueue_block_validation() {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestSkipped( 'The block editor is not available.' );
-		} elseif ( version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ) {
-			$this->markTestSkipped( 'Block editor is too old.' );
 		}
 
 		AMP_Validation_Manager::enqueue_block_validation();
