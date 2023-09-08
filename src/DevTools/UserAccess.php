@@ -196,7 +196,11 @@ final class UserAccess implements Service, Registerable {
 		if ( ! $this->can_modify_option( $user_id ) ) {
 			return false;
 		}
-		$enabled = isset( $_POST[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] ) && rest_sanitize_boolean( wp_unslash( $_POST[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce handled by user-edit.php; sanitization used is sanitized.
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- -- Nonce handled by user-edit.php; sanitization used is sanitized.
+		$enabled = isset( $_POST[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] ) && rest_sanitize_boolean( wp_unslash( $_POST[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
 		return $this->set_user_enabled( $user_id, $enabled );
 	}
 
