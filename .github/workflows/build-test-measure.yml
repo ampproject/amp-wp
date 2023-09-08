@@ -366,6 +366,13 @@ jobs:
         env:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: amp-e2e-artifacts
+          path: artifacts
+
 #-----------------------------------------------------------------------------------------------------------------------
 
   # Adapted from workflow for running PHP unit tests on google/web-stories-wp.
