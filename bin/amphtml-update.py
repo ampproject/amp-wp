@@ -411,8 +411,9 @@ def ParseRules(repo_directory, out_dir):
 				satisfies = script_tag['tag_spec']['satisfies']
 			else:
 				satisfies = extension
-			if satisfies in extension_specs_by_satisfies:
-				raise Exception( 'Duplicate extension script that satisfies %s.' % satisfies )
+			# TODO: Confirm once if this need to be disabled as there can be more than once spec per extension.
+			# if satisfies in extension_specs_by_satisfies:
+			# 	raise Exception( 'Duplicate extension script that satisfies %s.' % satisfies )
 
 			extension_specs_by_satisfies[satisfies] = script_tag['tag_spec']['extension_spec']
 
@@ -468,11 +469,10 @@ def ParseRules(repo_directory, out_dir):
 			tag['tag_spec']['requires_extension'] = requires_extension_versions
 
 	extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.extensions.json' ) ) )
-	bento_extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.bento.json' ) ) )
 
 	latest_versions = json.load( open( latest_extensions_file_path ) )
 	extensions_versions = dict()
-	for extension in extensions + bento_extensions:
+	for extension in extensions:
 		if '-impl' in extension['name'] or '-polyfill' in extension['name']:
 			continue
 
