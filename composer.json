@@ -5,7 +5,7 @@
   "type": "wordpress-plugin",
   "homepage": "https://github.com/ampproject/amp-wp",
   "require": {
-    "php": "^7.0 || ^8.0",
+    "php": ">=7.4 || ^8.0",
     "ext-curl": "*",
     "ext-date": "*",
     "ext-dom": "*",
@@ -20,23 +20,22 @@
     "sabberworm/php-css-parser": "dev-master#cc791ad"
   },
   "require-dev": {
-    "automattic/vipwpcs": "^2.2",
+    "automattic/vipwpcs": "^3.0",
     "civicrm/composer-downloads-plugin": "^3.0",
-    "dealerdirect/phpcodesniffer-composer-installer": "0.7.2",
-    "google/cloud-storage": "^1.22",
+    "google/cloud-storage": "^1.0",
     "mikey179/vfsstream": "1.6.11",
     "mustache/mustache": "^2",
-    "php-stubs/wordpress-stubs": "^6.0.0",
+    "php-stubs/wordpress-stubs": "^6.0",
     "phpcompatibility/phpcompatibility-wp": "2.1.4",
     "phpdocumentor/reflection": "^3.0",
     "roave/security-advisories": "dev-latest",
     "sirbrillig/phpcs-variable-analysis": "2.11.17",
     "wp-cli/export-command": "^2.0",
     "wp-cli/extension-command": "^2.0",
-    "wp-cli/wp-cli": "^2.4",
-    "wp-cli/wp-cli-tests": "^3.0.11",
-    "wp-coding-standards/wpcs": "2.3.0",
-    "yoast/wp-test-utils": "^1.0.0"
+    "wp-cli/wp-cli": "^2.0",
+    "wp-cli/wp-cli-tests": "^4.0",
+    "wp-coding-standards/wpcs": "^3.0",
+    "yoast/wp-test-utils": "^1.0"
   },
   "suggest": {
     "ext-intl": "Enables use of idn_to_utf8() to convert punycode domains to UTF-8 for use with an AMP Cache.",
@@ -75,7 +74,7 @@
       "dealerdirect/phpcodesniffer-composer-installer": true
     },
     "platform": {
-      "php": "7.0.8"
+      "php": "7.4"
     },
     "sort-packages": true
   },
@@ -89,10 +88,6 @@
       }
     },
     "patches": {
-      "phpunit/phpunit-mock-objects": {
-        "Fix ReflectionParameter warnings on PHP 8": "patches/phpunit-mock-objects.patch",
-        "Remove 'match' keyword from uses <https://github.com/sebastianbergmann/phpunit/issues/4373>": "patches/remove-match-keyword.patch"
-      },
       "sabberworm/php-css-parser": {
         "1. Validate name-start code points for identifier <https://github.com/westonruter/PHP-CSS-Parser/pull/2>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/cc791ad...westonruter:PHP-CSS-Parser:fix/malformed-identifier-without-tests.diff",
         "2. Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/cc791ad...westonruter:PHP-CSS-Parser:fix/selector-comma-parsing-without-tests.diff",

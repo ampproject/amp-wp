@@ -1288,7 +1288,7 @@ class AMP_Validation_Manager {
 
 		if ( empty( $matches['closing'] ) ) {
 			$source['block_content_index'] = self::$block_content_index;
-			self::$block_content_index++;
+			++self::$block_content_index;
 		}
 
 		// Make implicit core namespace explicit.
@@ -2006,12 +2006,12 @@ class AMP_Validation_Manager {
 		foreach ( self::$validation_results as $validation_result ) {
 			$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
 			if ( ! ( (int) $sanitization['status'] & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) ) {
-				$kept_count++;
+				++$kept_count;
 			}
 			if ( ! ( (int) $sanitization['status'] & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) ) {
-				$unreviewed_count++;
+				++$unreviewed_count;
 			}
-			$total_count++;
+			++$total_count;
 		}
 
 		/*
@@ -2489,19 +2489,17 @@ class AMP_Validation_Manager {
 			esc_url( 'https://wordpress.org/support/plugin/amp/#new-topic-0' )
 		);
 
-		$site_health_message = '';
-		if ( version_compare( get_bloginfo( 'version' ), '5.2', '>=' ) ) {
-			$site_health_message .= sprintf(
-				/* translators: %s is link to Site Health */
-				__( 'Please check your <a href="%s">Site Health</a> to verify it can perform loopback requests.', 'amp' ),
-				esc_url( admin_url( 'site-health.php' ) )
-			);
-			$support_forum_message .= ' ' . sprintf(
-				/* translators: %s is the URL to Site Health Info. */
-				__( 'Please include your <a href="%s">Site Health Info</a>.', 'amp' ),
-				esc_url( admin_url( 'site-health.php?tab=debug' ) )
-			);
-		}
+		$site_health_message = sprintf(
+			/* translators: %s is link to Site Health */
+			__( 'Please check your <a href="%s">Site Health</a> to verify it can perform loopback requests.', 'amp' ),
+			esc_url( admin_url( 'site-health.php' ) )
+		);
+
+		$support_forum_message .= ' ' . sprintf(
+			/* translators: %s is the URL to Site Health Info. */
+			__( 'Please include your <a href="%s">Site Health Info</a>.', 'amp' ),
+			esc_url( admin_url( 'site-health.php?tab=debug' ) )
+		);
 
 		$implode_non_empty_strings_with_spaces_and_sanitize = static function ( $strings ) {
 			return wp_kses(

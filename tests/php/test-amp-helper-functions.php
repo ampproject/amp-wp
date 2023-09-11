@@ -543,7 +543,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	private function set_home_url_with_filter( $home_url ) {
 		add_filter(
 			'home_url',
-			static function() use ( $home_url ) {
+			static function () use ( $home_url ) {
 				return $home_url;
 			}
 		);
@@ -689,7 +689,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$wp_rewrite->flush_rules();
 
 		// @todo This should also add a query param to see how it behaves.
-		$add_anchor_fragment = static function( $url ) {
+		$add_anchor_fragment = static function ( $url ) {
 			return $url . '#anchor';
 		};
 
@@ -809,7 +809,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 					false,
 				];
 			},
-			'is_post'         => function() {
+			'is_post'         => function () {
 				$post_id = self::factory()->post->create();
 				return [
 					get_permalink( $post_id ),
@@ -817,7 +817,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 					true,
 				];
 			},
-			'is_skipped_post' => function() {
+			'is_skipped_post' => function () {
 				$skipped_post_id = self::factory()->post->create();
 				add_filter(
 					'amp_skip_post',
@@ -838,7 +838,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			},
 		];
 		return array_map(
-			function( $provider ) {
+			function ( $provider ) {
 				return [ $provider ];
 			},
 			$providers
@@ -858,11 +858,11 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		list( $canonical_url, $amphtml_url, $available ) = $data_provider();
 		$this->assertFalse( current_theme_supports( AMP_Theme_Support::SLUG ) );
 		$this->assertFalse( amp_is_canonical() );
-		$get_amp_html_link = static function() {
+		$get_amp_html_link = static function () {
 			return get_echo( 'amp_add_amphtml_link' );
 		};
 
-		$assert_amphtml_link_present = function() use ( $amphtml_url, $get_amp_html_link, $available ) {
+		$assert_amphtml_link_present = function () use ( $amphtml_url, $get_amp_html_link, $available ) {
 			if ( $available ) {
 				$this->assertEquals(
 					sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
@@ -908,7 +908,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 					true,
 				];
 			},
-			'is_post'         => function() {
+			'is_post'         => function () {
 				$post_id = self::factory()->post->create();
 				return [
 					get_permalink( $post_id ),
@@ -916,7 +916,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 					true,
 				];
 			},
-			'is_skipped_post' => function() {
+			'is_skipped_post' => function () {
 				$skipped_post_id = self::factory()->post->create();
 				add_filter(
 					'amp_skip_post',
@@ -937,7 +937,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			},
 		];
 		return array_map(
-			function( $provider ) {
+			function ( $provider ) {
 				return [ $provider ];
 			},
 			$providers
@@ -960,11 +960,11 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		AMP_Theme_Support::init();
 		$this->assertFalse( amp_is_canonical() );
 
-		$get_amp_html_link = static function() {
+		$get_amp_html_link = static function () {
 			return get_echo( 'amp_add_amphtml_link' );
 		};
 
-		$assert_amphtml_link_present = function() use ( $amphtml_url, $get_amp_html_link, $available ) {
+		$assert_amphtml_link_present = function () use ( $amphtml_url, $get_amp_html_link, $available ) {
 			if ( $available ) {
 				$this->assertTrue( amp_is_available() );
 				$this->assertEquals(
@@ -1017,7 +1017,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	public function get_sandboxing_mode_amphtml_urls() {
 		return [
 			'is_sandboxing_disabled'              => [
-				static function() {
+				static function () {
 					return [
 						home_url( '/' ),
 						amp_add_paired_endpoint( home_url( '/' ) ),
@@ -1026,7 +1026,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 				},
 			],
 			'is_set_to_strict_sandboxing_level'   => [
-				static function() {
+				static function () {
 					return [
 						home_url( '/' ),
 						amp_add_paired_endpoint( home_url( '/' ) ),
@@ -1035,7 +1035,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 				},
 			],
 			'is_set_to_moderate_sandboxing_level' => [
-				static function() {
+				static function () {
 					return [
 						home_url( '/' ),
 						amp_add_paired_endpoint( home_url( '/' ) ),
@@ -1044,7 +1044,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 				},
 			],
 			'is_set_to_loose_sandboxing_level'    => [
-				static function() {
+				static function () {
 					return [
 						home_url( '/' ),
 						amp_add_paired_endpoint( home_url( '/' ) ),
@@ -1076,11 +1076,11 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		AMP_Theme_Support::init();
 		$this->assertFalse( amp_is_canonical() );
 
-		$get_amp_html_link = static function() {
+		$get_amp_html_link = static function () {
 			return get_echo( 'amp_add_amphtml_link' );
 		};
 
-		$assert_amphtml_link_present = function() use ( $amphtml_url, $get_amp_html_link, $sandboxing_level ) {
+		$assert_amphtml_link_present = function () use ( $amphtml_url, $get_amp_html_link, $sandboxing_level ) {
 			$sandboxing_level = amp_get_sandboxing_level();
 
 			if ( 0 === $sandboxing_level || 3 === $sandboxing_level ) {
@@ -1374,7 +1374,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		}
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
-		$get_generator_tag = static function() {
+		$get_generator_tag = static function () {
 			return get_echo( 'amp_add_generator_metadata' );
 		};
 
@@ -2007,7 +2007,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		// Make sure the style and validating sanitizers are always at the end, even after filtering.
 		add_filter(
 			'amp_content_sanitizers',
-			static function( $classes ) {
+			static function ( $classes ) {
 				$classes['Even_After_Validating_Sanitizer'] = [];
 				return $classes;
 			}
@@ -2184,7 +2184,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$excluded_urls = [ 'https://baz.com', 'https://example.com/one' ];
 		add_filter(
 			'amp_to_amp_excluded_urls',
-			static function() use ( $excluded_urls ) {
+			static function () use ( $excluded_urls ) {
 				return $excluded_urls;
 			}
 		);
@@ -2464,7 +2464,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$self = $this;
 		add_filter(
 			'amp_post_template_metadata',
-			static function( $meta, $post ) use ( $self, $post_id ) {
+			static function ( $meta, $post ) use ( $self, $post_id ) {
 				$self->assertEquals( $post_id, $post->ID );
 				$meta['did_amp_post_template_metadata'] = true;
 				$self->assertArrayNotHasKey( 'amp_schemaorg_metadata', $meta );
@@ -2475,7 +2475,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		);
 		add_filter(
 			'amp_schemaorg_metadata',
-			static function( $meta ) use ( $self ) {
+			static function ( $meta ) use ( $self ) {
 				$meta['did_amp_schemaorg_metadata'] = true;
 				$self->assertArrayHasKey( 'did_amp_post_template_metadata', $meta );
 				$meta['author']['name'] = 'George';
@@ -2525,12 +2525,10 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		);
 
 		$this->go_to( get_permalink( $post_id ) );
-		$metadata           = amp_get_schemaorg_metadata();
-		$expected_published = version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ? '2021-02-18T19:55:00+00:00' : '2021-02-18T12:55:00-07:00';
-		$expected_modified  = version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ? '2021-02-19T19:55:00+00:00' : '2021-02-19T12:55:00-07:00';
+		$metadata = amp_get_schemaorg_metadata();
 
-		$this->assertSame( $expected_published, $metadata['datePublished'] );
-		$this->assertSame( $expected_modified, $metadata['dateModified'] );
+		$this->assertSame( '2021-02-18T12:55:00-07:00', $metadata['datePublished'] );
+		$this->assertSame( '2021-02-19T12:55:00-07:00', $metadata['dateModified'] );
 	}
 
 	/**

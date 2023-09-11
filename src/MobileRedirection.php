@@ -415,28 +415,12 @@ final class MobileRedirection implements Service, Registerable {
 		$samesite = 'strict';                                      // Prevents the cookie from being sent by the browser to the target site in all cross-site browsing context.
 		$domain   = COOKIE_DOMAIN;
 
-		// Pre PHP 7.3, the `samesite` cookie attribute had to be set via unconventional means. This was
-		// addressed in PHP 7.3 (see <https://github.com/php/php-src/commit/5cb825df7251aeb28b297f071c35b227a3949f01>),
-		// which now allows setting the cookie attribute via an options array.
-		if ( 70300 <= PHP_VERSION_ID ) {
-			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.cookies_setcookie -- Cookies not used by default. Requires amp_mobile_client_side_redirection filter opt-in
-			setcookie(
-				self::DISABLED_STORAGE_KEY,
-				$value,
-				compact( 'expires', 'path', 'secure', 'httponly', 'samesite', 'domain' )
-			);
-		} else {
-			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.cookies_setcookie -- Cookies not used by default. Requires amp_mobile_client_side_redirection filter opt-in
-			setcookie(
-				self::DISABLED_STORAGE_KEY,
-				$value,
-				$expires,
-				$path . ';samesite=' . $samesite, // Includes the samesite option as a hack to be set in the cookie. See <https://stackoverflow.com/a/46971326>.
-				$domain,
-				$secure,
-				$httponly
-			);
-		}
+		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.cookies_setcookie -- Cookies not used by default. Requires amp_mobile_client_side_redirection filter opt-in
+		setcookie(
+			self::DISABLED_STORAGE_KEY,
+			$value,
+			compact( 'expires', 'path', 'secure', 'httponly', 'samesite', 'domain' )
+		);
 	}
 
 	/**

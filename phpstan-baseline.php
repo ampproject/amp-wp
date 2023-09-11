@@ -34,26 +34,6 @@ $ignore_errors_in_class_amp_allowed_tags_generated = [
 ];
 
 /**
- * Errors due to `Instanceof always evaluate to false`` in PHPStan.
- *
- * @see https://github.com/phpstan/phpstan/issues/3632
- *
- * @todo Remove once this is fixed in PHPStan.
- */
-$ignore_errors_due_to_instanceof_always_evaluating_to_false = [
-	[
-		'message' => '#^Instanceof between mixed and Error will always evaluate to false\\.$#',
-		'count'   => 1,
-		'path'    => __DIR__ . '/src/DevTools/ErrorPage.php',
-	],
-	[
-		'message' => '#^Instanceof between mixed and Error will always evaluate to false\\.$#',
-		'count'   => 1,
-		'path'    => __DIR__ . '/src/DevTools/LikelyCulpritDetector.php',
-	],
-];
-
-/**
  * Errors due `function_exists() and method_exists() always evaluating to true` in PHPStan.
  *
  * @see https://github.com/phpstan/phpstan/issues/8980
@@ -88,7 +68,6 @@ return [
 	'parameters' => [
 		'ignoreErrors' => array_merge(
 			$ignore_errors_in_class_amp_allowed_tags_generated,
-			$ignore_errors_due_to_instanceof_always_evaluating_to_false,
 			$ignore_errors_due_to_function_and_method_exists_always_evaluating_to_true
 		),
 	],

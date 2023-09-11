@@ -542,7 +542,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			} else {
 				$this->assertStringContainsString( 'Bad shortcode!', $content );
 			}
-			$checked++;
+			++$checked;
 		}
 
 		// Check bad-widget.
@@ -555,11 +555,9 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 
 			ob_start();
 			dynamic_sidebar( 'sidebar-1' );
-			if ( version_compare( get_bloginfo( 'version' ), '5.3', '>=' ) ) {
-				// Suppressing widgets printed by the widget() is only supported since WP>=5.3 when the 'widget_display_callback'
-				// filter was added to the_widget().
-				the_widget( 'Bad_Widget', array_fill_keys( [ 'before_widget', 'after_widget', 'before_title', 'after_title' ], '' ), [] );
-			}
+
+			the_widget( 'Bad_Widget', array_fill_keys( [ 'before_widget', 'after_widget', 'before_title', 'after_title' ], '' ), [] );
+
 			$rendered_sidebar = ob_get_clean();
 
 			$this->assertStringContainsString( 'searchform', $rendered_sidebar, 'Expected search widget to be present.' );
@@ -570,7 +568,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 				$this->assertStringContainsString( 'Bad Multi Widget', $rendered_sidebar );
 				$this->assertStringContainsString( 'Bad Single Widget', $rendered_sidebar );
 			}
-			$checked++;
+			++$checked;
 		}
 
 		// Check bad-hooks.
@@ -595,7 +593,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 				$this->assertStringContainsString( 'Bad action!', $footer );
 			}
 
-			$checked++;
+			++$checked;
 		}
 
 		// Check bad-block.
@@ -607,7 +605,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			} else {
 				$this->assertStringContainsString( 'Bad dynamic block!', $blocks );
 			}
-			$checked++;
+			++$checked;
 		}
 
 		if ( 0 === $checked ) {

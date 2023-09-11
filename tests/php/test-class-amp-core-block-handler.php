@@ -30,9 +30,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestIncomplete( 'Files needed for testing missing.' );
 		}
-		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			$this->markTestSkipped( 'Missing required render_block filter.' );
-		}
+
 		$this->prevent_block_pre_render();
 	}
 
