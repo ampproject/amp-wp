@@ -407,13 +407,12 @@ def ParseRules(repo_directory, out_dir):
 		if 'extension_spec' in script_tag['tag_spec']:
 			extension = script_tag['tag_spec']['extension_spec']['name']
 			extension_scripts[extension].append(script_tag)
-			if 'satisfies' in script_tag['tag_spec']:
-				satisfies = script_tag['tag_spec']['satisfies']
+			if 'satisfies_condition' in script_tag['tag_spec']:
+				satisfies = script_tag['tag_spec']['satisfies_condition']
 			else:
 				satisfies = extension
-			# TODO: Confirm once if this need to be disabled as there can be more than once spec per extension.
-			# if satisfies in extension_specs_by_satisfies:
-			# 	raise Exception( 'Duplicate extension script that satisfies %s.' % satisfies )
+			if satisfies in extension_specs_by_satisfies:
+				raise Exception( 'Duplicate extension script that satisfies %s.' % satisfies )
 
 			extension_specs_by_satisfies[satisfies] = script_tag['tag_spec']['extension_spec']
 
@@ -441,7 +440,7 @@ def ParseRules(repo_directory, out_dir):
 	# Amend the allowed_tags to supply the required versions for each component.
 	for tag_name, tags in allowed_tags.items():
 		for tag in tags:
-			tag['tag_spec'].pop('satisfies', None) # We don't need it anymore.
+			tag['tag_spec'].pop('satisfies_condition', None) # We don't need it anymore.
 			requires = tag['tag_spec'].pop('requires', [])
 
 			if 'requires_extension' not in tag['tag_spec']:
@@ -785,10 +784,10 @@ def GetTagRules(tag_spec):
 	if tag_spec.HasField('spec_name'):
 		tag_rules['spec_name'] = UnicodeEscape(tag_spec.spec_name)
 
-	if hasattr(tag_spec, 'satisfies') and len( tag_spec.satisfies ) > 0:
-		if len( tag_spec.satisfies ) > 1:
+	if hasattr(tag_spec, 'satisfies_condition') and len( tag_spec.satisfies_condition ) > 0:
+		if len( tag_spec.satisfies_condition ) > 1:
 			raise Exception('More than expected was satisfied')
-		tag_rules['satisfies'] = tag_spec.satisfies[0]
+		tag_rules['satisfies_condition'] = tag_spec.satisfies_condition[0]
 
 	if tag_spec.HasField('spec_url'):
 		tag_rules['spec_url'] = UnicodeEscape(tag_spec.spec_url)
