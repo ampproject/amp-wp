@@ -14,8 +14,8 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Services;
 use WP_Screen;
-use function get_current_screen;
 use stdClass;
+use function get_current_screen;
 
 /**
  * Add new tab (AMP) in plugin install screen in WordPress admin.

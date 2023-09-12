@@ -26,7 +26,8 @@ use AmpProject\AmpWP\Tests\Helpers\HomeUrlLoopbackRequestMocking;
  */
 class SupportScreenTest extends DependencyInjectedTestCase {
 
-	use HomeUrlLoopbackRequestMocking, MockAdminUser;
+	use HomeUrlLoopbackRequestMocking;
+	use MockAdminUser;
 
 	/**
 	 * Instance of SupportMenu
@@ -106,6 +107,12 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 		$this->assertFalse( SupportScreen::check_core_version() );
 
 		$wp_version = '5.2';
+		$this->assertFalse( SupportScreen::check_core_version() );
+
+		$wp_version = '5.3';
+		$this->assertTrue( SupportScreen::check_core_version() );
+
+		$wp_version = '6.3';
 		$this->assertTrue( SupportScreen::check_core_version() );
 	}
 
@@ -157,7 +164,6 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->instance, 'enqueue_assets' ] ) );
 		$this->assertEquals( 9, has_action( 'admin_menu', [ $this->instance, 'add_menu_items' ] ) );
-
 	}
 
 	/**
@@ -206,7 +212,6 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 			],
 			$submenu['amp-options']
 		);
-
 	}
 
 	/**
@@ -226,7 +231,6 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 
 		$this->assertArrayHasKey( SupportScreen::ASSET_HANDLE, $wp_scripts->registered );
 		$this->assertArrayHasKey( SupportScreen::ASSET_HANDLE, $wp_styles->registered );
-
 	}
 
 	/**

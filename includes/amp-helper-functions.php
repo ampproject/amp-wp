@@ -180,7 +180,7 @@ function amp_init() {
 
 	add_action(
 		'rest_api_init',
-		static function() {
+		static function () {
 			$reader_themes = new ReaderThemes();
 
 			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
@@ -998,6 +998,12 @@ function amp_register_default_scripts( $wp_scripts ) {
 			$version = $extension_spec['latest'];
 		}
 
+		// Skip registering the amp-gfycat extension.
+		// @TODO: Remove this once the amp-gfycat extension is removed from spec.
+		if ( 'amp-gfycat' === $extension_name ) {
+			continue;
+		}
+
 		$src = sprintf(
 			'https://cdn.ampproject.org/v0/%s-%s.js',
 			$extension_name,
@@ -1408,7 +1414,6 @@ function amp_get_content_embed_handlers( $post = null ) {
 			AMP_TikTok_Embed_Handler::class       => [],
 			AMP_Tumblr_Embed_Handler::class       => [],
 			AMP_Gallery_Embed_Handler::class      => [],
-			AMP_Gfycat_Embed_Handler::class       => [],
 			AMP_Imgur_Embed_Handler::class        => [],
 			AMP_Scribd_Embed_Handler::class       => [],
 			AMP_WordPress_Embed_Handler::class    => [],
@@ -1922,13 +1927,8 @@ function amp_get_schemaorg_metadata() {
 
 	$queried_object = get_queried_object();
 	if ( $queried_object instanceof WP_Post ) {
-		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.3', '>=' ) ) {
-			$date_published = mysql2date( 'c', $queried_object->post_date, false );
-			$date_modified  = mysql2date( 'c', $queried_object->post_modified, false );
-		} else {
-			$date_published = mysql2date( 'c', $queried_object->post_date_gmt, false );
-			$date_modified  = mysql2date( 'c', $queried_object->post_modified_gmt, false );
-		}
+		$date_published = mysql2date( 'c', $queried_object->post_date, false );
+		$date_modified  = mysql2date( 'c', $queried_object->post_modified, false );
 
 		$metadata = array_merge(
 			$metadata,

@@ -16,7 +16,8 @@ use AmpProject\AmpWP\Validation\URLValidationCron;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationCron */
 final class URLValidationCronTest extends DependencyInjectedTestCase {
-	use ValidationRequestMocking, PrivateAccess;
+	use ValidationRequestMocking;
+	use PrivateAccess;
 
 	/**
 	 * Test instance
@@ -122,9 +123,8 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		$this->assertNotEquals( $old_interval, $interval );
 		$old_time = time() + HOUR_IN_SECONDS;
 		$success  = wp_schedule_event( $old_time, $old_interval, $event_name, $args );
-		if ( version_compare( get_bloginfo( 'version' ), '5.1', '>=' ) ) {
-			$this->assertTrue( $success );
-		}
+
+		$this->assertTrue( $success );
 		$this->assertEquals( $old_time, wp_next_scheduled( $event_name, $args ) );
 		$this->assertEquals( 1, $count_events( $event_name ) );
 

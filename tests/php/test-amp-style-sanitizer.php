@@ -481,7 +481,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$error_codes = [];
 		$args        = [
 			'use_document_element'      => $use_document_element,
-			'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
+			'validation_error_callback' => static function ( $error ) use ( &$error_codes ) {
 				$error_codes[] = $error['code'];
 			},
 		];
@@ -919,13 +919,13 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	public function test_link_and_style_elements( $source, $expected_stylesheets, $expected_errors = [] ) {
 		add_filter(
 			'locale',
-			static function() {
+			static function () {
 				return 'en_US';
 			}
 		);
 		add_filter(
 			'pre_http_request',
-			static function( $preempt, $request, $url ) {
+			static function ( $preempt, $request, $url ) {
 				$preempt = [
 					'response' => [
 						'code' => 200,
@@ -945,7 +945,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$error_codes = [];
 		$args        = [
 			'use_document_element'      => true,
-			'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
+			'validation_error_callback' => static function ( $error ) use ( &$error_codes ) {
 				$error_codes[] = $error['code'];
 			},
 		];
@@ -1007,7 +1007,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			$dom,
 			[
 				'use_document_element' => true,
-				'validation_error_callback' => static function( $error ) use ( &$actual_error_codes ) {
+				'validation_error_callback' => static function ( $error ) use ( &$actual_error_codes ) {
 					$actual_error_codes[] = $error['code'];
 					return true;
 				},
@@ -1918,7 +1918,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			$dom,
 			[
 				'use_document_element'      => true,
-				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
+				'validation_error_callback' => static function ( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
 			]
@@ -1947,7 +1947,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			$dom,
 			[
 				'use_document_element'      => true,
-				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
+				'validation_error_callback' => static function ( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
 			]
@@ -2106,7 +2106,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 			$this->assertEqualSets( $expected_urls, $actual_urls, "Is cached: $is_cached" );
 
-			for ( $i = 0; $i < $link_elements_count; $i ++ ) {
+			for ( $i = 0; $i < $link_elements_count; $i++ ) {
 				$this->assertStringEndsWith(
 					$expected_urls[ $i ],
 					$link_elements->item( $i )->getAttribute( 'href' )
@@ -2163,7 +2163,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			$dom,
 			[
 				'use_document_element'      => true,
-				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
+				'validation_error_callback' => static function ( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
 			]
@@ -2300,7 +2300,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			$dom,
 			[
 				'use_document_element'      => true,
-				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
+				'validation_error_callback' => static function ( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
 			]
@@ -2412,7 +2412,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$request_count = 0;
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) use ( $href, &$request_count, $content_type, $response_body ) {
+			function ( $preempt, $request, $url ) use ( $href, &$request_count, $content_type, $response_body ) {
 				$this->assertMatchesRegularExpression( '#^https?://#', $url );
 				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
 					$request_count++;
@@ -2432,7 +2432,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			3
 		);
 
-		$sanitize_and_get_stylesheets = static function() use ( $href ) {
+		$sanitize_and_get_stylesheets = static function () use ( $href ) {
 			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $href ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 			$dom  = Document::fromHtml( $html, Options::DEFAULTS );
 
@@ -2442,7 +2442,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				$dom,
 				[
 					'use_document_element'      => true,
-					'validation_error_callback' => static function( $error ) use ( &$found_error_codes ) {
+					'validation_error_callback' => static function ( $error ) use ( &$found_error_codes ) {
 						$found_error_codes[] = $error['code'];
 					},
 				]
@@ -2487,7 +2487,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) use ( $href, &$request_count, $response_body, $headers, $status_code ) {
+			function ( $preempt, $request, $url ) use ( $href, &$request_count, $response_body, $headers, $status_code ) {
 				$this->assertMatchesRegularExpression( '#^https?://#', $url );
 				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
 					$request_count++;
@@ -2505,7 +2505,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			3
 		);
 
-		$sanitize_and_get_stylesheets = static function() use ( $href ) {
+		$sanitize_and_get_stylesheets = static function () use ( $href ) {
 			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $href ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 			$dom  = Document::fromHtml( $html, Options::DEFAULTS );
 
@@ -2515,7 +2515,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				$dom,
 				[
 					'use_document_element'      => true,
-					'validation_error_callback' => static function( $error ) use ( &$found_error_codes ) {
+					'validation_error_callback' => static function ( $error ) use ( &$found_error_codes ) {
 						$found_error_codes[] = $error['code'];
 					},
 				]
@@ -2629,7 +2629,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) use ( $style_url, $http_response, &$request_count ) {
+			function ( $preempt, $request, $url ) use ( $style_url, $http_response, &$request_count ) {
 				$this->assertMatchesRegularExpression( '#^https?://#', $url );
 				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $style_url, 'https' ) ) {
 					$request_count++;
@@ -2647,7 +2647,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			3
 		);
 
-		$sanitize_and_get_stylesheets = static function( $css_url ) {
+		$sanitize_and_get_stylesheets = static function ( $css_url ) {
 			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $css_url ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 			$dom  = Document::fromHtml( $html, Options::DEFAULTS );
 
@@ -2657,7 +2657,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				$dom,
 				[
 					'use_document_element'      => true,
-					'validation_error_callback' => static function( $error ) use ( &$found_error_codes ) {
+					'validation_error_callback' => static function ( $error ) use ( &$found_error_codes ) {
 						$found_error_codes[] = $error['code'];
 					},
 				]
@@ -2776,7 +2776,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			$dom,
 			[
 				'use_document_element' => true,
-				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
+				'validation_error_callback' => static function ( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
 			]
@@ -3034,7 +3034,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			$dom,
 			[
 				'use_document_element'      => true,
-				'validation_error_callback' => static function( $error ) use ( &$validation_errors ) {
+				'validation_error_callback' => static function ( $error ) use ( &$validation_errors ) {
 					$validation_errors[] = $error;
 				},
 			]
@@ -3202,7 +3202,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				includes_url( '/dynamic/import-buttons.php' ),
 				'<style>div::after{content:"After import-buttons"}</style><body class="wp-core-ui"><div><button class="button"></button></div></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				1,
-				static function( $requested_url ) {
+				static function ( $requested_url ) {
 					if ( false !== strpos( $requested_url, 'import-buttons.php' ) ) {
 						return '@import url( "../css/./foo/../buttons.css" );body{color:#123456}';
 					}
@@ -3220,7 +3220,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				includes_url( '/dynamic/import-buttons.php' ),
 				'<style>div::after{content:"After import-buttons2"}</style><body class="wp-core-ui"><div><button class="button"></button></div></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				1,
-				static function( $requested_url ) {
+				static function ( $requested_url ) {
 					if ( false !== strpos( $requested_url, 'import-buttons.php' ) ) {
 						return sprintf( '@import "%s";body{color:#123456}', plugins_url( 'tests/php/data/css/buttons.css', AMP__FILE__ ) );
 					}
@@ -3238,7 +3238,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				includes_url( '/dynamic/import-buttons.php' ),
 				'<style>div::after{content:"After import-buttons2"}</style><body><div></div></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				2,
-				static function( $requested_url ) {
+				static function ( $requested_url ) {
 					$self_call_url = includes_url( '/dynamic/nested.php' );
 					if ( false !== strpos( $requested_url, 'import-buttons.php' ) ) {
 						return sprintf( '@import "%s";body{color:#123456}', $self_call_url );
@@ -3293,7 +3293,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 		add_filter(
 			'pre_http_request',
-			static function( $preempt, $request, $url ) use ( $mock_response, $stylesheet_urls, &$http_request_count ) {
+			static function ( $preempt, $request, $url ) use ( $mock_response, $stylesheet_urls, &$http_request_count ) {
 				$http_request_count++;
 				if ( $mock_response ) {
 					$body = $mock_response( $url, $stylesheet_urls );
@@ -3494,7 +3494,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					require_once get_template_directory() . '/functions.php';
 					add_action(
 						'wp_head',
-						static function() {
+						static function () {
 							printf( '<style media=print id="early-print-style">html:after { content:"earlyprintstyle %s"; }</style>', esc_html( str_repeat( 'a', 75000 - 10 ) ) );
 						},
 						-1000
@@ -3505,7 +3505,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 					add_action(
 						'wp_footer',
-						function() {
+						function () {
 							?>
 							<figure class="wp-block-audio"><figcaption></figcaption></figure>
 							<div class="wp-block-foo"><figcaption></figcaption></div>
@@ -3518,7 +3518,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 					return $render_template();
 				},
-				function( $original_dom, $original_source, $amphtml_dom, $amphtml_source ) {
+				function ( $original_dom, $original_source, $amphtml_dom, $amphtml_source ) {
 					/**
 					 * Vars.
 					 *
@@ -3557,9 +3557,6 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * @param callable $assert         Function which runs assertions.
 	 */
 	public function test_prioritized_stylesheets( $html_generator, $assert ) {
-		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			$this->markTestSkipped( 'Requires WordPress 5.0.' );
-		}
 		global $wp_theme_directories; // Note that get_theme_roots() does not work, for some reason.
 
 		// @todo Remove once https://github.com/WordPress/gutenberg/pull/23104 is in a release.
@@ -3596,7 +3593,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$error_codes = [];
 		$args        = [
 			'use_document_element'      => true,
-			'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
+			'validation_error_callback' => static function ( $error ) use ( &$error_codes ) {
 				$error_codes[] = $error['code'];
 			},
 		];

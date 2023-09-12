@@ -16,7 +16,7 @@ import { saveSettings } from '../../utils/amp-settings-utils';
 describe('AMP settings page anchor linking', () => {
 	beforeEach(async () => {
 		await loginUser();
-	}, 400000);
+	});
 
 	it('jumps to supported templates section', async () => {
 		await visitAdminPageWithHash(
@@ -50,7 +50,7 @@ describe('AMP developer tools settings', () => {
 			'page=amp-options',
 			'other-settings'
 		);
-	}, 400000);
+	});
 
 	afterEach(async () => {
 		await cleanUpSettings();

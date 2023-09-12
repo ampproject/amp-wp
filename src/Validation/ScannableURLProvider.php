@@ -283,7 +283,7 @@ final class ScannableURLProvider implements Service {
 		// case, the absence of the meta may not mean AMP is enabled since the default-enabled state can be
 		// overridden with the `amp_post_status_default_enabled` filter. So in this case, we grab 100 post IDs
 		// and then just use the first one.
-		$args = [
+		$args             = [
 			'post_type'      => $post_type,
 			'posts_per_page' => 100,
 			'post_status'    => 'publish',
@@ -291,12 +291,13 @@ final class ScannableURLProvider implements Service {
 			'order'          => 'DESC',
 			'fields'         => 'ids',
 		];
+		$posts_to_exclude = [];
+
 		if ( 'page' === get_option( 'show_on_front' ) ) {
-			$args['post__not_in'] = [
-				(int) get_option( 'page_for_posts' ),
-				(int) get_option( 'page_on_front' ),
-			];
+			$posts_to_exclude[] = (int) get_option( 'page_for_posts' );
+			$posts_to_exclude[] = (int) get_option( 'page_on_front' );
 		}
+
 		if ( is_int( $offset ) ) {
 			$args['offset'] = $offset;
 		}
@@ -307,7 +308,7 @@ final class ScannableURLProvider implements Service {
 		}
 		$query = new WP_Query( $args );
 
-		return $this->get_posts_that_support_amp( $query->posts );
+		return $this->get_posts_that_support_amp( array_diff( $query->posts, $posts_to_exclude ) );
 	}
 
 	/**

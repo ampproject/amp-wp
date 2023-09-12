@@ -35,10 +35,6 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 	public function set_up() {
 		parent::set_up();
 
-		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			$this->markTestSkipped( 'Requires WordPress 5.0.' );
-		}
-
 		$this->add_reader_themes_request_filter();
 
 		$this->controller = $this->injector->make( OptionsRESTController::class );

@@ -29,7 +29,9 @@ use WP_Error;
  */
 class ReaderThemesTest extends TestCase {
 
-	use ThemesApiRequestMocking, LoadsCoreThemes, MockAdminUser;
+	use ThemesApiRequestMocking;
+	use LoadsCoreThemes;
+	use MockAdminUser;
 
 	/**
 	 * Test instance.
@@ -45,10 +47,6 @@ class ReaderThemesTest extends TestCase {
 	 */
 	public function set_up() {
 		parent::set_up();
-
-		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			$this->markTestSkipped( 'Requires WordPress 5.0.' );
-		}
 
 		delete_transient( 'amp_themes_wporg' );
 		$this->add_reader_themes_request_filter();
@@ -146,7 +144,7 @@ class ReaderThemesTest extends TestCase {
 	 * @covers ::get_default_reader_themes
 	 */
 	public function test_themes_api_empty_array() {
-		$filter_cb = static function() {
+		$filter_cb = static function () {
 			return (object) [ 'themes' => [] ];
 		};
 		add_filter( 'themes_api_result', $filter_cb );
@@ -168,7 +166,7 @@ class ReaderThemesTest extends TestCase {
 	 * @covers ::get_default_reader_themes
 	 */
 	public function test_themes_api_wp_error() {
-		$filter_cb = static function() {
+		$filter_cb = static function () {
 			return new WP_Error(
 				'amp_test_error',
 				'Test message'

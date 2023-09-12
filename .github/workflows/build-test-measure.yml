@@ -101,8 +101,6 @@ jobs:
 
       - name: Install Node dependencies
         run: npm ci
-        env:
-          CI: true
 
       - name: Detect coding standard violations (stylelint)
         run: npm run lint:css
@@ -126,8 +124,6 @@ jobs:
 
       - name: Install Node dependencies
         run: npm ci
-        env:
-          CI: true
 
       - name: Validate package.json
         run: npm run lint:pkg-json
@@ -300,8 +296,6 @@ jobs:
 
       - name: Install Node dependencies
         run: npm ci
-        env:
-          CI: true
 
       - name: Run unit tests (with coverage)
         run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache" --collectCoverage
@@ -351,8 +345,6 @@ jobs:
 
       - name: Install Node dependencies
         run: npm ci
-        env:
-          CI: true
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
@@ -373,6 +365,13 @@ jobs:
         if: always()
         env:
           COMPOSE_INTERACTIVE_NO_CLI: true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: amp-e2e-artifacts
+          path: artifacts
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -405,52 +404,51 @@ jobs:
         install-pwa-plugin: [true]
         coverage: [false]
         include:
-          - php: '8.0'
+          - php: '8.3'
             wp: 'trunk'
-            multisite: true
-            experimental: true
-
-          - php: '8.1'
-            wp: 'trunk'
+            phpunit: '9.6'
             experimental: true
 
           - php: '8.2'
             wp: 'trunk'
-            experimental: true
+            phpunit: '9.6'
+
+          - php: '8.1'
+            wp: 'trunk'
+            phpunit: '9.6'
+
+          - php: '8.0'
+            wp: 'trunk'
+            phpunit: '9.3'
+            multisite: true
 
           - php: '8.0'
             wp: 'latest'
+            phpunit: '9.3'
             coverage: true
 
           - php: '8.0'
             wp: 'latest'
+            phpunit: '9.3'
             external-http: true
 
           - php: '7.4'
+            wp: 'latest'
+            phpunit: '9.3'
             multisite: true
-            wp: 'latest'
 
           - php: '7.4'
             wp: 'latest'
+            phpunit: '9.3'
             external-http: true
 
-          - php: '7.3'
-            wp: 'latest'
+          - php: '7.4'
+            wp: '5.3'
+            phpunit: '7'
 
-          - php: '7.2'
-            wp: 'latest'
-
-          - php: '7.1'
-            wp: 'latest'
-
-          - php: '7.0'
-            wp: '5.1'
-
-          - php: '7.0'
-            wp: '5.0'
-
-          - php: '7.0'
-            wp: '4.9'
+          - php: '7.4'
+            wp: '5.3'
+            phpunit: '7'
             external-http: true
 
     steps:
@@ -472,6 +470,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
+          tools: phpunit:${{ matrix.phpunit }}
           coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
 
       - name: Shutdown default MySQL service
@@ -508,55 +507,20 @@ jobs:
 
       - name: Install Composer dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
-        run: |
-          # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency.
-          composer remove --dev phpdocumentor/reflection
-          composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
 
-      # See https://github.com/wp-cli/wp-cli/issues/5484
-      - name: Remove conflicting Requests library
-        if: needs.pre-run.outputs.changed-php-count > 0
-        run: composer remove --dev --ignore-platform-reqs --no-interaction --no-scripts  roave/security-advisories wp-cli/export-command wp-cli/extension-command wp-cli/wp-cli wp-cli/wp-cli-tests
-
-      # Installs a different PHPUnit version depending on the WP/PHP version combo we're testing against.
-      #
-      # | WP  / PHP | PHPUnit |
-      # |-----------|---------|
-      # | 5.0 / 7.0 | 6       |
-      # | 5.7 / 7.1 | 7       |
-      # | 5.9 / 7.2 | 8       |
-      # | 5.9 / 7.4 | 9       |
-      # | *   / 8   | 9       |
-      #
-      # See https://make.wordpress.org/core/handbook/references/phpunit-compatibility-and-wordpress-versions/
-      - name: Update PHPUnit
+        # Since locally installed PHPUnit classes are loaded into the classmap, running tests with globally
+        # installed PHPUnit requires removing locally installed PHPUnit. Additionally, using the workflow matrix
+        # makes it simple for us to maintain different PHPUnit versions for various PHP versions.
+      - name: Remove locally installed PHPUnit
         if: needs.pre-run.outputs.changed-php-count > 0
         run: |
-          if [[ $PHP_VERSION == "7.1" ]]; then
-            echo "Installing PHPUnit 7.5.x"
-            composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/phpunit:^7.5 --with-dependencies
-          elif [[ $PHP_VERSION == "7.2" ]]; then
-            echo "Installing PHPUnit 8.5.x"
-            composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/phpunit:^8.5 --with-dependencies
-            echo "Downgrading phpunit/php-token-stream because the latest version requires PHP 7.3"
-            composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/php-token-stream:^3.1.3 --with-dependencies
-          elif [[ $PHP_VERSION == "7.3" || $PHP_VERSION == "7.4" || $PHP_VERSION == "8.0" ]]; then
-            echo "Installing PHPUnit 9.3"
-            composer update --ignore-platform-reqs --no-interaction --no-scripts yoast/phpunit-polyfills --with-dependencies
-            composer require --dev --ignore-platform-reqs phpunit/phpunit:"9.3.*" --with-dependencies
-          elif [[ $WP_VERSION == "latest" || $WP_VERSION == "trunk" || $PHP_VERSION == "8.1" || $PHP_VERSION == "8.2" ]]; then
-            echo "Installing latest version of PHPUnit"
-            composer update --ignore-platform-reqs --no-interaction --no-scripts yoast/phpunit-polyfills --with-dependencies
-          fi
-        env:
-          WP_VERSION: ${{ matrix.wp }}
-          PHP_VERSION: ${{ matrix.php }}
+          rm -rf vendor/phpunit
+          composer dump-autoload -o
 
       - name: Install Node dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
         run: npm ci
-        env:
-          CI: true
 
       - name: Build plugin
         if: needs.pre-run.outputs.changed-php-count > 0
@@ -586,14 +550,18 @@ jobs:
 
       - name: Run tests
         if: ${{ matrix.coverage == false && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: vendor/bin/phpunit --verbose
+        run: |
+            phpunit --version
+            phpunit --verbose
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run multisite tests
         if: ${{ matrix.multisite == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: vendor/bin/phpunit --verbose
+        run: |
+          phpunit --version
+          phpunit --verbose
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
@@ -601,14 +569,18 @@ jobs:
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: vendor/bin/phpunit --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
+        run: |
+          phpunit --version
+          phpunit --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run external HTTP tests
         if: ${{ matrix.external-http == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: vendor/bin/phpunit --testsuite external-http
+        run: |
+          phpunit --version
+          phpunit --testsuite external-http --verbose
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
@@ -645,27 +617,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # @TODO: Revisit this if we want to enable code coverage for feature tests.
         coverage: [false]
-        php: ['7.4', '7.3', '7.2', '7.1']
+        php: ['7.4']
         wp: ['latest']
         include:
-          - php: '8.1'
+          - php: '8.3'
             wp: 'trunk'
             experimental: true
-            coverage: false
+
+          - php: '8.2'
+            wp: 'trunk'
+            experimental: true
+
+          - php: '8.1'
+            wp: 'trunk'
 
           - php: '8.0'
             wp: 'latest'
-            coverage: false
 
-          # TODO: Enable this once codecov upload merging works as expected.
-          # - php: '7.4'
-          #  wp: 'latest'
-          #  coverage: true
-
-          - php: '7.0'
-            wp: '5.1'
-            coverage: false
+          - php: '7.4'
+            wp: '5.3'
 
     steps:
       - name: Checkout
@@ -711,21 +683,20 @@ jobs:
 
       - name: Install Node dependencies
         run: npm ci
-        env:
-          CI: true
 
       - name: Build plugin
         run: npm run build:js
 
-      - name: Update PHPUnit to get latest php-code-coverage library
-        if: ${{ matrix.coverage == true }}
-        # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency.
-        # phpunit/phpunit has to be updated as the one in use provides an older version of phpunit/php-code-coverage,
-        # but we need the v9.x branch.
-        # It cannot be removed, as it is a requirement of wp-cli/wp-cli-tests as well.
-        run: |
-          composer remove --dev phpdocumentor/reflection
-          composer require --dev --ignore-platform-reqs --update-with-all-dependencies phpunit/phpunit
+      # @TODO: Revisit this if we want to enable code coverage for feature tests.
+      # - name: Update PHPUnit to get latest php-code-coverage library
+      #   if: ${{ matrix.coverage == true }}
+      #   # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency.
+      #   # phpunit/phpunit has to be updated as the one in use provides an older version of phpunit/php-code-coverage,
+      #   # but we need the v9.x branch.
+      #   # It cannot be removed, as it is a requirement of wp-cli/wp-cli-tests as well.
+      #   run: |
+      #     composer remove --dev phpdocumentor/reflection
+      #     composer require --dev --ignore-platform-reqs --update-with-all-dependencies phpunit/phpunit
 
       - name: Configure DB environment
         run: |
@@ -786,7 +757,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.0'
+          php-version: '7.4'
 
       - name: Setup Node
         uses: actions/setup-node@v3.8.1
@@ -813,8 +784,6 @@ jobs:
 
       - name: Install Node dependencies
         run: npm ci
-        env:
-          CI: true
 
       - name: Create destination directories
         run: mkdir -p builds/${{ matrix.build }}

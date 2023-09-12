@@ -143,11 +143,7 @@ class SiteHealthTest extends TestCase {
 		// Prior to WordPress 5.2, the view_site_health_checks cap didn't exist because Site Health didn't exist.
 		$this->mock_admin_user();
 
-		if ( version_compare( get_bloginfo( 'version' ), '5.2', '>=' ) ) {
-			$this->assertTrue( call_user_func( $route['permission_callback'] ) );
-		} else {
-			$this->assertFalse( call_user_func( $route['permission_callback'] ) );
-		}
+		$this->assertTrue( call_user_func( $route['permission_callback'] ) );
 	}
 
 	/**
