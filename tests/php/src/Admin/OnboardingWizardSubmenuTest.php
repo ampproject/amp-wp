@@ -61,6 +61,6 @@ class OnboardingWizardSubmenuTest  extends TestCase {
 
 		$this->instance->register();
 
-		$this->assertEquals( end( $submenu[''] )[2], 'amp-onboarding-wizard' );
+		$this->assertEquals( end( $submenu['options.php'] )[2], 'amp-onboarding-wizard' );
 	}
 }
