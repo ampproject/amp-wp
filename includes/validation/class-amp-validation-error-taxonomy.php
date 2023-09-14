@@ -2931,7 +2931,7 @@ class AMP_Validation_Error_Taxonomy {
 			add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
 		}
 
-		// Bail if redirect_is passed as null.
+		// Bail if `$redirect_to` is passed as null.
 		if ( null === $redirect_to ) {
 			return $redirect_to;
 		}
