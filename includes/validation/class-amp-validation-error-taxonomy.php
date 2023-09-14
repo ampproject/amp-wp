@@ -283,9 +283,7 @@ class AMP_Validation_Error_Taxonomy {
 					'manage_terms' => AMP_Validation_Manager::VALIDATE_CAPABILITY, // Needed to give access to the term list table.
 					'delete_terms' => AMP_Validation_Manager::VALIDATE_CAPABILITY, // Needed so the checkbox (cb) table column will work.
 					'assign_terms' => 'do_not_allow', // Block assign_terms since associating terms with posts is done programmatically.
-					// Terms are created (and updated) programmatically, but we still need to assign capabilities while generating edit link for term.
-					// @see <https://github.com/ampproject/amp-wp/issues/7604#issuecomment-1704244763>.
-					'edit_terms'   => AMP_Validation_Manager::VALIDATE_CAPABILITY,
+					'edit_terms'   => 'do_not_allow', // Terms are created (and updated) programmatically.
 				],
 			]
 		);
