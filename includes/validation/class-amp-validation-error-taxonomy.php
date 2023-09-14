@@ -2923,8 +2923,17 @@ class AMP_Validation_Error_Taxonomy {
 			}
 		}
 
+		if ( $updated_count ) {
+			delete_transient( AMP_Validated_URL_Post_Type::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+		}
+
 		if ( false !== $has_pre_term_description_filter ) {
 			add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		}
+
+		// Bail if `$redirect_to` is passed as null.
+		if ( null === $redirect_to ) {
+			return $redirect_to;
 		}
 
 		$term_ids_count = count( $term_ids );
@@ -2945,10 +2954,6 @@ class AMP_Validation_Error_Taxonomy {
 				],
 				$redirect_to
 			);
-		}
-
-		if ( $updated_count ) {
-			delete_transient( AMP_Validated_URL_Post_Type::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
 		}
 
 		return $redirect_to;

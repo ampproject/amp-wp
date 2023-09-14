@@ -40,7 +40,7 @@ final class OnboardingWizardSubmenu implements Delayed, Service, Registerable {
 	 */
 	public function register() {
 		add_submenu_page(
-			'',
+			'options.php',
 			__( 'AMP Onboarding Wizard', 'amp' ),
 			__( 'AMP Onboarding Wizard', 'amp' ),
 			'manage_options',

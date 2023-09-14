@@ -290,6 +290,13 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 			)
 		);
 
+		// Set current screen to be the options menu.
+		set_current_screen( $this->instance->screen_handle() );
+
+		// Set title to be used in the screen.
+		global $title;
+		$title = 'Test Title';
+
 		ob_start();
 		$this->instance->render_screen();
 		$this->assertStringContainsString( '<div class="wrap">', ob_get_clean() );
