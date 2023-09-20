@@ -17,6 +17,7 @@ use AmpProject\Layout;
  * AMP versions. Remove Bento stylesheets and scripts if they aren't needed.
  *
  * @since 2.2
+ * @deprecated 2.4.3 Bento support have been removed from amphtml.
  * @internal
  */
 class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
