@@ -366,7 +366,7 @@ function amp_post_template_add_analytics_script( $data ) {
  * @return bool Whether Bento components are enabled.
  */
 function amp_is_bento_enabled() {
-	_deprecated_function( __FUNCTION__, '2.4.3' );
+	_deprecated_function( __FUNCTION__, 'AMP 2.4.3' );
 
 	/**
 	 * Filters whether the use of Bento components is enabled.
@@ -381,5 +381,5 @@ function amp_is_bento_enabled() {
 	 *
 	 * @param bool $enabled Enabled.
 	 */
-	return apply_filters_deprecated( 'amp_bento_enabled', [ false ], '2.4.3', 'Remove beno support', 'Bento support has been removed.' );
+	return apply_filters_deprecated( 'amp_bento_enabled', [ false ], 'AMP 2.4.3', 'Remove beno support', 'Bento support has been removed.' );
 }
