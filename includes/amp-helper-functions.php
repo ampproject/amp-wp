@@ -1560,8 +1560,6 @@ function amp_get_content_sanitizers( $post = null ) {
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
 		],
 
-		AMP_Bento_Sanitizer::class                 => [],
-
 		// The AMP_PWA_Script_Sanitizer run before AMP_Script_Sanitizer, to prevent the script tags
 		// from getting removed in PWA plugin offline/500 templates.
 		AMP_PWA_Script_Sanitizer::class            => [],
@@ -1743,7 +1741,6 @@ function amp_get_content_sanitizers( $post = null ) {
 	$expected_final_sanitizer_order = [
 		AMP_Auto_Lightbox_Disable_Sanitizer::class,
 		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
-		AMP_Bento_Sanitizer::class, // Bento scripts may be preserved here.
 		AMP_PWA_Script_Sanitizer::class, // Must come before script sanitizer since PWA offline page scripts are removed.
 		AMP_GTag_Script_Sanitizer::class, // Must come before script sanitizer since gtag.js is removed.
 		AMP_Script_Sanitizer::class, // Must come before sanitizers for images, videos, audios, comments, forms, and styles.
