@@ -501,7 +501,6 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				$dom,
 				[
 					'use_document_element' => true,
-					'prefer_bento'         => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
 		];
@@ -633,15 +632,10 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			$this->assertStringContainsString( 'body:after{', $css_text );
 		}
 
-		// Verify that prefer_bento got set.
+		// Get registered scripts.
 		$scripts = $sanitizers[ AMP_Tag_And_Attribute_Sanitizer::class ]->get_scripts();
-		if ( 3 === $level ) {
-			$this->assertArrayHasKey( Extension::FACEBOOK_PAGE, $scripts );
-			$this->assertArrayNotHasKey( Extension::FACEBOOK, $scripts );
-		} else {
-			$this->assertArrayHasKey( Extension::FACEBOOK_PAGE, $scripts );
-			$this->assertArrayNotHasKey( Extension::FACEBOOK, $scripts );
-		}
+		$this->assertArrayHasKey( Extension::FACEBOOK_PAGE, $scripts );
+		$this->assertArrayNotHasKey( Extension::FACEBOOK, $scripts );
 	}
 
 	/** @return array */

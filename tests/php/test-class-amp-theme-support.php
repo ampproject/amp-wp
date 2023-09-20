@@ -1846,54 +1846,6 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertStringNotContainsString( '<html amp', $html );
 	}
 
-	/**
-	 * Test prepare_response when Bento is enabled.
-	 *
-	 * @covers AMP_Theme_Support::prepare_response()
-	 */
-	public function test_prepare_response_in_bento() {
-		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
-
-		add_filter( 'amp_bento_enabled', '__return_true' );
-		wp();
-
-		$html = AMP_Theme_Support::prepare_response( $this->get_original_html() );
-		$this->assertStringContainsString( '<script ' . ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE . '>(self.AMP = self.AMP || []).push(function (AMP) { AMP.toggleExperiment("bento", true); });</script>', $html );
-		$this->assertStringContainsString( 'amp-facebook-1.0', $html ); // As opposed to amp-facebook-page-0.1, since Bento is enabled.
-	}
-
-	/**
-	 * Test prepare_response when Bento is enabled and in dev mode.
-	 *
-	 * @covers AMP_Theme_Support::prepare_response()
-	 */
-	public function test_prepare_response_in_bento_with_dev_mode() {
-		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
-
-		add_filter( 'amp_dev_mode_enabled', '__return_true' );
-		add_filter( 'amp_bento_enabled', '__return_true' );
-		wp();
-
-		$html = AMP_Theme_Support::prepare_response( $this->get_original_html() );
-		$this->assertStringContainsString( '<script ' . ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE . ' data-ampdevmode>(self.AMP = self.AMP || []).push(function (AMP) { AMP.toggleExperiment("bento", true); });</script>', $html );
-		$this->assertStringContainsString( 'amp-facebook-1.0', $html ); // As opposed to amp-facebook-page-0.1, since Bento is enabled.
-	}
-
-	/**
-	 * Test prepare_response when Bento is not enabled.
-	 *
-	 * @covers AMP_Theme_Support::prepare_response()
-	 */
-	public function test_prepare_response_without_bento() {
-		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
-
-		wp();
-
-		$html = AMP_Theme_Support::prepare_response( $this->get_original_html() );
-		$this->assertStringNotContainsString( 'AMP.toggleExperiment("bento", true);', $html );
-		$this->assertStringContainsString( 'amp-facebook-page-0.1', $html ); // As opposed to amp-facebook-page-1.0, since Bento is not enabled.
-	}
-
 	/** @return array */
 	public function get_data_to_test_prepare_response_standard_mode_non_amp() {
 		return [

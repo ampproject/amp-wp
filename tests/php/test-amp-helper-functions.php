@@ -1490,7 +1490,6 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		global $wp_scripts, $wp_styles;
 		$wp_scripts = null;
 		$wp_styles  = null;
-		add_filter( 'amp_bento_enabled', '__return_false' );
 
 		$registered_script_srcs = [];
 		foreach ( wp_scripts()->registered as $handle => $dependency ) {
@@ -1512,61 +1511,6 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->assertTrue( wp_style_is( 'amp-default', 'registered' ) );
 		$this->assertTrue( wp_style_is( 'amp-icons', 'registered' ) );
 		$this->assertFalse( wp_style_is( 'amp-base-carousel', 'registered' ) );
-	}
-
-	/**
-	 * @covers ::amp_register_default_scripts()
-	 * @covers ::amp_register_default_styles()
-	 */
-	public function test_amp_register_default_scripts_and_styles_with_bento() {
-		global $wp_scripts, $wp_styles;
-		$wp_scripts = null;
-		$wp_styles  = null;
-		add_filter( 'amp_bento_enabled', '__return_true' );
-
-		$registered_script_srcs = [];
-		foreach ( wp_scripts()->registered as $handle => $dependency ) {
-			if ( 'amp-' === substr( $handle, 0, 4 ) ) {
-				$this->assertStringStartsWith( 'https://cdn.ampproject.org/', $dependency->src );
-				$registered_script_srcs[ $handle ] = str_replace( 'https://cdn.ampproject.org/', '', $dependency->src );
-			}
-		}
-		ksort( $registered_script_srcs );
-
-		// This allows us to ensure that we catch any version changes in scripts.
-		// Since bento support have been removed, there should be no bento scripts.
-		$expected_scripts = $this->get_expected_registered_scripts();
-
-		ksort( $expected_scripts );
-		ksort( $registered_script_srcs );
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
-		$this->assertEquals( $expected_scripts, $registered_script_srcs, "Actual fixture:\n" . var_export( $registered_script_srcs, true ) );
-
-		$bundled_styles = [ 'amp-default', 'amp-icons' ];
-		foreach ( $bundled_styles as $bundled_style ) {
-			$this->assertTrue( wp_style_is( $bundled_style, 'registered' ) );
-		}
-		$registered_style_srcs = [];
-		foreach ( wp_styles()->registered as $handle => $dependency ) {
-			if ( in_array( $handle, $bundled_styles, true ) ) {
-				continue;
-			}
-
-			if ( 'amp-' === substr( $handle, 0, 4 ) ) {
-				$this->assertStringStartsWith( 'https://cdn.ampproject.org/', $dependency->src );
-				$registered_style_srcs[ $handle ] = str_replace( 'https://cdn.ampproject.org/', '', $dependency->src );
-			}
-		}
-		ksort( $registered_style_srcs );
-
-		// This allows us to ensure that we catch any version changes in styles.
-		// Since bento support have been removed, there should be no bento styles.
-		$expected_styles = [];
-
-		ksort( $expected_styles );
-		ksort( $registered_style_srcs );
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
-		$this->assertEquals( $expected_styles, $registered_style_srcs, "Actual fixture:\n" . var_export( $registered_style_srcs, true ) );
 	}
 
 	/**

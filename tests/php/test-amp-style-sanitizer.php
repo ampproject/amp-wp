@@ -1637,20 +1637,6 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					'.stateful'   => false,
 				],
 			],
-			'bento_accordion_with_id' => [
-				'
-					<bento-accordion id="my-accordion">
-						<section>
-							<h2>Section 1</h2>
-							<div>Content in section 1.</div>
-						</section>
-					</bento-accordion>
-				',
-				[
-					'#my-accordion' => true,
-					'amp-accordion#my-accordion' => true,
-				],
-			],
 			'amp_replacement_elements_with_id' => [
 				'
 					<img id="my-img" src="https://example.com/foo.png" width="100" height="100">
