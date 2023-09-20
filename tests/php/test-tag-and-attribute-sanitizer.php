@@ -2994,20 +2994,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				[ 'amp-sidebar', 'amp-list', 'amp-mustache' ],
 			],
 
-			'amp-redbull-player'                           => [
-				'
-				<amp-redbull-player
-				  id="rbvideo"
-				  data-param-videoid="rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT"
-				  data-param-skinid="com"
-				  data-param-locale="en"
-				  height="360"
-				  width="640"></amp-redbull-player>
-				',
-				null,
-				[ 'amp-redbull-player' ],
-			],
-
 			'mustache_templates_with_variable_attrs'       => [
 				'
 				<template type="amp-mustache">
