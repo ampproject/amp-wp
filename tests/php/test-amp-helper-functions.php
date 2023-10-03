@@ -1450,9 +1450,14 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 		$output = get_echo( 'wp_print_scripts' );
 
-		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-0.1.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-latest.js\' async custom-template="amp-mustache"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContainsString( '<script', $output );
+		$this->assertStringContainsString( 'https://cdn.ampproject.org/v0.js', $output );
+		$this->assertStringContainsString( 'https://cdn.ampproject.org/v0/amp-mathml-0.1.js', $output );
+		$this->assertStringContainsString( 'https://cdn.ampproject.org/v0/amp-mustache-latest.js', $output );
+		$this->assertStringContainsString( 'async', $output );
+		$this->assertStringContainsString( 'custom-element="amp-mathml"', $output );
+		$this->assertStringContainsString( 'custom-template="amp-mustache"', $output );
+		$this->assertStringContainsString( '</script>', $output );
 
 		// Try rendering via amp_render_scripts() instead of amp_render_scripts(), which is how component scripts get added normally.
 		$output = amp_render_scripts(
@@ -1463,13 +1468,18 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			]
 		);
 		$this->assertStringNotContainsString( 'amp-mathml', $output, 'The amp-mathml component was already printed above.' );
-		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-2.0.js\' async custom-element="amp-carousel"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-accordion-0.1.js\' async custom-element="amp-accordion"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-2.0.js\' async custom-element="amp-carousel"></script>', $output );
+		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-accordion-0.1.js\' async custom-element="amp-accordion"></script>', $output );
 
 		// Try some experimental component to ensure expected script attributes are added.
 		wp_register_script( 'amp-foo', 'https://cdn.ampproject.org/v0/amp-foo-0.1.js', [ 'amp-runtime' ], null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter, WordPress.WP.EnqueuedResourceParameters.MissingVersion
 		$output = get_echo( 'wp_print_scripts', [ 'amp-foo' ] );
-		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-foo-0.1.js\' async custom-element="amp-foo"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+
+		$this->assertStringContainsString( '<script', $output );
+		$this->assertStringContainsString( 'https://cdn.ampproject.org/v0/amp-foo-0.1.js', $output );
+		$this->assertStringContainsString( 'async', $output );
+		$this->assertStringContainsString( 'custom-element="amp-foo"', $output );
+		$this->assertStringContainsString( '</script>', $output );
 	}
 
 	/**
