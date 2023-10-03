@@ -1225,12 +1225,21 @@ class AMP_Theme_Support {
 		} else {
 			$header_callback = '_admin_bar_bump_cb';
 		}
-		remove_action( 'wp_head', $header_callback );
+
+		// @see <https://core.trac.wordpress.org/ticket/58775>.
+		if ( ! function_exists( 'wp_enqueue_admin_bar_header_styles' ) ) {
+			remove_action( 'wp_head', $header_callback );
+		}
+
 		if ( '__return_false' !== $header_callback ) {
-			ob_start();
-			$header_callback();
-			$style = ob_get_clean();
-			$data  = trim( preg_replace( '#<style[^>]*>(.*)</style>#is', '$1', $style ) ); // See wp_add_inline_style().
+			if ( ! function_exists( 'wp_enqueue_admin_bar_header_styles' ) ) {
+				ob_start();
+				$header_callback();
+				$style = ob_get_clean();
+				$data  = trim( preg_replace( '#<style[^>]*>(.*)</style>#is', '$1', $style ) ); // See wp_add_inline_style().
+			} else {
+				$data = '';
+			}
 
 			// Override AMP's position:relative on the body for the sake of the AMP viewer, which is not relevant an an Admin Bar context.
 			if ( amp_is_dev_mode() ) {
