@@ -251,7 +251,10 @@ class SupportData {
 			$loopback_status = ( ! empty( $loopback_status->status ) ) ? $loopback_status->status : '';
 		}
 
-		if ( function_exists( 'wp_is_https_supported' ) ) {
+		if ( function_exists( 'wp_get_https_detection_errors' ) ) {
+			$https_errors = wp_get_https_detection_errors();
+			$is_ssl       = empty( $https_errors );
+		} elseif ( function_exists( 'wp_is_https_supported' ) ) {
 			$is_ssl = wp_is_https_supported();
 		} else {
 			$is_ssl = is_ssl();
