@@ -128,13 +128,13 @@ class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 			],
 
 			'parent theme' => [
-				[ get_template_directory() . '/functions.php' ],
+				[ '{{ get_template_directory }}/functions.php' ],
 				'theme',
 				'default',
 			],
 
 			'child theme'  => [
-				[ get_stylesheet_directory() . '/functions.php' ],
+				[ '{{ get_stylesheet_directory }}/functions.php' ],
 				'theme',
 				'default',
 			],
@@ -167,8 +167,8 @@ class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 						__FILE__, // AMP plugin is skipped.
 						WP_PLUGIN_DIR . '/bad-plugin/bad-plugin.php', // <== Likely culprit.
 						WP_CONTENT_DIR . '/mu-plugins/bad-mu-plugin.php',
-						get_template_directory() . '/functions.php',
-						get_stylesheet_directory() . '/functions.php',
+						'{{ get_template_directory }}/functions.php',
+						'{{ get_stylesheet_directory }}/functions.php',
 					],
 					'plugin',
 					'bad-plugin',
@@ -180,8 +180,8 @@ class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 						__FILE__, // AMP plugin is skipped.
 						WP_CONTENT_DIR . '/mu-plugins/bad-mu-plugin.php', // <== Likely culprit.
 						WP_PLUGIN_DIR . '/bad-plugin/bad-plugin.php',
-						get_template_directory() . '/functions.php',
-						get_stylesheet_directory() . '/functions.php',
+						'{{ get_template_directory }}/functions.php',
+						'{{ get_stylesheet_directory }}/functions.php',
 					],
 					'mu-plugin',
 					'bad-mu-plugin.php',
@@ -191,10 +191,10 @@ class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 					[
 						ABSPATH . '/wp-includes/some-file.php', // Core is skipped.
 						__FILE__, // AMP plugin is skipped.
-						get_template_directory() . '/functions.php', // <== Likely culprit.
+						'{{ get_template_directory }}/functions.php', // <== Likely culprit.
 						WP_PLUGIN_DIR . '/bad-plugin/bad-plugin.php',
 						WP_CONTENT_DIR . '/mu-plugins/bad-mu-plugin.php',
-						get_stylesheet_directory() . '/functions.php',
+						'{{ get_stylesheet_directory }}/functions.php',
 					],
 					'theme',
 					'default',
@@ -204,10 +204,10 @@ class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 					[
 						ABSPATH . '/wp-includes/some-file.php', // Core is skipped.
 						__FILE__, // AMP plugin is skipped.
-						get_stylesheet_directory() . '/functions.php', // <== Likely culprit.
+						'{{ get_stylesheet_directory }}/functions.php', // <== Likely culprit.
 						WP_PLUGIN_DIR . '/bad-plugin/bad-plugin.php',
 						WP_CONTENT_DIR . '/mu-plugins/bad-mu-plugin.php',
-						get_template_directory() . '/functions.php',
+						'{{ get_template_directory }}/functions.php',
 					],
 					'theme',
 					'default',
@@ -275,7 +275,12 @@ class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 	private function get_trace_from_file_stack( $file_stack ) {
 		return array_map(
 			static function ( $file ) {
-				return [ 'file' => $file ];
+				$file = str_replace( '{{ get_template_directory }}', get_template_directory(), $file );
+				$file = str_replace( '{{ get_stylesheet_directory }}', get_stylesheet_directory(), $file );
+
+				return [
+					'file' => $file,
+				];
 			},
 			$file_stack
 		);
