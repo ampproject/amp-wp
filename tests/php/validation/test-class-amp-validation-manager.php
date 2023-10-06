@@ -1907,7 +1907,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		// This will be called after `do_shortcode` in WP 6.4 and later.
 		// @see <https://core.trac.wordpress.org/ticket/58853>.
-		if ( version_compare( get_bloginfo( 'version' ), '6.4-alpha', '<' ) ) {
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '6.4', '<' ) ) {
 			$sources[] = [
 				'type'     => 'core',
 				'name'     => 'wp-includes',
