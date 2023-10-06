@@ -55,6 +55,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		unset( $GLOBALS['current_screen'] );
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 		remove_theme_support( 'amp' );
+		switch_theme( 'default' );
 		$this->register_core_themes();
 	}
 
@@ -777,7 +778,12 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		$this->assertEquals( 10, has_filter( 'wp_resource_hints', [ self::TESTED_CLASS, 'filter_resource_hints_to_remove_emoji_dns_prefetch' ] ) );
 		$this->assertFalse( has_action( 'wp_head', 'print_emoji_detection_script' ) );
-		$this->assertFalse( has_action( 'wp_print_styles', 'print_emoji_styles' ) );
+
+		if ( function_exists( 'wp_enqueue_emoji_styles' ) ) {
+			$this->assertEquals( 11, has_action( 'wp_print_styles', [ self::TESTED_CLASS, 'dequeue_emoji_styles' ] ) );
+		} else {
+			$this->assertFalse( has_action( 'wp_print_styles', 'print_emoji_styles' ) );
+		}
 
 		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ) );
 		$this->assertEquals( 0, has_action( 'wp_enqueue_scripts', [ self::TESTED_CLASS, 'enqueue_assets' ] ) );
@@ -1043,17 +1049,27 @@ class Test_AMP_Theme_Support extends TestCase {
 		AMP_Theme_Support::init_admin_bar();
 		$this->assertEquals( 10, has_filter( 'style_loader_tag', [ AMP_Theme_Support::class, 'filter_admin_bar_style_loader_tag' ] ) );
 		$this->assertEquals( 10, has_filter( 'script_loader_tag', [ AMP_Theme_Support::class, 'filter_admin_bar_script_loader_tag' ] ) );
-		$this->assertFalse( has_action( 'wp_head', $callback ) );
+
+		if ( ! function_exists( 'wp_enqueue_admin_bar_header_styles' ) ) {
+			$this->assertFalse( has_action( 'wp_head', $callback ) );
+		}
+
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+
 		ob_start();
 		wp_print_styles();
 		wp_print_scripts();
 		$output = ob_get_clean();
-		$this->assertStringContainsString( '<style id=\'admin-bar-inline-css\' type=\'text/css\'>', $output ); // Note: data-ampdevmode attribute will be added by AMP_Dev_Mode_Sanitizer.
-		$this->assertStringNotContainsString( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertStringContainsString( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertStringContainsString( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertStringContainsString( '<link data-ampdevmode rel=\'stylesheet\' id=\'example-admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertStringContainsString( 'html { margin-top: 64px !important; }', $output );
+
+		if ( ! function_exists( 'wp_enqueue_admin_bar_header_styles' ) ) {
+			$this->assertStringContainsString( '<style id=\'admin-bar-inline-css\' type=\'text/css\'>', $output ); // Note: data-ampdevmode attribute will be added by AMP_Dev_Mode_Sanitizer.
+			$this->assertStringNotContainsString( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+			$this->assertStringContainsString( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+			$this->assertStringContainsString( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+			$this->assertStringContainsString( '<link data-ampdevmode rel=\'stylesheet\' id=\'example-admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+			$this->assertStringContainsString( 'html { margin-top: 64px !important; }', $output );
+		}
+
 		$this->assertMatchesRegularExpression( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+admin-bar\.js' ] ) . '/', $output );
 		$this->assertMatchesRegularExpression( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+example-admin-bar\.js' ] ) . '/', $output );
 
@@ -1183,6 +1199,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		add_filter( 'style_loader_tag', [ AMP_Theme_Support::class, 'filter_admin_bar_style_loader_tag' ], 10, 2 );
 		$setup_callback();
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 		ob_start();
 		echo '<html><head>';
 		wp_print_styles();
@@ -1304,6 +1321,8 @@ class Test_AMP_Theme_Support extends TestCase {
 		// Enqueued directly.
 		wp_enqueue_style( 'dashicons' );
 
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+
 		ob_start();
 		wp_print_styles();
 		$output = ob_get_clean();
@@ -1329,6 +1348,8 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		// Enqueued indirectly.
 		wp_enqueue_style( 'my-font-pack', 'https://example.com/fonts', [ 'dashicons' ], '0.1' );
+
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
 		ob_start();
 		wp_print_styles();
