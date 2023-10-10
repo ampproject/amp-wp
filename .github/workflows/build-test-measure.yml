@@ -548,6 +548,20 @@ jobs:
         run: |
           echo "WP_ENVIRONMENT_TYPE=local" >> $GITHUB_ENV
 
+      - name: Override default PHPUnit configuration
+        if: ${{ matrix.experimental == true && needs.pre-run.outputs.changed-php-count > 0 }}
+        run: |
+          cp phpunit.xml.dist phpunit.xml
+
+          # Avoid converting deprecations, errors, notices, and warnings to exceptions in experimental mode.
+          sed -i 's/convertDeprecationsToExceptions="true"/convertDeprecationsToExceptions="false"/g' phpunit.xml
+          sed -i 's/convertErrorsToExceptions="true"/convertErrorsToExceptions="false"/g' phpunit.xml
+          sed -i 's/convertNoticesToExceptions="true"/convertNoticesToExceptions="false"/g' phpunit.xml
+          sed -i 's/convertWarningsToExceptions="true"/convertWarningsToExceptions="false"/g' phpunit.xml
+        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
+        env:
+          WP_TESTS_DIR: /tmp/wordpress-tests-lib
+
       - name: Run tests
         if: ${{ matrix.coverage == false && needs.pre-run.outputs.changed-php-count > 0 }}
         run: |
