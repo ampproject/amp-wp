@@ -855,13 +855,7 @@ class AMP_Theme_Support {
 		// Prevent emoji detection and emoji loading since platforms/browsers now support emoji natively (and Twemoji is not AMP-compatible).
 		add_filter( 'wp_resource_hints', [ __CLASS__, 'filter_resource_hints_to_remove_emoji_dns_prefetch' ], 10, 2 );
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-
-		if ( function_exists( 'wp_enqueue_emoji_styles' ) ) {
-			// By default, emoji styles are enqueued at priority 10.
-			add_action( 'wp_print_styles', [ __CLASS__, 'dequeue_emoji_styles' ], 11 );
-		} else {
-			remove_action( 'wp_print_styles', 'print_emoji_styles' );
-		}
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
 		// The AMP version of the skip link is implemented by AMP_Accessibility_Sanitizer::add_skip_link().
 		remove_action( 'wp_footer', 'gutenberg_the_skip_link' );

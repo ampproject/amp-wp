@@ -778,12 +778,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		$this->assertEquals( 10, has_filter( 'wp_resource_hints', [ self::TESTED_CLASS, 'filter_resource_hints_to_remove_emoji_dns_prefetch' ] ) );
 		$this->assertFalse( has_action( 'wp_head', 'print_emoji_detection_script' ) );
-
-		if ( function_exists( 'wp_enqueue_emoji_styles' ) ) {
-			$this->assertEquals( 11, has_action( 'wp_print_styles', [ self::TESTED_CLASS, 'dequeue_emoji_styles' ] ) );
-		} else {
-			$this->assertFalse( has_action( 'wp_print_styles', 'print_emoji_styles' ) );
-		}
+		$this->assertFalse( has_action( 'wp_print_styles', 'print_emoji_styles' ) );
 
 		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ) );
 		$this->assertEquals( 0, has_action( 'wp_enqueue_scripts', [ self::TESTED_CLASS, 'enqueue_assets' ] ) );
