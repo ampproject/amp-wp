@@ -85,13 +85,6 @@ class AMP_Theme_Support {
 	const READER_MODE_TEMPLATE_DIRECTORY = 'amp';
 
 	/**
-	 * `wp-emoji-styles` styles handle.
-	 *
-	 * @var string
-	 */
-	const WP_EMOJI_STYLES = 'wp-emoji-styles';
-
-	/**
 	 * Sanitizers, with keys as class names and values as arguments.
 	 *
 	 * @var array[]
@@ -912,15 +905,6 @@ class AMP_Theme_Support {
 			},
 			0
 		);
-	}
-
-	/**
-	 * Dequeue emoji styles.
-	 *
-	 * @since 2.4.3
-	 */
-	public static function dequeue_emoji_styles() {
-		wp_dequeue_style( self::WP_EMOJI_STYLES );
 	}
 
 	/**
