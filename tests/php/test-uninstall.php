@@ -413,6 +413,11 @@ class Test_Uninstall extends TestCase {
 		set_transient( 'bar', 2, MINUTE_IN_SECONDS );
 		set_transient( 'baz', 3, HOUR_IN_SECONDS );
 
+		// Update transient created by `_wp_get_block_patterns()`.
+		// If it does not exist, we will create it, else we will update it.
+		$transient_name = 'wp_theme_patterns_' . get_stylesheet();
+		set_transient( $transient_name, [ '...' ] );
+
 		// AMP transients.
 		set_transient( BlockSources::class . BlockSources::CACHE_KEY, '...', BlockSources::CACHE_TIMEOUT );
 		set_transient( 'amp-parsed-stylesheet-v10-1', [ '...' ], MONTH_IN_SECONDS );
@@ -454,6 +459,7 @@ class Test_Uninstall extends TestCase {
 					'_transient_foo',
 					'_transient_timeout_bar',
 					'_transient_timeout_baz',
+					'_transient_wp_theme_patterns_' . get_stylesheet(),
 				],
 				$transient_keys_after_delete
 			);

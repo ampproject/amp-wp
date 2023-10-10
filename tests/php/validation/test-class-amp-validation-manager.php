@@ -1869,54 +1869,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'name'     => 'wp-includes',
 					'function' => 'prepend_attachment',
 				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => version_compare( get_bloginfo( 'version' ), '5.5-alpha', '>' ) ? 'wp_filter_content_tags' : 'wp_make_content_images_responsive',
-				],
-			];
-		} elseif ( has_filter( 'the_content', 'do_blocks' ) ) {
-			$sources = [
-				[
-					'type'     => 'plugin',
-					'name'     => 'gutenberg',
-					'function' => 'do_blocks',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'WP_Embed::run_shortcode',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'WP_Embed::autoembed',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'wptexturize',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'wpautop',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'shortcode_unautop',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'prepend_attachment',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'wp_make_content_images_responsive',
-				],
 			];
 		} else {
 			$sources = [
@@ -1950,11 +1902,16 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'name'     => 'wp-includes',
 					'function' => 'prepend_attachment',
 				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'wp_make_content_images_responsive',
-				],
+			];
+		}
+
+		// This will be called after `do_shortcode` in WP 6.4 and later.
+		// @see <https://core.trac.wordpress.org/ticket/58853>.
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '6.4', '<' ) ) {
+			$sources[] = [
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => version_compare( get_bloginfo( 'version' ), '5.5-alpha', '>' ) ? 'wp_filter_content_tags' : 'wp_make_content_images_responsive',
 			];
 		}
 
@@ -1987,13 +1944,25 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'name'     => 'wp-includes',
 					'function' => 'do_shortcode',
 				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'convert_smilies',
-				],
 			]
 		);
+
+		// `wp_filter_content_tags` is called after `do_shortcode` in WP 6.4 and later.
+		// @see <https://core.trac.wordpress.org/ticket/58853>.
+		if ( version_compare( get_bloginfo( 'version' ), '6.4-alpha', '>=' ) ) {
+			$sources[] = [
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'wp_filter_content_tags',
+			];
+		}
+
+		// `wp_filter_content_tags` is called before `convert_smilies` in WP 6.4 and later.
+		$sources[] = [
+			'type'     => 'core',
+			'name'     => 'wp-includes',
+			'function' => 'convert_smilies',
+		];
 
 		foreach ( $sources as &$source ) {
 			$function = $source['function'];

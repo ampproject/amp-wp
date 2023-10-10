@@ -383,6 +383,8 @@ jobs:
     needs: pre-run
     env:
       WP_CORE_DIR: /tmp/wordpress
+      WP_TESTS_DIR: /tmp/wordpress-tests-lib
+      WP_ENVIRONMENT_TYPE: local
     services:
       mysql:
         image: mariadb:latest
@@ -544,9 +546,17 @@ jobs:
         if: needs.pre-run.outputs.changed-php-count > 0
         run: cp -r "$PWD" "$WP_CORE_DIR/src/wp-content/plugins/amp"
 
-      - name: Setup required WP constants
+      - name: Override default PHPUnit configuration
+        if: ${{ matrix.experimental == true && needs.pre-run.outputs.changed-php-count > 0 }}
         run: |
-          echo "WP_ENVIRONMENT_TYPE=local" >> $GITHUB_ENV
+          cp phpunit.xml.dist phpunit.xml
+
+          # Avoid converting deprecations, errors, notices, and warnings to exceptions in experimental mode.
+          sed -i 's/convertDeprecationsToExceptions="true"/convertDeprecationsToExceptions="false"/g' phpunit.xml
+          sed -i 's/convertErrorsToExceptions="true"/convertErrorsToExceptions="false"/g' phpunit.xml
+          sed -i 's/convertNoticesToExceptions="true"/convertNoticesToExceptions="false"/g' phpunit.xml
+          sed -i 's/convertWarningsToExceptions="true"/convertWarningsToExceptions="false"/g' phpunit.xml
+        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
       - name: Run tests
         if: ${{ matrix.coverage == false && needs.pre-run.outputs.changed-php-count > 0 }}
@@ -554,8 +564,6 @@ jobs:
             phpunit --version
             phpunit --verbose
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
-        env:
-          WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run multisite tests
         if: ${{ matrix.multisite == true && needs.pre-run.outputs.changed-php-count > 0 }}
@@ -564,7 +572,6 @@ jobs:
           phpunit --verbose
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
-          WP_TESTS_DIR: /tmp/wordpress-tests-lib
           WP_MULTISITE: 1
 
       - name: Run tests with coverage
@@ -573,8 +580,6 @@ jobs:
           phpunit --version
           phpunit --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
-        env:
-          WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run external HTTP tests
         if: ${{ matrix.external-http == true && needs.pre-run.outputs.changed-php-count > 0 }}
@@ -582,8 +587,6 @@ jobs:
           phpunit --version
           phpunit --testsuite external-http --verbose
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
-        env:
-          WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 && github.actor != 'dependabot[bot]' }}
