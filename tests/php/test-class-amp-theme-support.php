@@ -1049,6 +1049,8 @@ class Test_AMP_Theme_Support extends TestCase {
 			$this->assertFalse( has_action( 'wp_head', $callback ) );
 		}
 
+		// Avoid running deprecated `print_emoji_styles()` while printing styles.
+		// @see <https://core.trac.wordpress.org/ticket/58775>.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
 		ob_start();
@@ -1194,6 +1196,9 @@ class Test_AMP_Theme_Support extends TestCase {
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		add_filter( 'style_loader_tag', [ AMP_Theme_Support::class, 'filter_admin_bar_style_loader_tag' ], 10, 2 );
 		$setup_callback();
+
+		// Avoid running deprecated `print_emoji_styles()` while printing styles.
+		// @see <https://core.trac.wordpress.org/ticket/58775>.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 		ob_start();
 		echo '<html><head>';
@@ -1316,6 +1321,8 @@ class Test_AMP_Theme_Support extends TestCase {
 		// Enqueued directly.
 		wp_enqueue_style( 'dashicons' );
 
+		// Avoid running deprecated `print_emoji_styles()` while printing styles.
+		// @see <https://core.trac.wordpress.org/ticket/58775>.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
 		ob_start();
@@ -1344,6 +1351,8 @@ class Test_AMP_Theme_Support extends TestCase {
 		// Enqueued indirectly.
 		wp_enqueue_style( 'my-font-pack', 'https://example.com/fonts', [ 'dashicons' ], '0.1' );
 
+		// Avoid running deprecated `print_emoji_styles()` while printing styles.
+		// @see <https://core.trac.wordpress.org/ticket/58775>.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
 		ob_start();
