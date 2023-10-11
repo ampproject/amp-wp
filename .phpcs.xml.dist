@@ -54,6 +54,7 @@
 		<exclude name="WordPress.PHP.IniSet.display_errors_Disallowed" />
 		<exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames.matchFound" />
 		<exclude name="WordPress.Security.NonceVerification.Missing" />
+		<exclude name="WordPress.Security.EscapeOutput.ExceptionNotEscaped" />
 	</rule>
 
 	<rule ref="WordPress-Docs">
