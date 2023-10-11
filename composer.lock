@@ -1010,16 +1010,16 @@
         },
         {
             "name": "firebase/php-jwt",
-            "version": "v6.8.1",
+            "version": "v6.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/firebase/php-jwt.git",
-                "reference": "5dbc8959427416b8ee09a100d7a8588c00fb2e26"
+                "reference": "f03270e63eaccf3019ef0f32849c497385774e11"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/5dbc8959427416b8ee09a100d7a8588c00fb2e26",
-                "reference": "5dbc8959427416b8ee09a100d7a8588c00fb2e26",
+                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/f03270e63eaccf3019ef0f32849c497385774e11",
+                "reference": "f03270e63eaccf3019ef0f32849c497385774e11",
                 "shasum": ""
             },
             "require": {
@@ -1067,22 +1067,22 @@
             ],
             "support": {
                 "issues": "https://github.com/firebase/php-jwt/issues",
-                "source": "https://github.com/firebase/php-jwt/tree/v6.8.1"
+                "source": "https://github.com/firebase/php-jwt/tree/v6.9.0"
             },
-            "time": "2023-07-14T18:33:00+00:00"
+            "time": "2023-10-05T00:24:42+00:00"
         },
         {
             "name": "google/auth",
-            "version": "v1.29.1",
+            "version": "v1.31.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-auth-library-php.git",
-                "reference": "f199ed635b945e5adfd3c1a203543d8d86aff239"
+                "reference": "22209fddd0c06f3f8e3cb4aade0b352aa00f9888"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/f199ed635b945e5adfd3c1a203543d8d86aff239",
-                "reference": "f199ed635b945e5adfd3c1a203543d8d86aff239",
+                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/22209fddd0c06f3f8e3cb4aade0b352aa00f9888",
+                "reference": "22209fddd0c06f3f8e3cb4aade0b352aa00f9888",
                 "shasum": ""
             },
             "require": {
@@ -1125,22 +1125,22 @@
             "support": {
                 "docs": "https://googleapis.github.io/google-auth-library-php/main/",
                 "issues": "https://github.com/googleapis/google-auth-library-php/issues",
-                "source": "https://github.com/googleapis/google-auth-library-php/tree/v1.29.1"
+                "source": "https://github.com/googleapis/google-auth-library-php/tree/v1.31.0"
             },
-            "time": "2023-08-23T08:49:35+00:00"
+            "time": "2023-10-05T20:39:00+00:00"
         },
         {
             "name": "google/cloud-core",
-            "version": "v1.52.3",
+            "version": "v1.52.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-cloud-php-core.git",
-                "reference": "2ae714abfbf979cb52de26227a87e42bfdfb6347"
+                "reference": "71f092f4dab880515917da64423656ed3d6aefc2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-cloud-php-core/zipball/2ae714abfbf979cb52de26227a87e42bfdfb6347",
-                "reference": "2ae714abfbf979cb52de26227a87e42bfdfb6347",
+                "url": "https://api.github.com/repos/googleapis/google-cloud-php-core/zipball/71f092f4dab880515917da64423656ed3d6aefc2",
+                "reference": "71f092f4dab880515917da64423656ed3d6aefc2",
                 "shasum": ""
             },
             "require": {
@@ -1190,22 +1190,22 @@
             ],
             "description": "Google Cloud PHP shared dependency, providing functionality useful to all components.",
             "support": {
-                "source": "https://github.com/googleapis/google-cloud-php-core/tree/v1.52.3"
+                "source": "https://github.com/googleapis/google-cloud-php-core/tree/v1.52.6"
             },
-            "time": "2023-08-25T20:04:15+00:00"
+            "time": "2023-10-06T21:49:26+00:00"
         },
         {
             "name": "google/cloud-storage",
-            "version": "v1.33.1",
+            "version": "v1.33.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-cloud-php-storage.git",
-                "reference": "dc3fbf15d1a1519de20f4b55ab76b2ac94b89652"
+                "reference": "e22877e96c3f5c4f53b0fb2077834fb6d64d0fca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-cloud-php-storage/zipball/dc3fbf15d1a1519de20f4b55ab76b2ac94b89652",
-                "reference": "dc3fbf15d1a1519de20f4b55ab76b2ac94b89652",
+                "url": "https://api.github.com/repos/googleapis/google-cloud-php-storage/zipball/e22877e96c3f5c4f53b0fb2077834fb6d64d0fca",
+                "reference": "e22877e96c3f5c4f53b0fb2077834fb6d64d0fca",
                 "shasum": ""
             },
             "require": {
@@ -1246,9 +1246,9 @@
             ],
             "description": "Cloud Storage Client for PHP",
             "support": {
-                "source": "https://github.com/googleapis/google-cloud-php-storage/tree/v1.33.1"
+                "source": "https://github.com/googleapis/google-cloud-php-storage/tree/v1.33.3"
             },
-            "time": "2023-08-17T19:37:27+00:00"
+            "time": "2023-09-30T16:50:41+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -3493,16 +3493,16 @@
         },
         {
             "name": "psr/http-client",
-            "version": "1.0.2",
+            "version": "1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/http-client.git",
-                "reference": "0955afe48220520692d2d09f7ab7e0f93ffd6a31"
+                "reference": "bb5906edc1c324c9a05aa0873d40117941e5fa90"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/http-client/zipball/0955afe48220520692d2d09f7ab7e0f93ffd6a31",
-                "reference": "0955afe48220520692d2d09f7ab7e0f93ffd6a31",
+                "url": "https://api.github.com/repos/php-fig/http-client/zipball/bb5906edc1c324c9a05aa0873d40117941e5fa90",
+                "reference": "bb5906edc1c324c9a05aa0873d40117941e5fa90",
                 "shasum": ""
             },
             "require": {
@@ -3539,9 +3539,9 @@
                 "psr-18"
             ],
             "support": {
-                "source": "https://github.com/php-fig/http-client/tree/1.0.2"
+                "source": "https://github.com/php-fig/http-client"
             },
-            "time": "2023-04-10T20:12:12+00:00"
+            "time": "2023-09-23T14:17:50+00:00"
         },
         {
             "name": "psr/http-factory",
