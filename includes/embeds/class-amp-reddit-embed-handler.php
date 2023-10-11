@@ -74,4 +74,3 @@ class AMP_Reddit_Embed_Handler extends AMP_Base_Embed_Handler {
 		);
 	}
 }
-

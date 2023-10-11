@@ -40,6 +40,3 @@ register_shutdown_function(
 		( new Clover() )->process( $coverage, $destination, $name );
 	}
 );
-
-
-
