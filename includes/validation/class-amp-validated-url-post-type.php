@@ -1448,7 +1448,7 @@ class AMP_Validated_URL_Post_Type {
 				}
 				if ( ! empty( $items ) ) {
 					$imploded_items = implode( ',</div><div>', $items );
-					echo sprintf( '<div>%s</div>', $imploded_items ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					printf( '<div>%s</div>', $imploded_items ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				} else {
 					esc_html_e( '--', 'amp' );
 				}

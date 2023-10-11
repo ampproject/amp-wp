@@ -75,7 +75,7 @@ amp-img.aligncenter { display: block; margin-left: auto; margin-right: auto; }
 .amp-wp-content, .amp-wp-title-bar div {
 	<?php $content_max_width = absint( $this->get( 'content_max_width' ) ); ?>
 	<?php if ( $content_max_width > 0 ) : ?>
-	max-width: <?php echo sprintf( '%dpx', $content_max_width ); ?>;
+	max-width: <?php printf( '%dpx', $content_max_width ); ?>;
 	margin: 0 auto;
 	<?php endif; ?>
 }
