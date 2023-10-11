@@ -64,7 +64,7 @@
     "@wordpress/plugins": "6.11.0",
     "@wordpress/prettier-config": "3.0.0",
     "@wordpress/scripts": "26.14.0",
-    "axios": "1.5.0",
+    "axios": "1.5.1",
     "babel-plugin-inline-react-svg": "2.0.2",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "copy-webpack-plugin": "11.0.0",
