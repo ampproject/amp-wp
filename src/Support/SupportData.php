@@ -338,7 +338,7 @@ class SupportData {
 		);
 
 		$response = array_map(
-			static function( WP_Theme $theme ) {
+			static function ( WP_Theme $theme ) {
 				return self::normalize_theme_info( $theme );
 			},
 			$themes

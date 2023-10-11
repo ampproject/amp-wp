@@ -194,7 +194,7 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 
 		add_filter(
 			'amp_validation_error_default_sanitized',
-			static function( $sanitized, $error ) {
+			static function ( $sanitized, $error ) {
 				if ( 'new accepted' === $error['code'] ) {
 					$sanitized = true;
 				} elseif ( 'new rejected' === $error['code'] ) {
@@ -208,7 +208,7 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 
 		add_filter(
 			'amp_validation_error_sanitized',
-			static function( $sanitized, $error ) {
+			static function ( $sanitized, $error ) {
 				if ( 'accepted' === $error['code'] ) {
 					$sanitized = true;
 				} elseif ( 'rejected' === $error['code'] ) {
@@ -375,7 +375,7 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 
 		add_filter(
 			'amp_validation_error_sanitized',
-			static function( $sanitized, $error ) {
+			static function ( $sanitized, $error ) {
 				if ( 'accepted' === $error['code'] ) {
 					$sanitized = true;
 				} elseif ( 'rejected' === $error['code'] ) {
@@ -484,7 +484,7 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		$this->assertEquals(
 			$errors,
 			array_map(
-				static function( $stored_error ) {
+				static function ( $stored_error ) {
 					return $stored_error['data'];
 				},
 				$stored_errors
@@ -1156,12 +1156,12 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		// The action isn't correct, so the callback should return the URL unchanged.
 		$this->assertEquals( $initial_redirect, AMP_Validated_URL_Post_Type::handle_bulk_action( $initial_redirect, 'trash', $items ) );
 
-		$filter = function() {
+		$filter = function () {
 			return [
 				'body' => wp_json_encode(
 					[
 						'results' => array_map(
-							static function( $error ) {
+							static function ( $error ) {
 								return array_merge(
 									compact( 'error' ),
 									[ 'sanitized' => false ]
@@ -1189,7 +1189,7 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		// Test error scenario.
 		add_filter(
 			'pre_http_request',
-			static function() {
+			static function () {
 				return [
 					'body' => '<html></html>',
 				];
@@ -1270,19 +1270,19 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		$exception = null;
 		add_filter(
 			'wp_redirect',
-			static function( $url, $status ) {
+			static function ( $url, $status ) {
 				throw new Exception( $url, $status );
 			},
 			10,
 			2
 		);
 
-		$filter = function() {
+		$filter = function () {
 			return [
 				'body' => wp_json_encode(
 					[
 						'results' => array_map(
-							static function( $error ) {
+							static function ( $error ) {
 								return array_merge(
 									compact( 'error' ),
 									[ 'sanitized' => false ]
@@ -1296,7 +1296,7 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		};
 		add_filter( 'pre_http_request', $filter, 10, 3 );
 
-		$handle_validate_request = static function() {
+		$handle_validate_request = static function () {
 			try {
 				AMP_Validated_URL_Post_Type::handle_validate_request();
 			} catch ( Exception $exception ) {
@@ -1403,7 +1403,7 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		);
 		add_filter(
 			'pre_http_request',
-			static function() {
+			static function () {
 				return [
 					'body' => wp_json_encode(
 						[
@@ -1494,7 +1494,7 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 
 		add_filter(
 			'pre_http_request',
-			static function() use ( $errors ) {
+			static function () use ( $errors ) {
 				$results = array_map(
 					static function ( $error ) {
 						return [
@@ -1542,7 +1542,7 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 
 		add_filter(
 			'wp_redirect',
-			static function( $url, $status ) {
+			static function ( $url, $status ) {
 				throw new Exception( $url, $status );
 			},
 			10,

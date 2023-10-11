@@ -280,19 +280,19 @@ class AMP_Validated_URL_Post_Type {
 		// Post list screen hooks.
 		add_filter(
 			'view_mode_post_types',
-			static function( $post_types ) {
+			static function ( $post_types ) {
 				return array_diff( $post_types, [ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
 			}
 		);
 		add_action(
 			'load-edit.php',
-			static function() {
+			static function () {
 				if ( 'edit-' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== get_current_screen()->id ) {
 					return;
 				}
 				add_action(
 					'admin_head-edit.php',
-					static function() {
+					static function () {
 						global $mode;
 						$mode = 'list'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					}
@@ -904,7 +904,7 @@ class AMP_Validated_URL_Post_Type {
 		$placeholder  = 'amp_validated_url_content_placeholder' . wp_rand();
 
 		// Guard against Kses from corrupting content by adding post_content after content_save_pre filter applies.
-		$insert_post_content = static function( $post_data ) use ( $placeholder, $post_content ) {
+		$insert_post_content = static function ( $post_data ) use ( $placeholder, $post_content ) {
 			$should_supply_post_content = (
 				isset( $post_data['post_content'], $post_data['post_type'] )
 				&&
@@ -1691,7 +1691,7 @@ class AMP_Validated_URL_Post_Type {
 			$unaccepted_error_count = count(
 				array_filter(
 					$validation_errors,
-					static function( $error ) {
+					static function ( $error ) {
 						return ! AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
 					}
 				)
@@ -2104,7 +2104,7 @@ class AMP_Validated_URL_Post_Type {
 				$args[ self::REMAINING_ERRORS ] = count(
 					array_filter(
 						$validation_results,
-						static function( $result ) {
+						static function ( $result ) {
 							return ! $result['sanitized'];
 						}
 					)
@@ -2919,7 +2919,7 @@ class AMP_Validated_URL_Post_Type {
 		 *
 		 * @return WP_Term[]
 		 */
-		$override_terms_in_occurrence_order = static function() use ( $post ) {
+		$override_terms_in_occurrence_order = static function () use ( $post ) {
 			return wp_list_pluck( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $post ), 'term' );
 		};
 

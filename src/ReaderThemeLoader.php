@@ -389,7 +389,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 		add_filter( 'sidebars_widgets', '__return_empty_array', PHP_INT_MAX );
 		add_filter(
 			'customize_loaded_components',
-			static function( $components ) {
+			static function ( $components ) {
 				return array_diff( $components, [ 'widgets' ] );
 			}
 		);

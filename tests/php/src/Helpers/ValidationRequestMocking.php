@@ -27,7 +27,7 @@ trait ValidationRequestMocking {
 		);
 
 		return array_map(
-			static function( $post ) {
+			static function ( $post ) {
 				return remove_query_arg( 'amp', AMP_Validated_URL_Post_Type::get_url_from_post( $post ) );
 			},
 			$query->posts

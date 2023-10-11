@@ -1098,7 +1098,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 			],
 
 			'attribute_amp_accordion_value'                => call_user_func(
-				static function() {
+				static function () {
 					$html = str_replace(
 						[ "\n", "\t" ],
 						'',
@@ -3804,7 +3804,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 			array_merge(
 				[
 					'use_document_element'      => true,
-					'validation_error_callback' => static function( $error ) use ( &$actual_errors ) {
+					'validation_error_callback' => static function ( $error ) use ( &$actual_errors ) {
 						$actual_errors[] = $error;
 						return true;
 					},
@@ -3852,7 +3852,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 			$dom,
 			[
 				'use_document_element'      => false,
-				'validation_error_callback' => static function( $error ) use ( &$actual_errors ) {
+				'validation_error_callback' => static function ( $error ) use ( &$actual_errors ) {
 					$actual_errors[] = $error;
 					return true;
 				},
@@ -4194,7 +4194,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
 			[
-				'validation_error_callback' => function( $error, $context ) use ( &$expected_errors, $sanitize ) {
+				'validation_error_callback' => function ( $error, $context ) use ( &$expected_errors, $sanitize ) {
 					$expected = array_shift( $expected_errors );
 					$this->assertIsArray( $expected );
 					$tag = $expected['node_name'];

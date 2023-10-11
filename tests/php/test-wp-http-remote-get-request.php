@@ -48,7 +48,7 @@ class Test_WP_Http_Remote_Get_Request extends TestCase {
 
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) use ( $href, $headers ) {
+			function ( $preempt, $request, $url ) use ( $href, $headers ) {
 				$this->assertMatchesRegularExpression( '#^https?://#', $url );
 				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
 					$preempt = [

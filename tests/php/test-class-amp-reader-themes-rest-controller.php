@@ -80,7 +80,7 @@ class Test_Reader_Theme_REST_Controller extends TestCase {
 			$this->assertContains( $expected_reader_theme, $actual_reader_themes );
 		}
 
-		$filter = static function() {
+		$filter = static function () {
 			return [
 				[
 					'name'           => 'My theme',
@@ -131,7 +131,7 @@ class Test_Reader_Theme_REST_Controller extends TestCase {
 	 * @covers ::get_items
 	 */
 	public function test_get_items_header_with_themes_api_empty_array() {
-		$filter_cb = static function() {
+		$filter_cb = static function () {
 			return (object) [ 'themes' => [] ];
 		};
 		add_filter( 'themes_api_result', $filter_cb );
@@ -149,7 +149,7 @@ class Test_Reader_Theme_REST_Controller extends TestCase {
 	 * @covers ::get_items
 	 */
 	public function test_themes_api_remote_wp_error() {
-		$filter_cb = static function() {
+		$filter_cb = static function () {
 			return new WP_Error(
 				'amp_test_error',
 				'Test message'

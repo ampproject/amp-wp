@@ -1501,7 +1501,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	public function test_handle_clear_empty_terms_request() {
 		add_filter(
 			'wp_redirect',
-			static function() {
+			static function () {
 				throw new Exception( 'redirected' );
 			}
 		);
