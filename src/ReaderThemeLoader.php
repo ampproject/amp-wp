@@ -281,7 +281,6 @@ final class ReaderThemeLoader implements Service, Registerable {
 			);
 		</script>
 		<?php
-
 	}
 
 	/**

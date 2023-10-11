@@ -237,6 +237,5 @@ class AmpThemesTest extends TestCase {
 			],
 			$this->instance->filter_theme_row_meta( [], 'astra' )
 		);
-
 	}
 }

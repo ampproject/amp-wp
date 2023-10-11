@@ -1665,7 +1665,6 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertStringContainsString( 'BAR', $output );
 		$this->assertStringContainsString( '<amp-video src="test.mp4"', $output );
 		$this->assertStringNotContainsString( '<script data-test', $output );
-
 	}
 
 	/**

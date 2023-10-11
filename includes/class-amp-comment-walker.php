@@ -69,7 +69,6 @@ class AMP_Comment_Walker extends Walker_Comment {
 		}
 
 		$output .= $new_tag . substr( ltrim( $new_out ), strlen( $tag ) );
-
 	}
 
 	/**

@@ -146,7 +146,6 @@ class SupportData {
 			$this->urls
 		);
 		$this->urls = array_values( array_unique( array_filter( $this->urls ) ) );
-
 	}
 
 	/**
@@ -455,7 +454,6 @@ class SupportData {
 			'is_network_active' => is_plugin_active_for_network( $plugin_file ),
 			'is_suppressed'     => in_array( $slug, $suppressed_plugin_list, true ) ? $suppressed_plugins[ $slug ]['last_version'] : '',
 		];
-
 	}
 
 	/**
@@ -740,7 +738,6 @@ class SupportData {
 			'error_sources' => $error_sources,
 			'urls'          => $amp_invalid_urls,
 		];
-
 	}
 
 	/**
@@ -886,7 +883,6 @@ class SupportData {
 			'error_sources' => $error_source_list,
 			'url'           => $amp_invalid_url,
 		];
-
 	}
 
 	/**
@@ -971,7 +967,6 @@ class SupportData {
 		];
 
 		return $response;
-
 	}
 
 	/**

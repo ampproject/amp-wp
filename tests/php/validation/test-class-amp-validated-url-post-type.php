@@ -2008,7 +2008,6 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		$this->assertArrayNotHasKey( 'trash', $filtered_actions );
 		$this->assertArrayHasKey( 'delete', $filtered_actions );
 		$this->assertStringContainsString( 'Forget</a>', $filtered_actions['delete'] );
-
 	}
 
 	/**

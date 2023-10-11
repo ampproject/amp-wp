@@ -141,7 +141,6 @@ class Test_Reader_Theme_REST_Controller extends TestCase {
 			[ 'X-AMP-Theme-API-Error' => 'The default reader themes cannot be displayed because a plugin appears to be overriding the themes response from WordPress.org.' ],
 			$response->get_headers()
 		);
-
 	}
 
 	/**

@@ -2667,7 +2667,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		$node->parentNode->replaceChild( $fragment, $node );
 		return true;
-
 	}
 
 	/**

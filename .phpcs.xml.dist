@@ -14,7 +14,6 @@
 		<exclude name="Universal.Operators.DisallowShortTernary" />
 
 		<!-- @TODO(P0): Fix these once WPCS is merged on develop and remove the exclusions. -->
-		<exclude name="PSR2.Methods.FunctionClosingBrace.SpacingBeforeClose" />
 		<exclude name="WordPress.Security.EscapeOutput.OutputNotEscaped" />
 		<exclude name="Squiz.Functions.MultiLineFunctionDeclaration.SpaceAfterFunction" />
 		<exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames.stringFound" />
