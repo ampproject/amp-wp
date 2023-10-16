@@ -3179,35 +3179,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 			),
-			array(
-				'attr_spec_list' => array(
-					'data-href' => array(
-						'mandatory' => true,
-					),
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							6,
-							2,
-							3,
-							7,
-							1,
-							4,
-						),
-					),
-					'requires_extension' => array(
-						'amp-facebook',
-					),
-					'spec_name' => 'amp-facebook-comments 1.0',
-				),
-			),
 		),
 		'amp-facebook-like' => array(
 			array(
@@ -3245,42 +3216,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 			),
-			array(
-				'attr_spec_list' => array(
-					'data-href' => array(
-						'mandatory' => true,
-						'value_url' => array(
-							'allow_relative' => false,
-							'protocol' => array(
-								'http',
-								'https',
-							),
-						),
-					),
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							6,
-							2,
-							3,
-							7,
-							1,
-							4,
-						),
-					),
-					'requires_extension' => array(
-						'amp-facebook',
-					),
-					'spec_name' => 'amp-facebook-like 1.0',
-				),
-			),
 		),
 		'amp-facebook-page' => array(
 			array(
@@ -3316,42 +3251,6 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-facebook-page',
 					),
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'data-href' => array(
-						'mandatory' => true,
-						'value_url' => array(
-							'allow_relative' => false,
-							'protocol' => array(
-								'http',
-								'https',
-							),
-						),
-					),
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							6,
-							2,
-							3,
-							7,
-							1,
-							4,
-						),
-					),
-					'requires_extension' => array(
-						'amp-facebook',
-					),
-					'spec_name' => 'amp-facebook-page 1.0',
 				),
 			),
 		),
@@ -16443,7 +16342,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -16754,7 +16652,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -16848,7 +16745,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -17004,7 +16900,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -17223,7 +17118,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -17255,7 +17149,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -17287,7 +17180,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -17412,7 +17304,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -17476,7 +17367,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -17601,7 +17491,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -17943,7 +17832,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -18130,7 +18018,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -18193,7 +18080,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -18349,7 +18235,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -18381,7 +18266,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => false,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -18508,7 +18392,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -19255,7 +19138,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -19287,7 +19169,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -19412,7 +19293,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -19444,7 +19324,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -19880,7 +19759,7 @@ class AMP_Allowed_Tags_Generated {
 						'name' => 'amp-stream-gallery',
 						'requires_usage' => true,
 						'version' => array(
-							'1.0',
+							'0.1',
 						),
 					),
 				),
@@ -20008,7 +19887,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -20071,7 +19949,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -20134,7 +20011,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -20197,7 +20073,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
@@ -20479,7 +20354,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'1.0',
 						),
 					),
 				),
