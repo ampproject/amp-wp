@@ -354,6 +354,13 @@ def ParseRules(repo_directory, out_dir):
 		'!DOCTYPE',
 	]
 
+	manual_versioning = {
+		'amp-stream-gallery': ['0.1'],
+		'amp-wordpress-embed': ['1.0'],
+	}
+
+	bento_spec_names = []
+
 	for (field_desc, field_val) in rules.ListFields():
 		if 'tags' == field_desc.name:
 			for tag_spec in field_val:
@@ -380,6 +387,30 @@ def ParseRules(repo_directory, out_dir):
 				else:
 					tag_list = allowed_tags[tag_name]
 
+				if 'SCRIPT' == tag_spec.tag_name:
+					gotten_tag_spec = GetTagSpec(tag_spec, attr_lists)
+					if gotten_tag_spec is not None:
+						if 'extension_spec' in gotten_tag_spec['tag_spec'] and 'bento_supported_version' in gotten_tag_spec['tag_spec']['extension_spec']:
+							if '' != tag_spec.spec_name:
+								bento_spec_names.append( gotten_tag_spec['tag_spec']['extension_spec']['name'] )
+
+							version = gotten_tag_spec['tag_spec']['extension_spec']['version']
+							bento_version = gotten_tag_spec['tag_spec']['extension_spec']['bento_supported_version']
+
+							for _version in bento_version:
+								if _version in version:
+									version.remove( _version )
+
+							gotten_tag_spec['tag_spec']['extension_spec'].pop('bento_supported_version', None)
+							gotten_tag_spec['tag_spec']['extension_spec']['version'] = version
+
+							if len( version ) == 0 and gotten_tag_spec['tag_spec']['extension_spec']['name'] in manual_versioning.keys():
+								gotten_tag_spec['tag_spec']['extension_spec']['version'] = manual_versioning[ gotten_tag_spec['tag_spec']['extension_spec']['name'] ]
+
+							tag_list.append(gotten_tag_spec)
+							allowed_tags[tag_name] = tag_list
+							continue
+
 				gotten_tag_spec = GetTagSpec(tag_spec, attr_lists)
 				if gotten_tag_spec is not None:
 					tag_list.append(gotten_tag_spec)
@@ -398,6 +429,19 @@ def ParseRules(repo_directory, out_dir):
 						continue
 
 					descendant_lists[_list.name].append( val.lower() )
+
+	# Remove any tags that requires bento_spec_names.keys()
+	for tag_name, tag_list in allowed_tags.items():
+		for tag in tag_list:
+			if 'requires_extension' not in tag['tag_spec'] or 'spec_name' not in tag['tag_spec']:
+				continue
+
+			requires_extension = tag['tag_spec']['requires_extension'][0]
+
+			if requires_extension not in bento_spec_names:
+				continue
+
+			tag_list.remove( tag )
 
 	# Separate extension scripts from non-extension scripts and gather the versions
 	extension_scripts = collections.defaultdict(list)
