@@ -354,6 +354,13 @@ def ParseRules(repo_directory, out_dir):
 		'!DOCTYPE',
 	]
 
+	manual_versioning = {
+		'amp-stream-gallery': ['0.1'],
+		'amp-wordpress-embed': ['1.0'],
+	}
+
+	bento_spec_names = {}
+
 	for (field_desc, field_val) in rules.ListFields():
 		if 'tags' == field_desc.name:
 			for tag_spec in field_val:
@@ -380,6 +387,32 @@ def ParseRules(repo_directory, out_dir):
 				else:
 					tag_list = allowed_tags[tag_name]
 
+				if 'SCRIPT' == tag_spec.tag_name:
+					gotten_tag_spec = GetTagSpec(tag_spec, attr_lists)
+					if gotten_tag_spec is not None:
+						if 'extension_spec' in gotten_tag_spec['tag_spec'] and 'bento_supported_version' in gotten_tag_spec['tag_spec']['extension_spec']:
+							if '' != tag_spec.spec_name:
+								# In case some other extension requires bento extension, we need to know the spec name of the bento extension.
+								bento_spec_names[ gotten_tag_spec['tag_spec']['extension_spec']['name'] ] = tag_spec.spec_name
+
+							# Remove bento spec version from the list of versions.
+							version = gotten_tag_spec['tag_spec']['extension_spec']['version']
+							bento_version = gotten_tag_spec['tag_spec']['extension_spec']['bento_supported_version']
+
+							for _version in bento_version:
+								if _version in version:
+									version.remove( _version )
+
+							gotten_tag_spec['tag_spec']['extension_spec'].pop('bento_supported_version', None)
+							gotten_tag_spec['tag_spec']['extension_spec']['version'] = version
+
+							if len( version ) == 0 and gotten_tag_spec['tag_spec']['extension_spec']['name'] in manual_versioning.keys():
+								gotten_tag_spec['tag_spec']['extension_spec']['version'] = manual_versioning[ gotten_tag_spec['tag_spec']['extension_spec']['name'] ]
+
+							tag_list.append(gotten_tag_spec)
+							allowed_tags[tag_name] = tag_list
+							continue
+
 				gotten_tag_spec = GetTagSpec(tag_spec, attr_lists)
 				if gotten_tag_spec is not None:
 					tag_list.append(gotten_tag_spec)
@@ -399,6 +432,18 @@ def ParseRules(repo_directory, out_dir):
 
 					descendant_lists[_list.name].append( val.lower() )
 
+	# Remove any tags that requires bento_spec_names.keys()
+	for tag_name, tag_list in allowed_tags.items():
+		for tag in tag_list:
+			if 'requires_extension' not in tag['tag_spec'] or 'requires_condition' not in tag['tag_spec']:
+				continue
+			requires_condition = tag['tag_spec']['requires_condition'][0]
+			requires_extension = tag['tag_spec']['requires_extension'][0]
+			if requires_extension not in bento_spec_names:
+				continue
+			if bento_spec_names[requires_extension] == requires_condition:
+				tag_list.remove( tag )
+
 	# Separate extension scripts from non-extension scripts and gather the versions
 	extension_scripts = collections.defaultdict(list)
 	extension_specs_by_satisfies = dict()
@@ -407,8 +452,8 @@ def ParseRules(repo_directory, out_dir):
 		if 'extension_spec' in script_tag['tag_spec']:
 			extension = script_tag['tag_spec']['extension_spec']['name']
 			extension_scripts[extension].append(script_tag)
-			if 'satisfies' in script_tag['tag_spec']:
-				satisfies = script_tag['tag_spec']['satisfies']
+			if 'satisfies_condition' in script_tag['tag_spec']:
+				satisfies = script_tag['tag_spec']['satisfies_condition']
 			else:
 				satisfies = extension
 			if satisfies in extension_specs_by_satisfies:
@@ -440,7 +485,8 @@ def ParseRules(repo_directory, out_dir):
 	# Amend the allowed_tags to supply the required versions for each component.
 	for tag_name, tags in allowed_tags.items():
 		for tag in tags:
-			tag['tag_spec'].pop('satisfies', None) # We don't need it anymore.
+			tag['tag_spec'].pop('satisfies_condition', None) # We don't need it anymore.
+			tag['tag_spec'].pop('requires_condition', None) # We don't need it anymore.
 			requires = tag['tag_spec'].pop('requires', [])
 
 			if 'requires_extension' not in tag['tag_spec']:
@@ -468,11 +514,10 @@ def ParseRules(repo_directory, out_dir):
 			tag['tag_spec']['requires_extension'] = requires_extension_versions
 
 	extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.extensions.json' ) ) )
-	bento_extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.bento.json' ) ) )
 
 	latest_versions = json.load( open( latest_extensions_file_path ) )
 	extensions_versions = dict()
-	for extension in extensions + bento_extensions:
+	for extension in extensions:
 		if '-impl' in extension['name'] or '-polyfill' in extension['name']:
 			continue
 
@@ -686,6 +731,11 @@ def GetTagRules(tag_spec):
 		for requires_extension in tag_spec.requires_extension:
 			requires_extension_list.add(requires_extension)
 
+	requires_condition_list = set()
+	if hasattr(tag_spec, 'requires_condition') and len( tag_spec.requires_condition ) != 0:
+		for requires_condition in tag_spec.requires_condition:
+			requires_condition_list.add(requires_condition)
+
 	if hasattr(tag_spec, 'requires') and len( tag_spec.requires ) != 0:
 		tag_rules['requires'] = [ requires for requires in tag_spec.requires ]
 
@@ -698,6 +748,9 @@ def GetTagRules(tag_spec):
 
 	if len( requires_extension_list ) > 0:
 		tag_rules['requires_extension'] = list( requires_extension_list )
+
+	if len( requires_condition_list ) > 0:
+		tag_rules['requires_condition'] = list( requires_condition_list )
 
 	if hasattr(tag_spec, 'reference_points') and len( tag_spec.reference_points ) != 0:
 		tag_reference_points = {}
@@ -785,10 +838,10 @@ def GetTagRules(tag_spec):
 	if tag_spec.HasField('spec_name'):
 		tag_rules['spec_name'] = UnicodeEscape(tag_spec.spec_name)
 
-	if hasattr(tag_spec, 'satisfies') and len( tag_spec.satisfies ) > 0:
-		if len( tag_spec.satisfies ) > 1:
+	if hasattr(tag_spec, 'satisfies_condition') and len( tag_spec.satisfies_condition ) > 0:
+		if len( tag_spec.satisfies_condition ) > 1:
 			raise Exception('More than expected was satisfied')
-		tag_rules['satisfies'] = tag_spec.satisfies[0]
+		tag_rules['satisfies_condition'] = tag_spec.satisfies_condition[0]
 
 	if tag_spec.HasField('spec_url'):
 		tag_rules['spec_url'] = UnicodeEscape(tag_spec.spec_url)

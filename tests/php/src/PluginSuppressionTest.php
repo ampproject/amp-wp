@@ -583,6 +583,10 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 				$this->assertStringContainsString( 'Bad filter!', $content );
 			}
 
+			// Avoid running deprecated `the_block_template_skip_link()` while printing styles.
+			// @see <https://core.trac.wordpress.org/ticket/59505>.
+			remove_action( 'wp_footer', 'the_block_template_skip_link' );
+
 			// Check action.
 			ob_start();
 			wp_footer();

@@ -141,8 +141,8 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			$sanitizer_arg_updates[ AMP_Img_Sanitizer::class ]['native_img_used']           = true;
 		}
 
-		// When custom scripts are on the page, use Bento AMP components whenever possible and turn off some CSS
-		// processing is unnecessary for a valid AMP page and which can break custom scripts.
+		// When custom scripts are on the page, turn off some CSS processing because it is
+		// unnecessary for a valid AMP page and which can break custom scripts.
 		if ( $this->px_verified_kept_node_count > 0 || $this->kept_script_count > 0 ) {
 			$sanitizer_arg_updates[ AMP_Style_Sanitizer::class ]['transform_important_qualifiers'] = false;
 			$sanitizer_arg_updates[ AMP_Style_Sanitizer::class ]['allow_excessive_css']            = true;

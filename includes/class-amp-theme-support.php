@@ -1559,47 +1559,6 @@ class AMP_Theme_Support {
 			}
 		}
 
-		// Make sure that Bento versions are used when required, either by explicitly requesting Bento or when the document is non-valid AMP.
-		$is_using_bento = (
-			array_key_exists( AMP_Tag_And_Attribute_Sanitizer::class, $sanitizers )
-			&&
-			$sanitizers[ AMP_Tag_And_Attribute_Sanitizer::class ]->get_arg( 'prefer_bento' )
-		);
-		if ( $is_using_bento ) {
-			$bento_extension_count = 0;
-
-			// Override all required scripts with the available Bento versions.
-			foreach ( $amp_scripts as $extension_name => $script_element ) {
-				if ( ! empty( $extension_specs[ $extension_name ]['bento']['version'] ) ) {
-					$script_element->setAttribute(
-						Attribute::SRC,
-						sprintf(
-							'https://cdn.ampproject.org/v0/%s-%s.js',
-							$extension_name,
-							$extension_specs[ $extension_name ]['bento']['version']
-						)
-					);
-					$bento_extension_count++;
-				}
-			}
-
-			// Enable Bento experiment per <https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/?format=websites#enable-bento-experiment>.
-			// @todo Remove this once Bento no longer requires an experiment to opt-in.
-			if ( $bento_extension_count > 0 ) {
-				$bento_experiment_script = $dom->createElement( Tag::SCRIPT );
-				$bento_experiment_script->appendChild(
-					$dom->createTextNode( '(self.AMP = self.AMP || []).push(function (AMP) { AMP.toggleExperiment("bento", true); });' )
-				);
-
-				ValidationExemption::mark_node_as_px_verified( $bento_experiment_script );
-				if ( DevMode::isActiveForDocument( $dom ) ) {
-					$bento_experiment_script->setAttributeNode( $dom->createAttribute( Attribute::DATA_AMPDEVMODE ) );
-				}
-
-				$dom->head->appendChild( $bento_experiment_script );
-			}
-		}
-
 		/*
 		 * "3. If your page includes render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, amp-story),
 		 * preload those extensions as they're required by the AMP runtime for rendering the page."

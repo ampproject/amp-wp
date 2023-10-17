@@ -194,14 +194,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				[ 'amp-facebook-comments' ],
 			],
 
-			'amp-facebook-comments_bento'                  => [
-				'<amp-facebook-comments width="486" height="657" data-href="http://example.com/baz" layout="responsive" data-numposts="5"></amp-facebook-comments>',
-				null, // No change.
-				[ 'amp-facebook' ],
-				[],
-				[ 'prefer_bento' => true ],
-			],
-
 			'amp-facebook-comments_missing_required_attribute' => [
 				'<amp-facebook-comments width="486" height="657" layout="responsive" data-numposts="5"></amp-facebook-comments>',
 				'',
@@ -220,26 +212,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				[ 'amp-facebook-like' ],
 			],
 
-			'amp-facebook-like_bento'                      => [
-				'<amp-facebook-like width="90" height="20" data-href="http://example.com/baz" layout="fixed" data-layout="button_count"></amp-facebook-like>',
-				null, // No change.
-				[ 'amp-facebook' ],
-				[],
-				[ 'prefer_bento' => true ],
-			],
-
 			'amp-facebook-page'                            => [
 				'<amp-facebook-page width="340" height="130" layout="responsive" data-href="https://www.facebook.com/imdb/"></amp-facebook-page>',
 				null, // No change.
 				[ 'amp-facebook-page' ],
-			],
-
-			'amp-facebook-page_bento'                      => [
-				'<amp-facebook-page width="340" height="130" layout="responsive" data-href="https://www.facebook.com/imdb/"></amp-facebook-page>',
-				null, // No change.
-				[ 'amp-facebook' ],
-				[],
-				[ 'prefer_bento' => true ],
 			],
 
 			'amp-facebook-like_missing_required_attribute' => [
@@ -2992,20 +2968,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				',
 				null,
 				[ 'amp-sidebar', 'amp-list', 'amp-mustache' ],
-			],
-
-			'amp-redbull-player'                           => [
-				'
-				<amp-redbull-player
-				  id="rbvideo"
-				  data-param-videoid="rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT"
-				  data-param-skinid="com"
-				  data-param-locale="en"
-				  height="360"
-				  width="640"></amp-redbull-player>
-				',
-				null,
-				[ 'amp-redbull-player' ],
 			],
 
 			'mustache_templates_with_variable_attrs'       => [
