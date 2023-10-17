@@ -362,7 +362,7 @@ function amp_post_template_add_analytics_script( $data ) {
  * @link https://blog.amp.dev/2021/01/28/bento/
  *
  * @deprecated 2.4.3 Bento support has been removed.
- *
+ * @codeCoverageIgnore
  * @return bool Whether Bento components are enabled.
  */
 function amp_is_bento_enabled() {
