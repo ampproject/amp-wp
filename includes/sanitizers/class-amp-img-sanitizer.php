@@ -298,6 +298,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					}
 					break;
 
+				// Avoid adding `fetchpriority` to amp-img element.
+				case Attribute::FETCHPRIORITY:
+					break;
+
 				default:
 					$out[ $name ] = $value;
 					break;
