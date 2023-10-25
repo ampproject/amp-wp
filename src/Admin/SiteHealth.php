@@ -359,7 +359,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			return (int) apply_filters_deprecated(
 				'amp_page_cache_good_response_time_threshold',
 				[ $threshold ],
-				'2.4.3',
+				'AMP 2.4.3',
 				'site_status_good_response_time_threshold'
 			);
 		} else {
