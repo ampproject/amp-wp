@@ -113,12 +113,16 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	/**
 	 * Detect whether async tests can be used.
 	 *
-	 * Returns true if *not* on version of Health Check plugin which doesn't support REST async tests.
+	 * Returns true if on WP 5.6+ and *not* on version of Health Check plugin which doesn't support REST async tests.
 	 *
 	 * @param array $tests Tests.
 	 * @return bool
 	 */
 	private function supports_async_rest_tests( $tests ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.6', '<' ) ) {
+			return false;
+		}
+
 		if ( defined( 'HEALTH_CHECK_PLUGIN_VERSION' ) ) {
 			$core_async_tests = [
 				'dotorg_communication',
@@ -350,21 +354,23 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 * @return int Threshold.
 	 */
 	public function get_good_response_time_threshold( $threshold = 600 ) {
-		/**
-		 * Filters the threshold below which a response time is considered good.
-		 *
-		 * @since 2.2.1
-		 *
-		 * @deprecated 2.4.3 Use `site_status_good_response_time_threshold` instead.
-		 *
-		 * @param int $threshold Threshold in milliseconds.
-		 */
-		return (int) apply_filters_deprecated(
-			'amp_page_cache_good_response_time_threshold',
-			[ $threshold ],
-			'2.4.3',
-			'site_status_good_response_time_threshold'
-		);
+		if ( version_compare( get_bloginfo( 'version' ), '6.1', '>=' ) ) {
+			/** @deprecated 2.4.3 Use `site_status_good_response_time_threshold` instead. */
+			return (int) apply_filters_deprecated(
+				'amp_page_cache_good_response_time_threshold',
+				[ $threshold ],
+				'2.4.3',
+				'site_status_good_response_time_threshold'
+			);
+		} else {
+			/**
+			 * Filters the threshold below which a response time is considered good.
+			 *
+			 * @since 2.2.1
+			 * @param int $threshold Threshold in milliseconds.
+			 */
+			return (int) apply_filters( 'amp_page_cache_good_response_time_threshold', 600 );
+		}
 	}
 
 	/**
