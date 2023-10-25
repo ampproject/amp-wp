@@ -102,6 +102,10 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		add_filter( 'site_status_test_result', [ $this, 'modify_test_result' ] );
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
 
+		if ( version_compare( get_bloginfo( 'version' ), '6.1', '>=' ) && has_filter( 'amp_page_cache_good_response_time_threshold' ) ) {
+			add_filter( 'site_status_good_response_time_threshold', [ $this, 'get_good_response_time_threshold' ] );
+		}
+
 		add_action( 'admin_print_styles-tools_page_health-check', [ $this, 'add_styles' ] );
 		add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
 	}
@@ -180,17 +184,13 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 * @return array $tests The filtered tests, with tests for AMP.
 	 */
 	public function add_tests( $tests ) {
-		$tests['direct']['amp_persistent_object_cache'] = [
-			'label' => esc_html__( 'Persistent object cache', 'amp' ),
-			'test'  => [ $this, 'persistent_object_cache' ],
-		];
-
 		if ( ! amp_is_canonical() && QueryVar::AMP !== amp_get_slug() ) {
 			$tests['direct']['amp_slug_definition_timing'] = [
 				'label' => esc_html__( 'AMP slug (query var) definition timing', 'amp' ),
 				'test'  => [ $this, 'slug_definition_timing' ],
 			];
 		}
+
 		$tests['direct']['amp_curl_multi_functions'] = [
 			'label' => esc_html__( 'cURL multi functions', 'amp' ),
 			'test'  => [ $this, 'curl_multi_functions' ],
@@ -207,7 +207,8 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			'label' => esc_html__( 'Transient caching of stylesheets', 'amp' ),
 			'test'  => [ $this, 'css_transient_caching' ],
 		];
-		$tests['direct']['amp_xdebug_extension']      = [
+
+		$tests['direct']['amp_xdebug_extension'] = [
 			'label' => esc_html__( 'Xdebug extension', 'amp' ),
 			'test'  => [ $this, 'xdebug_extension' ],
 		];
@@ -217,13 +218,21 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			'test'  => [ $this, 'publisher_logo' ],
 		];
 
-		if ( $this->supports_async_rest_tests( $tests ) ) {
-			$tests['async'][ self::TEST_PAGE_CACHING ] = [
-				'label'             => esc_html__( 'Page caching', 'amp' ),
-				'test'              => rest_url( self::REST_API_NAMESPACE . self::REST_API_PAGE_CACHE_ENDPOINT ),
-				'has_rest'          => true,
-				'async_direct_test' => [ $this, 'page_cache' ],
+		// Only run page and object cache tests for WP < 6.1, since it has been a part of core now.
+		if ( version_compare( get_bloginfo( 'version' ), '6.1', '<' ) ) {
+			$tests['direct']['amp_persistent_object_cache'] = [
+				'label' => esc_html__( 'Persistent object cache', 'amp' ),
+				'test'  => [ $this, 'persistent_object_cache' ],
 			];
+
+			if ( $this->supports_async_rest_tests( $tests ) ) {
+				$tests['async'][ self::TEST_PAGE_CACHING ] = [
+					'label'             => esc_html__( 'Page caching', 'amp' ),
+					'test'              => rest_url( self::REST_API_NAMESPACE . self::REST_API_PAGE_CACHE_ENDPOINT ),
+					'has_rest'          => true,
+					'async_direct_test' => [ $this, 'page_cache' ],
+				];
+			}
 		}
 
 		return $tests;
@@ -340,16 +349,31 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 *
 	 * @since 2.2.1
 	 *
+	 * @param int $threshold Threshold in milliseconds.
+	 *
 	 * @return int Threshold.
 	 */
-	public function get_good_response_time_threshold() {
-		/**
-		 * Filters the threshold below which a response time is considered good.
-		 *
-		 * @since 2.2.1
-		 * @param int $threshold Threshold in milliseconds.
-		 */
-		return (int) apply_filters( 'amp_page_cache_good_response_time_threshold', 600 );
+	public function get_good_response_time_threshold( $threshold = 600 ) {
+		if ( version_compare( get_bloginfo( 'version' ), '6.1', '>=' ) ) {
+			/** This filter is documented in src/Admin/SiteHealth.php */
+			return (int) apply_filters_deprecated(
+				'amp_page_cache_good_response_time_threshold',
+				[ $threshold ],
+				'AMP 2.4.3',
+				'site_status_good_response_time_threshold'
+			);
+		} else {
+			/**
+			 * Filters the threshold below which a response time is considered good.
+			 *
+			 * @since 2.2.1
+			 *
+			 * @deprecated 2.4.3 Use `site_status_good_response_time_threshold` instead.
+			 *
+			 * @param int $threshold Threshold in milliseconds.
+			 */
+			return (int) apply_filters( 'amp_page_cache_good_response_time_threshold', 600 );
+		}
 	}
 
 	/**

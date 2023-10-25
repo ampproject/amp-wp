@@ -153,13 +153,17 @@ class SiteHealthTest extends TestCase {
 	 */
 	public function test_add_tests() {
 		$tests = $this->instance->add_tests( [] );
-		$this->assertArrayHasKey( 'direct', $tests );
-		$this->assertArrayHasKey( 'amp_persistent_object_cache', $tests['direct'] );
 
-		if ( version_compare( get_bloginfo( 'version' ), '5.6', '>=' ) ) {
-			$this->assertArrayHasKey( 'amp_page_cache', $tests['async'] );
-		} elseif ( array_key_exists( 'async', $tests ) ) {
-			$this->assertArrayNotHasKey( 'amp_page_cache', $tests['async'] );
+		$this->assertArrayHasKey( 'direct', $tests );
+
+		if ( ! version_compare( get_bloginfo( 'version' ), '6.1', '>=' ) ) {
+			$this->assertArrayHasKey( 'amp_persistent_object_cache', $tests['direct'] );
+
+			if ( version_compare( get_bloginfo( 'version' ), '5.6', '>=' ) ) {
+				$this->assertArrayHasKey( 'amp_page_cache', $tests['async'] );
+			} elseif ( array_key_exists( 'async', $tests ) ) {
+				$this->assertArrayNotHasKey( 'amp_page_cache', $tests['async'] );
+			}
 		}
 
 		$this->assertArrayHasKey( 'amp_curl_multi_functions', $tests['direct'] );
@@ -698,6 +702,10 @@ class SiteHealthTest extends TestCase {
 	 * @covers ::get_good_response_time_threshold()
 	 */
 	public function test_get_good_response_time_threshold() {
+		if ( version_compare( get_bloginfo( 'version' ), '6.1', '>=' ) ) {
+			$this->markTestSkipped( '`amp_page_cache_good_response_time_threshold` is deprecated in WordPress 6.1 and above.' );
+		}
+
 		$this->assertSame( 600, $this->instance->get_good_response_time_threshold() );
 
 		add_filter(
@@ -918,6 +926,9 @@ class SiteHealthTest extends TestCase {
 	 * @covers ::check_for_page_caching()
 	 */
 	public function test_page_cache( $responses, $expected_status, $expected_label, $good_basic_auth = null, $delay_the_response = false ) {
+		if ( version_compare( get_bloginfo( 'version' ), '6.1', '>=' ) ) {
+			$this->markTestSkipped( 'AMP plugin omits page and object caching tests for Site Health if on WP>=6.1 ' );
+		}
 
 		$badge_color = [
 			'critical'    => 'red',
