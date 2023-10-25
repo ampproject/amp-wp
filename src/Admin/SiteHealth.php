@@ -102,6 +102,10 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		add_filter( 'site_status_test_result', [ $this, 'modify_test_result' ] );
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
 
+		if ( version_compare( get_bloginfo( 'version' ), '6.1', '>=' ) && has_filter( 'amp_page_cache_good_response_time_threshold' ) ) {
+			add_filter( 'site_status_good_response_time_threshold', 'get_good_response_time_threshold' );
+		}
+
 		add_action( 'admin_print_styles-tools_page_health-check', [ $this, 'add_styles' ] );
 		add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
 	}
@@ -341,16 +345,26 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 *
 	 * @since 2.2.1
 	 *
+	 * @param int $threshold Threshold in milliseconds.
+	 *
 	 * @return int Threshold.
 	 */
-	public function get_good_response_time_threshold() {
+	public function get_good_response_time_threshold( $threshold = 600 ) {
 		/**
 		 * Filters the threshold below which a response time is considered good.
 		 *
 		 * @since 2.2.1
+		 *
+		 * @deprecated 2.4.3 Use `site_status_good_response_time_threshold` instead.
+		 *
 		 * @param int $threshold Threshold in milliseconds.
 		 */
-		return (int) apply_filters( 'amp_page_cache_good_response_time_threshold', 600 );
+		return (int) apply_filters_deprecated(
+			'amp_page_cache_good_response_time_threshold',
+			[ $threshold ],
+			'2.4.3',
+			'site_status_good_response_time_threshold'
+		);
 	}
 
 	/**
