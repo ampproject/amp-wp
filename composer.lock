@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d9195e33ee6f648c1742b605ba7414a7",
+    "content-hash": "06d098e8f871b8cc6e0e676e8ee4c226",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "0.11.3",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "56c812508f5ebe538036d75cf0c21de094b316d3"
+                "reference": "c79a0fe558a3c042aee4789bbf33376cca7a733d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/56c812508f5ebe538036d75cf0c21de094b316d3",
-                "reference": "56c812508f5ebe538036d75cf0c21de094b316d3",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/c79a0fe558a3c042aee4789bbf33376cca7a733d",
+                "reference": "c79a0fe558a3c042aee4789bbf33376cca7a733d",
                 "shasum": ""
             },
             "require": {
@@ -48,6 +48,7 @@
                 "mck89/peast": "Needed to minify the AMP script.",
                 "nette/php-generator": "Needed to generate the validator spec PHP classes and interfaces."
             },
+            "default-branch": true,
             "bin": [
                 "bin/amp"
             ],
@@ -76,9 +77,9 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.11.3"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/main"
             },
-            "time": "2023-02-07T23:27:03+00:00"
+            "time": "2023-10-24T22:47:58+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -8136,6 +8137,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "ampproject/amp-toolbox": 20,
         "sabberworm/php-css-parser": 20,
         "roave/security-advisories": 20
     },
@@ -8156,5 +8158,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
