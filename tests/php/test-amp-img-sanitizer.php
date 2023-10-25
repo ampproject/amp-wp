@@ -595,6 +595,27 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 					'native_img_used' => false,
 				],
 			],
+
+			'fetchpriority_attr_not_added_to_amp-img'  => [
+				'<img width="825" height="510" src="https://placehold.it/825x510" fetchpriority="high">',
+				'<amp-img width="825" height="510" src="https://placehold.it/825x510" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img>',
+				[
+					'add_noscript_fallback' => false,
+				],
+			],
+
+			'fetchpriority_attr_is_preserved_in_noscript_fallback_img' => [
+				'<img width="825" height="510" src="https://placehold.it/825x510" fetchpriority="high">',
+				'<amp-img width="825" height="510" src="https://placehold.it/825x510" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img width="825" height="510" src="https://placehold.it/825x510" fetchpriority="high"></noscript></amp-img>',
+			],
+
+			'fetchpriority_attr_is_preserved_in_native_img' => [
+				'<img width="825" height="510" src="https://placehold.it/825x510" fetchpriority="high">',
+				'<img width="825" height="510" src="https://placehold.it/825x510" fetchpriority="high" decoding="async" class="amp-wp-enforced-sizes">',
+				[
+					'native_img_used' => true,
+				],
+			],
 		];
 	}
 
