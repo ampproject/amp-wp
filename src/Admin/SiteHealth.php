@@ -103,7 +103,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
 
 		if ( version_compare( get_bloginfo( 'version' ), '6.1', '>=' ) && has_filter( 'amp_page_cache_good_response_time_threshold' ) ) {
-			add_filter( 'site_status_good_response_time_threshold', 'get_good_response_time_threshold' );
+			add_filter( 'site_status_good_response_time_threshold', [ $this, 'get_good_response_time_threshold' ] );
 		}
 
 		add_action( 'admin_print_styles-tools_page_health-check', [ $this, 'add_styles' ] );
