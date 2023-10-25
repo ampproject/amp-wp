@@ -359,7 +359,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			return (int) apply_filters_deprecated(
 				'amp_page_cache_good_response_time_threshold',
 				[ $threshold ],
-				'AMP 2.4.3',
+				'AMP 2.5.0',
 				'site_status_good_response_time_threshold'
 			);
 		} else {
@@ -368,7 +368,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			 *
 			 * @since 2.2.1
 			 *
-			 * @deprecated 2.4.3 Use `site_status_good_response_time_threshold` instead.
+			 * @deprecated 2.5.0 Use `site_status_good_response_time_threshold` instead.
 			 *
 			 * @param int $threshold Threshold in milliseconds.
 			 */
