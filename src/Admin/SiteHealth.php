@@ -355,7 +355,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 */
 	public function get_good_response_time_threshold( $threshold = 600 ) {
 		if ( version_compare( get_bloginfo( 'version' ), '6.1', '>=' ) ) {
-			/** @deprecated 2.4.3 Use `site_status_good_response_time_threshold` instead. */
+			/** This filter is documented in src/Admin/SiteHealth.php */
 			return (int) apply_filters_deprecated(
 				'amp_page_cache_good_response_time_threshold',
 				[ $threshold ],
@@ -367,6 +367,9 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			 * Filters the threshold below which a response time is considered good.
 			 *
 			 * @since 2.2.1
+			 *
+			 * @deprecated 2.4.3 Use `site_status_good_response_time_threshold` instead.
+			 *
 			 * @param int $threshold Threshold in milliseconds.
 			 */
 			return (int) apply_filters( 'amp_page_cache_good_response_time_threshold', 600 );
