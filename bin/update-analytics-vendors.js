@@ -57,7 +57,7 @@ class UpdateAnalyticsVendors {
 	}
 
 	/**
-	 * Extract vendors from recieved data.
+	 * Extract vendors from received data.
 	 *
 	 * @return {Promise<void>}
 	 */
