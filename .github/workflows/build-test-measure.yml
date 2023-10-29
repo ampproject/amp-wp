@@ -682,7 +682,7 @@ jobs:
           ${{ needs.upload-to-gcs.outputs.prod-checksum }}
           \`\`\`
 
-          <details>
+          </details>
 
           :warning: **Note:** These builds are for testing purposes only and should not be used in production."
 
