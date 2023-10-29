@@ -28,6 +28,18 @@ jobs:
       changed-js-count: ${{ steps.determine-file-counts.outputs.js-count }}
       changed-gha-workflow-count: ${{ steps.determine-file-counts.outputs.gha-workflow-count }}
     steps:
+      - name: Checkout including last 2 commits
+        # Fetch last 2 commits if it's not a PR, so that we can determine the list of modified files.
+        if: ${{ github.base_ref == null }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Checkout
+        # Do usual checkout if it's a PR.
+        if: ${{ github.base_ref != null }}
+        uses: actions/checkout@v4
+
       - name: Determine modified files
         id: determine-file-counts
         uses: ./.github/actions/determine-changed-files

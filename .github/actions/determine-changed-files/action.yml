@@ -22,18 +22,6 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Checkout including last 2 commits
-      # Fetch last 2 commits if it's not a PR, so that we can determine the list of modified files.
-      if: ${{ github.base_ref == null }}
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 2
-
-    - name: Checkout
-      # Do usual checkout if it's a PR.
-      if: ${{ github.base_ref != null }}
-      uses: actions/checkout@v4
-
     - name: Fetch base branch
       # Only fetch base ref if it's a PR.
       if: ${{ github.base_ref != null }}
