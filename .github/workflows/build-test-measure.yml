@@ -201,7 +201,7 @@ jobs:
         uses: ./.github/actions/setup-php-composer
 
       - name: Build plugin
-        run: npm run build:js
+        uses: ./.github/actions/plugin-build
 
       - name: Start Docker environment
         run: npm run env:start:ci
@@ -353,7 +353,7 @@ jobs:
 
       - name: Build plugin
         if: needs.pre-run.outputs.changed-php-count > 0
-        run: npm run build:js
+        uses: ./.github/actions/plugin-build
 
       # Avoid conflicts with globally installed PHPUnit.
       - name: Remove locally installed PHPUnit
@@ -512,7 +512,7 @@ jobs:
         uses: ./.github/actions/setup-node-npm
 
       - name: Build plugin
-        run: npm run build:js
+        uses: ./.github/actions/plugin-build
 
       - name: Configure DB environment
         run: |
