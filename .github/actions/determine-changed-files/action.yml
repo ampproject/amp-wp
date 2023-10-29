@@ -25,18 +25,22 @@ runs:
     - name: Fetch base branch
       # Only fetch base ref if it's a PR.
       if: ${{ github.base_ref != null }}
+      shell: bash
       run: git fetch --depth=1 --no-tags origin ${{ github.base_ref }}
 
     - name: Determine modified files for PR
       if: ${{ github.base_ref != null }}
+      shell: bash
       run: echo "MODIFIED_FILES=$(git diff --name-only FETCH_HEAD HEAD | base64 -w 0)" >> $GITHUB_ENV
 
     - name: Determine modified files for commit
       if: ${{ github.base_ref == null }}
+      shell: bash
       run: echo "MODIFIED_FILES=$(git diff --name-only HEAD~1 HEAD | base64 -w 0)" >> $GITHUB_ENV
 
     - name: Determine if modified files should make the workflow run continue
       id: determine-file-counts
+      shell: bash
       run: |
         # Get modified files.
         MODIFIED_FILES=$(echo "$MODIFIED_FILES" | base64 -d)
