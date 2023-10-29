@@ -31,18 +31,13 @@ runs:
         coverage: ${{ inputs.coverage }}
         tools: ${{ inputs.tools }}
 
-    - name: Get Composer Cache Directory
-      id: composer-cache
-      shell: bash
-      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
     - name: Setup composer cache
       uses: actions/cache@v3
       id: php-composer-cache
       env:
         SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
       with:
-        path: ${{ steps.composer-cache.outputs.dir }}
+        path: vendor
         key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}-${{ hashFiles('.github/actions/setup-php-composer/action.yml') }}
 
     - name: Install composer dependencies
