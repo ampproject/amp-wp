@@ -17,6 +17,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
   cancel-in-progress: true
 
+# Disable permissions for all available scopes.
+# Enable permissions for specific scopes as needed on job level.
+permissions: {}
+
 jobs:
   pre-run:
     name: 'Pre run'
@@ -40,49 +44,11 @@ jobs:
         if: ${{ github.base_ref != null }}
         uses: actions/checkout@v4
 
-      - name: Fetch base branch
-        # Only fetch base ref if it's a PR.
-        if: ${{ github.base_ref != null }}
-        run: git fetch --depth=1 --no-tags origin ${{ github.base_ref }}
+      - name: Determine modified files
+        id: determine-file-counts
+        uses: ./.github/actions/determine-changed-files
 
-      - name: Determine modified files for PR
-        if: ${{ github.base_ref != null }}
-        run: echo "MODIFIED_FILES=$(git diff --name-only FETCH_HEAD HEAD | base64 -w 0)" >> $GITHUB_ENV
-
-      - name: Determine modified files for commit
-        if: ${{ github.base_ref == null }}
-        run: echo "MODIFIED_FILES=$(git diff --name-only HEAD~1 HEAD | base64 -w 0)" >> $GITHUB_ENV
-
-      - id: determine-file-counts
-        name: Determine if modified files should make the workflow run continue
-        run: |
-          MODIFIED_FILES=$(echo "$MODIFIED_FILES" | base64 -d)
-          echo -e "Modified files:\n$MODIFIED_FILES\n"
-
-          FILE_COUNT=$(php -f bin/determine-modified-files-count.php "$IGNORE_PATH_REGEX" "$MODIFIED_FILES" --invert)
-          PHP_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.php|composer\.(json|lock)|phpstan\.neon\.dist" "$MODIFIED_FILES")
-          CSS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.s?css|package\.json|package-lock\.json" "$MODIFIED_FILES")
-          JS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.(js|snap)|package\.json|package-lock\.json" "$MODIFIED_FILES")
-          GHA_WORKFLOW_COUNT=$(php -f bin/determine-modified-files-count.php "(\.github\/workflows\/.+\.yml)" "$MODIFIED_FILES")
-
-          echo "Changed file count: $FILE_COUNT"
-          echo "Changed PHP file count: $PHP_FILE_COUNT"
-          echo "Changed CSS file count: $CSS_FILE_COUNT"
-          echo "Changed JS file count: $JS_FILE_COUNT"
-          echo "Changed GHA workflow file count: $GHA_WORKFLOW_COUNT"
-
-          echo "count=$FILE_COUNT" >> $GITHUB_OUTPUT
-          echo "php-count=$PHP_FILE_COUNT" >> $GITHUB_OUTPUT
-          echo "css-count=$CSS_FILE_COUNT" >> $GITHUB_OUTPUT
-          echo "js-count=$JS_FILE_COUNT" >> $GITHUB_OUTPUT
-          echo "gha-workflow-count=$GHA_WORKFLOW_COUNT" >> $GITHUB_OUTPUT
-        env:
-          # Ignore Paths:
-          # - .github/
-          # - !.github/workflows
-          # - .wordpress-org/
-          # - docs/
-          IGNORE_PATH_REGEX: \.github\/(?!workflows)|\.wordpress-org\/|docs\/
+#-----------------------------------------------------------------------------------------------------------------------
 
   lint-css:
     needs: pre-run
@@ -93,14 +59,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v3.8.1
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-
-      - name: Install Node dependencies
-        run: npm ci
+      - name: Setup NodeJS and NPM
+        uses: ./.github/actions/setup-node-npm
 
       - name: Detect coding standard violations (stylelint)
         run: npm run lint:css
@@ -112,18 +72,14 @@ jobs:
     needs: pre-run
     if: needs.pre-run.outputs.changed-js-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v3.8.1
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-
-      - name: Install Node dependencies
-        run: npm ci
+      - name: Setup NodeJS and NPM
+        uses: ./.github/actions/setup-node-npm
 
       - name: Validate package.json
         run: npm run lint:pkg-json
@@ -154,49 +110,6 @@ jobs:
 
 #-----------------------------------------------------------------------------------------------------------------------
 
-  normalize-composer:
-    name: 'Normalize composer.json'
-    needs: pre-run
-    if: needs.pre-run.outputs.changed-php-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
-          coverage: none
-
-      - name: Get composer-normalize.phar
-        run: |
-          wget https://github.com/ergebnis/composer-normalize/releases/latest/download/composer-normalize.phar
-
-          # Check if phar is actually downloaded.
-          if [ ! -f composer-normalize.phar ]; then
-            sleep 5
-            wget https://github.com/ergebnis/composer-normalize/releases/latest/download/composer-normalize.phar
-          fi
-
-          # If not downloaded, exit with error this time.
-          if [ ! -f composer-normalize.phar ]; then
-            echo "::error::Failed to download composer-normalize.phar"
-            exit 1
-          fi
-
-          chmod +x composer-normalize.phar
-
-      - name: Validate composer.json
-        run: composer --no-interaction validate --no-check-all
-
-      - name: Normalize composer.json
-        run: |
-          composer config --no-interaction --no-plugins allow-plugins.ergebnis/composer-normalize true
-          ./composer-normalize.phar --dry-run
-
-#-----------------------------------------------------------------------------------------------------------------------
-
   lint-php:
     name: 'Lint: PHP'
     needs: pre-run
@@ -206,30 +119,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Setup PHP and Composer
+        uses: ./.github/actions/setup-php-composer
         with:
-          php-version: '8.0'
-          coverage: none
-          tools: cs2pr
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Configure Composer cache
-        uses: actions/cache@v3.3.2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
+          tools: 'composer,cs2pr,composer-normalize'
+          php-version: '8.1'
 
       - name: Detect coding standard violations (PHPCS)
         run: vendor/bin/phpcs -q --report=checkstyle --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 | cs2pr --graceful-warnings
+
+      - name: Validate composer.json
+        run: composer --no-interaction validate --no-check-all
+
+      - name: Normalize composer.json
+        run: |
+          composer config --no-interaction --no-plugins allow-plugins.ergebnis/composer-normalize true
+          composer-normalize --dry-run --diff
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -242,33 +147,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Setup PHP and Composer
+        uses: ./.github/actions/setup-php-composer
         with:
-          # phpstan requires PHP 7.1+.
-          php-version: '8.0'
-          extensions: dom, iconv, json, libxml, zip
-          tools: phpstan
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Configure Composer cache
-        uses: actions/cache@v3.3.2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Install Composer dependencies
-        run: composer install
+          tools: 'composer,phpstan'
+          php-version: '8.1'
 
       - name: Static Analysis (PHPStan)
-        run: |
-          phpstan --version
-          phpstan analyse
+        run: phpstan analyze
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -277,25 +163,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: pre-run
     if: needs.pre-run.outputs.changed-js-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v3.8.1
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
+      - name: Setup NodeJS and NPM
+        uses: ./.github/actions/setup-node-npm
 
       - name: Setup Jest cache
         uses: actions/cache@v3.3.2
         with:
           path: ~/.jest-cache
           key: ${{ runner.os }}-jest
-
-      - name: Install Node dependencies
-        run: npm ci
 
       - name: Run unit tests (with coverage)
         run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache" --collectCoverage
@@ -315,50 +194,51 @@ jobs:
     needs: pre-run
     if: needs.pre-run.outputs.changed-file-count > 0
     runs-on: ubuntu-latest
-
+    permissions:
+      actions: write
+    env:
+      WP_BASE_URL: 'http://127.0.0.1:8890'
+    strategy:
+      fail-fast: false
+      matrix:
+          part: [1, 2]
+          totalParts: [2]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.0'
+      - name: Setup NodeJS and NPM
+        uses: ./.github/actions/setup-node-npm
 
-      - name: Setup Node
-        uses: actions/setup-node@v3.8.1
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Configure Composer cache
-        uses: actions/cache@v3.3.2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Install Node dependencies
-        run: npm ci
-
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
+      - name: Setup PHP and Composer
+        uses: ./.github/actions/setup-php-composer
 
       - name: Build plugin
-        run: npm run build:js
+        uses: ./.github/actions/plugin-build
+
+      - name: Setup Jest cache
+        uses: actions/cache@v3.3.2
+        with:
+          path: ~/.jest-cache
+          key: ${{ runner.os }}-jest-e2e-${{ matrix.part }}
 
       - name: Start Docker environment
         run: npm run env:start:ci
         env:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
+        # Avoid adding any logs to stdout/stderr, while getting the list of E2E tests.
+      - name: Set NPM log level
+        run: export npm_config_loglevel=silent
+
+      - name: Get E2E test files
+        run: npx wp-scripts test-e2e --config=tests/e2e/jest-ci.config.js --listTests > $RUNNER_TEMP/.jest-e2e-tests
+
+      - name: Unset NPM log level
+        run: unset npm_config_loglevel
+
       - name: Run E2E tests
-        run: npm run test:e2e:ci
+        run: npx wp-scripts test-e2e --config=tests/e2e/jest-ci.config.js --cacheDirectory="$HOME/.jest-cache" --runTestsByPath $( awk 'NR % ${{ matrix.totalParts }} == ${{ matrix.part }} - 1' < $RUNNER_TEMP/.jest-e2e-tests )
 
       - name: Stop Docker environment
         run: npm run env:stop:ci
@@ -366,12 +246,13 @@ jobs:
         env:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
-      - name: Upload artifacts
+      - name: Archive debug artifacts (screenshots, HTML snapshots)
         uses: actions/upload-artifact@v3
-        if: failure()
+        if: always()
         with:
-          name: amp-e2e-artifacts
+          name: e2e-failure-artifacts
           path: artifacts
+          if-no-files-found: ignore
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -452,7 +333,6 @@ jobs:
             wp: '5.3'
             phpunit: '7'
             external-http: true
-
     steps:
       # Note: The repeated `needs.pre-run.outputs.changed-php-count > 0` checks would be avoided if a step could short-
       # circuit per <https://github.com/actions/runner/issues/662>. The reason why the if statement can't be put on the
@@ -462,19 +342,6 @@ jobs:
         if: needs.pre-run.outputs.changed-php-count == 0
         run: echo "No PHP files were changed so no PHP unit tests will run"
 
-      - name: Checkout
-        if: needs.pre-run.outputs.changed-php-count > 0
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        if: needs.pre-run.outputs.changed-php-count > 0
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
-          tools: phpunit:${{ matrix.phpunit }}
-          coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
-
       - name: Shutdown default MySQL service
         if: needs.pre-run.outputs.changed-php-count > 0
         run: sudo service mysql stop
@@ -482,51 +349,47 @@ jobs:
       - name: Verify MariaDB connection
         if: needs.pre-run.outputs.changed-php-count > 0
         run: |
-          while ! mysqladmin ping -h"127.0.0.1" -P"${{ job.services.mysql.ports[3306] }}" --silent; do
-            sleep 1
+          retry_count=0
+          max_retries=5
+
+          while [ $retry_count -lt $max_retries ]; do
+            if mysqladmin ping -h"127.0.0.1" -P"${{ job.services.mysql.ports[3306] }}" --silent; then
+              break
+            else
+              ((retry_count++))
+              sleep 5
+            fi
           done
 
-      - name: Setup Node
+          if [ $retry_count -ge $max_retries ]; then
+            echo "::error::Failed to establish a MariaDB connection after $max_retries retries."
+            exit 1
+          fi
+
+      - name: Checkout
         if: needs.pre-run.outputs.changed-php-count > 0
-        uses: actions/setup-node@v3.8.1
+        uses: actions/checkout@v4
+
+      - name: Setup PHP and Composer
+        uses: ./.github/actions/setup-php-composer
         with:
-          node-version-file: '.nvmrc'
-          cache: npm
+          php-version: ${{ matrix.php }}
+          coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
+          tools: 'composer,phpunit:${{ matrix.phpunit }}'
 
-      - name: Get Composer Cache Directory
+      - name: Setup NodeJS and NPM
+        uses: ./.github/actions/setup-node-npm
+
+      - name: Build plugin
         if: needs.pre-run.outputs.changed-php-count > 0
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        uses: ./.github/actions/plugin-build
 
-      - name: Configure Composer cache
-        if: needs.pre-run.outputs.changed-php-count > 0
-        uses: actions/cache@v3.3.2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Install Composer dependencies
-        if: needs.pre-run.outputs.changed-php-count > 0
-        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
-
-        # Since locally installed PHPUnit classes are loaded into the classmap, running tests with globally
-        # installed PHPUnit requires removing locally installed PHPUnit. Additionally, using the workflow matrix
-        # makes it simple for us to maintain different PHPUnit versions for various PHP versions.
+      # Avoid conflicts with globally installed PHPUnit.
       - name: Remove locally installed PHPUnit
         if: needs.pre-run.outputs.changed-php-count > 0
         run: |
           rm -rf vendor/phpunit
           composer dump-autoload -o
-
-      - name: Install Node dependencies
-        if: needs.pre-run.outputs.changed-php-count > 0
-        run: npm ci
-
-      - name: Build plugin
-        if: needs.pre-run.outputs.changed-php-count > 0
-        run: npm run build:js
 
       # Scan the logs for failing tests and surface that information by creating annotations and log file decorations.
       - name: Setup problem matcher to provide annotations for PHPUnit
@@ -558,35 +421,35 @@ jobs:
           sed -i 's/convertWarningsToExceptions="true"/convertWarningsToExceptions="false"/g' phpunit.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
-      - name: Run tests
-        if: ${{ matrix.coverage == false && needs.pre-run.outputs.changed-php-count > 0 }}
+      - name: Run Single Site tests
+        if: ${{ matrix.multisite == false }}
         run: |
-            phpunit --version
-            phpunit --verbose
+            if [[ ${{ matrix.external-http == false }} == true && ${{ matrix.coverage == false }} == true ]]; then
+              phpunit --verbose
+            elif [[ ${{ matrix.external-http == true }} == true && ${{ matrix.coverage == false }} == true ]]; then
+              phpunit --testsuite external-http --verbose
+            elif [[ ${{ matrix.external-http == false }} == true && ${{ matrix.coverage == true }} == true ]]; then
+              phpunit --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
+            elif [[ ${{ matrix.external-http == true }} == true && ${{ matrix.coverage == true }} == true ]]; then
+              phpunit --testsuite external-http --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
+            fi
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
       - name: Run multisite tests
-        if: ${{ matrix.multisite == true && needs.pre-run.outputs.changed-php-count > 0 }}
+        if: ${{ matrix.multisite == true }}
         run: |
-          phpunit --version
-          phpunit --verbose
+          if [[ ${{ matrix.external-http == false }} == true && ${{ matrix.coverage == false }} == true ]]; then
+            phpunit --verbose
+          elif [[ ${{ matrix.external-http == true }} == true && ${{ matrix.coverage == false }} == true ]]; then
+            phpunit --testsuite external-http --verbose
+          elif [[ ${{ matrix.external-http == false }} == true && ${{ matrix.coverage == true }} == true ]]; then
+            phpunit --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
+          elif [[ ${{ matrix.external-http == true }} == true && ${{ matrix.coverage == true }} == true ]]; then
+            phpunit --testsuite external-http --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
+          fi
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_MULTISITE: 1
-
-      - name: Run tests with coverage
-        if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: |
-          phpunit --version
-          phpunit --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
-        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
-
-      - name: Run external HTTP tests
-        if: ${{ matrix.external-http == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: |
-          phpunit --version
-          phpunit --testsuite external-http --verbose
-        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 && github.actor != 'dependabot[bot]' }}
@@ -599,11 +462,12 @@ jobs:
 #-----------------------------------------------------------------------------------------------------------------------
 
   feature-test-php:
-    name: "Feature test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
+    name: "Feature tests: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
     needs: pre-run
     if: needs.pre-run.outputs.changed-php-count > 0
     runs-on: ubuntu-latest
     env:
+      # @see <https://github.com/wp-cli/wp-cli-tests?tab=readme-ov-file#wordpress-version>.
       WP_VERSION: ${{ matrix.wp }}
     services:
       mysql:
@@ -620,8 +484,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # @TODO: Revisit this if we want to enable code coverage for feature tests.
-        coverage: [false]
         php: ['7.4']
         wp: ['latest']
         include:
@@ -641,65 +503,44 @@ jobs:
 
           - php: '7.4'
             wp: '5.3'
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
-          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
-          ini-values: pcov.directory=.
-
       - name: Shutdown default MySQL service
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: sudo service mysql stop
 
       - name: Verify MariaDB connection
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: |
-          while ! mysqladmin ping -h"127.0.0.1" -P"${{ job.services.mysql.ports[3306] }}" --silent; do
-            sleep 1
+          retry_count=0
+          max_retries=5
+
+          while [ $retry_count -lt $max_retries ]; do
+            if mysqladmin ping -h"127.0.0.1" -P"${{ job.services.mysql.ports[3306] }}" --silent; then
+              break
+            else
+              ((retry_count++))
+              sleep 5
+            fi
           done
 
-      - name: Setup Node
-        uses: actions/setup-node@v3.8.1
+          if [ $retry_count -ge $max_retries ]; then
+            echo "::error::Failed to establish a MariaDB connection after $max_retries retries."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP and Composer
+        uses: ./.github/actions/setup-php-composer
         with:
-          node-version-file: '.nvmrc'
-          cache: npm
+          php-version: ${{ matrix.php }}
 
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Configure Composer cache
-        uses: actions/cache@v3.3.2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
-
-      - name: Install Node dependencies
-        run: npm ci
+      - name: Setup NodeJS and NPM
+        uses: ./.github/actions/setup-node-npm
 
       - name: Build plugin
-        run: npm run build:js
-
-      # @TODO: Revisit this if we want to enable code coverage for feature tests.
-      # - name: Update PHPUnit to get latest php-code-coverage library
-      #   if: ${{ matrix.coverage == true }}
-      #   # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency.
-      #   # phpunit/phpunit has to be updated as the one in use provides an older version of phpunit/php-code-coverage,
-      #   # but we need the v9.x branch.
-      #   # It cannot be removed, as it is a requirement of wp-cli/wp-cli-tests as well.
-      #   run: |
-      #     composer remove --dev phpdocumentor/reflection
-      #     composer require --dev --ignore-platform-reqs --update-with-all-dependencies phpunit/phpunit
+        uses: ./.github/actions/plugin-build
 
       - name: Configure DB environment
         run: |
@@ -715,78 +556,39 @@ jobs:
         run: composer prepare-tests
 
       - name: Run tests
-        env:
-          BEHAT_CODE_COVERAGE: ${{ matrix.coverage }}
-        run: vendor/bin/behat
-
-      - name: Retrieve list of coverage files
-        if: ${{ matrix.coverage == true }}
-        run: |
-          FILES=$(ls -d -1 "$GITHUB_WORKSPACE/build/logs/clover-behat/"*.* | xargs echo | sed 's/ /,/g')
-          echo $FILES
-          echo "COVERAGE_FILES=$FILES" >> $GITHUB_ENV
-
-      - name: Upload code coverage report
-        if: ${{ matrix.coverage == true && github.actor != 'dependabot[bot]' }}
-        uses: codecov/codecov-action@v3
-        with:
-          files: ${{ env.COVERAGE_FILES }}
-          flags: php,feature
-          fail_ci_if_error: true
+        run: ./vendor/bin/behat
 
 #-----------------------------------------------------------------------------------------------------------------------
 
   build-zip:
     name: 'Build: ${{ matrix.build }} build ZIP'
+    needs: pre-run
     # Only run if the PR was not authored by Dependabot and it is not a draft or not from a fork.
     if: >
       needs.pre-run.outputs.changed-file-count > 0 &&
       github.event.pull_request.draft == false &&
       github.event.pull_request.head.repo.fork == false &&
       github.event.pull_request.user.login != 'dependabot[bot]'
-    needs: pre-run
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
       git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
     strategy:
       matrix:
         build: ['dev', 'prod']
-
     steps:
-      - name: Check out source files
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Setup NodeJS and NPM
+        uses: ./.github/actions/setup-node-npm
+
+      - name: Setup PHP and Composer
+        uses: ./.github/actions/setup-php-composer
         with:
           php-version: '7.4'
-
-      - name: Setup Node
-        uses: actions/setup-node@v3.8.1
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Configure Composer cache
-        uses: actions/cache@v3.3.2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Install Composer dependencies
-        # Scripts are not ignored as they are needed to apply patches for the
-        # `sabberworm/php-css-parser` dependency.
-        run: composer install --prefer-dist --optimize-autoloader
-
-      - name: Install Node dependencies
-        run: npm ci
 
       - name: Create destination directories
         run: mkdir -p builds/${{ matrix.build }}
@@ -797,6 +599,14 @@ jobs:
           mv amp.zip builds/${{ matrix.build }}/amp.zip
         env:
           LAST_PR_COMMIT_HASH: ${{ github.event.pull_request.head.sha }}
+
+      - name: Generate checksum file
+        working-directory: builds/${{ matrix.build }}
+        run: |
+          mkdir -p $RUNNER_TEMP/plugin-checksums
+          find . -type f -print0 | sort -z | xargs -r0 shasum -a 256 -b | sed 's# \*\./# *#' > $RUNNER_TEMP/plugin-checksums/checksums.txt
+          shasum -a 256 -U -c $RUNNER_TEMP/plugin-checksums/checksums.txt
+          cat $RUNNER_TEMP/plugin-checksums/checksums.txt | while read sum file; do echo "$sum $file" > ${file#\*}.sha256; done
 
       - name: Retrieve branch name
         id: retrieve-branch-name
@@ -817,8 +627,13 @@ jobs:
   upload-to-gcs:
     name: Upload plugin ZIPs to Google Cloud Storage
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     needs:
       - build-zip
+    outputs:
+      dev-checksum: ${{ steps.output-checksums.outputs.dev-checksum }}
+      prod-checksum: ${{ steps.output-checksums.outputs.prod-checksum }}
     steps:
       - name: Download dev build
         uses: actions/download-artifact@v3
@@ -838,11 +653,25 @@ jobs:
           project_id: ${{ secrets.GCS_PROJECT_ID }}
           service_account_key: ${{ secrets.GCS_APPLICATION_CREDENTIALS }}
 
+      - name: Output checksums
+        id: output-checksums
+        run: |
+          echo "dev-checksum=$(cat builds/dev/*.sha256)" >> $GITHUB_OUTPUT
+          echo "prod-checksum=$(cat builds/prod/*.sha256)" >> $GITHUB_OUTPUT
+
       - name: Upload dev build to bucket
         run: gsutil cp -r builds/dev/amp.zip gs://ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip
 
+      - name: Upload dev build checksums to bucket
+        if: ${{ github.ref == 'refs/heads/develop' }}
+        run: gsutil cp -r builds/dev/*.sha256 gs://ampwp_github_artifacts/${{ github.ref }}/dev/
+
       - name: Upload prod build to bucket
         run: gsutil cp -r builds/prod/amp.zip gs://ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip
+
+      - name: Upload prod build checksums to bucket
+        if: ${{ github.ref == 'refs/heads/develop' }}
+        run: gsutil cp -r builds/prod/*.sha256 gs://ampwp_github_artifacts/${{ github.ref }}/prod/
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -852,18 +681,23 @@ jobs:
     if: ${{ github.head_ref && github.head_ref != null }}
     runs-on: ubuntu-latest
     needs: upload-to-gcs
-
-    outputs:
-      comment_body: ${{ steps.get-comment-body.outputs.body }}
-
+    permissions:
+      issues: write
     steps:
       - name: Check if a comment was already made
         id: find-comment
-        uses: peter-evans/find-comment@v2
+        uses: actions/github-script@v6
         with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: github-actions[bot]
-          body-includes: Plugin builds for
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const comment = comments.find((comment) => comment.body.includes('Plugin builds for'));
+
+            return comment ? comment.id : '';
 
       - name: Get comment body
         id: get-comment-body
@@ -871,23 +705,49 @@ jobs:
         run: |
           body="Plugin builds for ${{ github.event.pull_request.head.sha }} are ready :bellhop_bell:!
           - Download [development build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip?${{ github.sha }})
-          - Download [production build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip?${{ github.sha }})"
+          - Download [production build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip?${{ github.sha }})
+
+          <details>
+          <summary>Checksums</summary>
+
+          <pre>
+          <code># Development build checksums
+          ${{ needs.upload-to-gcs.outputs.dev-checksum }}
+
+          # Production build checksums
+          ${{ needs.upload-to-gcs.outputs.prod-checksum }}</code>
+          </pre>
+
+          </details>
+
+          > [!WARNING]
+          > These builds are for testing purposes only and should not be used in production."
+
           delimiter="${body//$'\n'/'%0A'}"
           echo "body<<${delimiter}" >> $GITHUB_OUTPUT
           echo "$body" >> $GITHUB_OUTPUT
           echo "${delimiter}" >> $GITHUB_OUTPUT
 
       - name: Create comment on PR with links to plugin builds
-        if: ${{ steps.find-comment.outputs.comment-id == '' }}
-        uses: peter-evans/create-or-update-comment@v3
+        if: ${{ steps.find-comment.outputs.result == '' }}
+        uses: actions/github-script@v6
         with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: ${{ steps.get-comment-body.outputs.body }}
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `${{ steps.get-comment-body.outputs.body }}`,
+            });
 
       - name: Update comment on PR with links to plugin builds
-        if: ${{ steps.find-comment.outputs.comment-id != '' }}
-        uses: peter-evans/create-or-update-comment@v3
+        if: ${{ steps.find-comment.outputs.result != '' }}
+        uses: actions/github-script@v6
         with:
-          comment-id: ${{ steps.find-comment.outputs.comment-id }}
-          edit-mode: replace
-          body: ${{ steps.get-comment-body.outputs.body }}
+          script: |
+            github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: ${{ steps.find-comment.outputs.result }},
+              body: `${{ steps.get-comment-body.outputs.body }}`,
+            });

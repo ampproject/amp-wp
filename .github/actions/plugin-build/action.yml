@@ -1,0 +1,20 @@
+name: Build plugin assets
+
+description: Build and cache the plugin assets to speed up builds.
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache assets directory
+      uses: actions/cache@v3
+      id: assets-cache
+      env:
+        SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
+      with:
+        path: ${{ github.workspace }}/assets
+        key: ${{ runner.os }}-amp-wp-assets-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('assets/**') }}
+
+    - name: Build plugin assets
+      if: ${{ steps.assets-cache.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: npm run build:js

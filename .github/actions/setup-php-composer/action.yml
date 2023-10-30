@@ -1,0 +1,46 @@
+name: Setup PHP and Composer
+
+description: Setup PHP and Composer with caching
+
+inputs:
+  tools:
+    description: 'The tools to install'
+    required: false
+    default: 'composer'
+  php-version:
+    description: 'The PHP version to install'
+    required: true
+    default: '7.4'
+  extensions:
+    description: 'The PHP extensions to install'
+    required: false
+    default: 'curl, date, dom, gd, iconv, json, libxml, mysql, spl'
+  coverage:
+    description: 'Whether to install the PHP Xdebug extension'
+    required: false
+    default: 'none'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php-version }}
+        extensions: ${{ inputs.extensions }}
+        coverage: ${{ inputs.coverage }}
+        tools: ${{ inputs.tools }}
+
+    - name: Setup composer cache
+      uses: actions/cache@v3
+      id: php-composer-cache
+      env:
+        SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
+      with:
+        path: vendor
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}-${{ hashFiles('.github/actions/setup-php-composer/action.yml') }}
+
+    - name: Install composer dependencies
+      if: ${{ steps.php-composer-cache.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: composer install --ansi --no-interaction --prefer-dist --ignore-platform-reqs
