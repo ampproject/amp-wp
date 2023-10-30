@@ -1,11 +1,11 @@
-name: Setup Node and NPM
+name: Setup Node.js and npm
 
-description: Setup Node and NPM with caching
+description: Setup Node.js and npm with caching
 
 runs:
   using: 'composite'
   steps:
-    - name: Configure NodeJS cache
+    - name: Configure Node.js cache
       uses: actions/cache@v3.3.1
       id: node-npm-cache
       env:
@@ -14,7 +14,7 @@ runs:
         path: node_modules
         key: ${{ runner.os }}-node_modules-${{ hashFiles('package*.json') }}-${{ hashFiles('.github/actions/setup-node-npm/action.yml') }}
 
-    - name: Setup NodeJS
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version-file: '.nvmrc'
