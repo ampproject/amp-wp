@@ -196,6 +196,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: write
+    env:
+      WP_BASE_URL: 'http://127.0.0.1:8890'
+    strategy:
+      fail-fast: false
+      matrix:
+          part: [1, 2]
+          totalParts: [2]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -209,13 +216,29 @@ jobs:
       - name: Build plugin
         uses: ./.github/actions/plugin-build
 
+      - name: Setup Jest cache
+        uses: actions/cache@v3.3.2
+        with:
+          path: ~/.jest-cache
+          key: ${{ runner.os }}-jest-e2e-${{ matrix.part }}
+
       - name: Start Docker environment
         run: npm run env:start:ci
         env:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
+        # Avoid adding any logs to stdout/stderr, while getting the list of E2E tests.
+      - name: Set NPM log level
+        run: export npm_config_loglevel=silent
+
+      - name: Get E2E test files
+        run: npx wp-scripts test-e2e --config=tests/e2e/jest-ci.config.js --listTests > $RUNNER_TEMP/.jest-e2e-tests
+
+      - name: Unset NPM log level
+        run: unset npm_config_loglevel
+
       - name: Run E2E tests
-        run: npm run test:e2e:ci
+        run: npx wp-scripts test-e2e --config=tests/e2e/jest-ci.config.js --runInBand --cacheDirectory="$HOME/.jest-cache" --runTestsByPath $( awk 'NR % ${{ matrix.totalParts }} == ${{ matrix.part }} - 1' < $RUNNER_TEMP/.jest-e2e-tests )
 
       - name: Stop Docker environment
         run: npm run env:stop:ci
@@ -223,12 +246,13 @@ jobs:
         env:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
-      - name: Upload artifacts
+      - name: Archive debug artifacts (screenshots, HTML snapshots)
         uses: actions/upload-artifact@v3
-        if: failure()
+        if: always()
         with:
-          name: amp-e2e-artifacts
+          name: e2e-failure-artifacts
           path: artifacts
+          if-no-files-found: ignore
 
 #-----------------------------------------------------------------------------------------------------------------------
 
