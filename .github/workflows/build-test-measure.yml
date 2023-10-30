@@ -686,13 +686,13 @@ jobs:
           <details>
           <summary>Checksums</summary>
 
-          <code>
-          # Development build checksums
+          <pre>
+          <code># Development build checksums
           ${{ needs.upload-to-gcs.outputs.dev-checksum }}
 
           # Production build checksums
-          ${{ needs.upload-to-gcs.outputs.prod-checksum }}
-          </code>
+          ${{ needs.upload-to-gcs.outputs.prod-checksum }}</code>
+          </pre>
 
           </details>
 
