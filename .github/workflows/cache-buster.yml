@@ -1,0 +1,37 @@
+---
+name: Bust Runner Caches
+
+on:
+  workflow_dispatch:
+  schedule:
+    # https://crontab.guru/#0_0_*_*_0
+    - cron: '0 0 * * 0'
+
+permissions:
+  actions: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bust-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bust cache
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const caches = await github.rest.actions.getActionsCacheList({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+            for (const cache of caches.data.actions_caches) {
+              console.log(`Clearing ${cache.id}`)
+              github.rest.actions.deleteActionsCacheById({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                cache_id: cache.id,
+              })
+            }
+            console.log(`Caches cleared at ${new Date().toISOString()}`)
