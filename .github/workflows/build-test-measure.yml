@@ -71,7 +71,7 @@ jobs:
     if: needs.pre-run.outputs.changed-js-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     runs-on: ubuntu-latest
     permissions:
-      statuses: write
+      checks: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -711,7 +711,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: ${{ steps.get-comment-body.outputs.body }},
+              body: "${{ steps.get-comment-body.outputs.body }}",
             });
 
       - name: Update comment on PR with links to plugin builds
@@ -723,5 +723,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               comment_id: ${{ steps.find-comment.outputs.result }},
-              body: ${{ steps.get-comment-body.outputs.body }},
+              body: "${{ steps.get-comment-body.outputs.body }}",
             });
