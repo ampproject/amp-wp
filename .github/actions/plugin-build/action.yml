@@ -12,7 +12,7 @@ runs:
         SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
       with:
         path: ${{ github.workspace }}/assets
-        key: ${{ runner.os }}-amp-wp-assets-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/assets/**') }}
+        key: ${{ runner.os }}-amp-wp-assets-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('assets/**') }}
 
     - name: Build plugin assets
       if: ${{ steps.assets-cache.outputs.cache-hit != 'true' }}
