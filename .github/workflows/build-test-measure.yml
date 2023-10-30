@@ -684,13 +684,13 @@ jobs:
           <details>
           <summary>Checksums</summary>
 
-          \`\`\`
+          <code>
           # Development build checksums
           ${{ needs.upload-to-gcs.outputs.dev-checksum }}
 
           # Production build checksums
           ${{ needs.upload-to-gcs.outputs.prod-checksum }}
-          \`\`\`
+          </code>
 
           </details>
 
@@ -711,7 +711,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: "${{ steps.get-comment-body.outputs.body }}",
+              body: `${{ steps.get-comment-body.outputs.body }}`,
             });
 
       - name: Update comment on PR with links to plugin builds
@@ -723,5 +723,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               comment_id: ${{ steps.find-comment.outputs.result }},
-              body: "${{ steps.get-comment-body.outputs.body }}",
+              body: `${{ steps.get-comment-body.outputs.body }}`,
             });
