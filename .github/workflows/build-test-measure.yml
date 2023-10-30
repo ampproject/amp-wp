@@ -238,7 +238,7 @@ jobs:
         run: unset npm_config_loglevel
 
       - name: Run E2E tests
-        run: npx wp-scripts test-e2e --config=tests/e2e/jest-ci.config.js --runInBand --cacheDirectory="$HOME/.jest-cache" --runTestsByPath $( awk 'NR % ${{ matrix.totalParts }} == ${{ matrix.part }} - 1' < $RUNNER_TEMP/.jest-e2e-tests )
+        run: npx wp-scripts test-e2e --config=tests/e2e/jest-ci.config.js --cacheDirectory="$HOME/.jest-cache" --runTestsByPath $( awk 'NR % ${{ matrix.totalParts }} == ${{ matrix.part }} - 1' < $RUNNER_TEMP/.jest-e2e-tests )
 
       - name: Stop Docker environment
         run: npm run env:stop:ci
