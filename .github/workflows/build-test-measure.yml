@@ -695,7 +695,7 @@ jobs:
           </details>
 
           > [!WARNING]
-          > These builds are for testing purposes only and should not be used in production.
+          > These builds are for testing purposes only and should not be used in production."
 
           delimiter="${body//$'\n'/'%0A'}"
           echo "body<<${delimiter}" >> $GITHUB_OUTPUT
