@@ -1691,7 +1691,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 		add_filter( 'amp_native_img_used', '__return_false' );
 
-		// The toggling of the 'add_noscript_fallback' arg is to catch a bizzare PHP DOM issue whereby if you replace
+		// The toggling of the 'add_noscript_fallback' arg is to catch a bizarre PHP DOM issue whereby if you replace
 		// an element in a Document, and that replaced element had an ID, the element will still be returned by
 		// getElementById even though it is no longer inside of the document. When add_noscript_fallback is false,
 		// then the original img (for example) will not be inside of the document (?).
