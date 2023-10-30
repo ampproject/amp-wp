@@ -17,6 +17,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
   cancel-in-progress: true
 
+# Disable permissions for all available scopes.
+# Enable permissions for specific scopes as needed on job level.
 permissions: {}
 
 jobs:

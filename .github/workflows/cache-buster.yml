@@ -7,8 +7,9 @@ on:
     # https://crontab.guru/#0_0_*_*_0
     - cron: '0 0 * * 0'
 
-permissions:
-  actions: write
+# Disable permissions for all available scopes.
+# Enable permissions for specific scopes as needed on job level.
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
@@ -17,6 +18,8 @@ concurrency:
 jobs:
   bust-cache:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     steps:
       - name: Bust cache
         uses: actions/github-script@v6
