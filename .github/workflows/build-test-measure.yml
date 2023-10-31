@@ -682,7 +682,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: upload-to-gcs
     permissions:
-      issues: write
+      pull-requests: write
     steps:
       - name: Check if a comment was already made
         id: find-comment
