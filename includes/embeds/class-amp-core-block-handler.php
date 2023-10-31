@@ -339,7 +339,10 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			add_action( 'wp_print_footer_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
 		}
 
-		$is_interactive_block = false !== strpos( $block_content, ' data-wp-interactive' );
+		$is_interactive_block = str_contains(
+			preg_match( '/(?<=<nav)\s[^>]+/', $block_content, $matches ) ? $matches[0] : '',
+			'data-wp-interactive',
+		);
 
 		$this->navigation_block_count++;
 		$modal_state_property = "modal_{$this->navigation_block_count}_expanded";
@@ -437,15 +440,6 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			},
 			$block_content
 		);
-
-		// Delete other micromodal-related data attributes.
-		$block_content = preg_replace( '/\sdata-micromodal-close/', '', $block_content );
-
-		// Delete `data-wp-*` attributes.
-		if ( $is_interactive_block ) {
-			$block_content = preg_replace( '/\sdata-wp-[^=]+="[^"]*"/', '', $block_content );
-			$block_content = preg_replace( '/\sdata-wp-[^=]+=\'[^\']*\'/', '', $block_content );
-		}
 
 		// Change a responsive container class name and aria-hidden value based on the AMP state.
 		$block_content = preg_replace_callback(
