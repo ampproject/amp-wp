@@ -339,7 +339,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			add_action( 'wp_print_footer_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
 		}
 
-		$is_interactive_block = false !== strpos( $block_content, 'data-wp-interactive' );
+		$is_interactive_block = false !== strpos( $block_content, ' data-wp-interactive' );
 
 		$this->navigation_block_count++;
 		$modal_state_property = "modal_{$this->navigation_block_count}_expanded";
@@ -411,22 +411,18 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 					}
 				} else {
 					// Replace micromodal toggle logic bound with buttons with AMP state to open the modal.
-					if ( false !== strpos( $new_block_content, ' data-micromodal-trigger' ) ) {
-						$new_block_content = preg_replace(
-							'/\sdata-micromodal-trigger="modal-\w+"/',
-							sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
-							$new_block_content
-						);
-					}
+					$new_block_content = preg_replace(
+						'/\sdata-micromodal-trigger="modal-\w+"/',
+						sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
+						$new_block_content
+					);
 
 					// Replace micromodal toggle logic bound with buttons with AMP state to close the modal.
-					if ( false !== strpos( $new_block_content, ' data-micromodal-close' ) ) {
-						$new_block_content = str_replace(
-							' data-micromodal-close',
-							sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
-							$new_block_content
-						);
-					}
+					$new_block_content = str_replace(
+						' data-micromodal-close',
+						sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
+						$new_block_content
+					);
 				}
 
 				// Set `aria-expanded` value whenever AMP state changes.
