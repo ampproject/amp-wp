@@ -697,7 +697,7 @@ jobs:
 
             const comment = comments.find((comment) => comment.body.includes('Plugin builds for'));
 
-            return comment ? comment.id : '';
+            return comment ? comment.id : null;
 
       - name: Get comment body
         id: get-comment-body
@@ -729,7 +729,7 @@ jobs:
           echo "${delimiter}" >> $GITHUB_OUTPUT
 
       - name: Create comment on PR with links to plugin builds
-        if: ${{ steps.find-comment.outputs.result == '' }}
+        if: ${{ steps.find-comment.outputs.result == 'null' }}
         uses: actions/github-script@v6
         with:
           script: |
@@ -741,7 +741,7 @@ jobs:
             });
 
       - name: Update comment on PR with links to plugin builds
-        if: ${{ steps.find-comment.outputs.result != '' }}
+        if: ${{ steps.find-comment.outputs.result != 'null' }}
         uses: actions/github-script@v6
         with:
           script: |
