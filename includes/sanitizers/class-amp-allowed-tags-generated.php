@@ -44,6 +44,7 @@ class AMP_Allowed_Tags_Generated {
 			'h5',
 			'h6',
 			'i',
+			'img',
 			'input',
 			'label',
 			'li',
