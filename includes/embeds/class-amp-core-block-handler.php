@@ -339,6 +339,11 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			add_action( 'wp_print_footer_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
 		}
 
+		$is_interactive_block = str_contains(
+			preg_match( '/(?<=<nav)\s[^>]+/', $block_content, $matches ) ? $matches[0] : '',
+			'data-wp-interactive',
+		);
+
 		$this->navigation_block_count++;
 		$modal_state_property = "modal_{$this->navigation_block_count}_expanded";
 
@@ -379,16 +384,9 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			return $block_content;
 		}
 
-		// Replace micromodal toggle logic with AMP state and set modal state property name based on its ID.
-		$block_content = preg_replace(
-			'/\sdata-micromodal-trigger="modal-\w+"/',
-			sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
-			$block_content
-		);
-
 		$block_content = preg_replace_callback(
 			'/(?<=<button)\s[^>]+/',
-			static function ( $matches ) use ( $modal_state_property ) {
+			static function ( $matches ) use ( $modal_state_property, $is_interactive_block ) {
 				$new_block_content = $matches[0];
 
 				// Skip submenu toggles.
@@ -396,8 +394,33 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 					return $new_block_content;
 				}
 
-				// Replace micromodal toggle logic bound with buttons with AMP state.
-				if ( false !== strpos( $new_block_content, ' data-micromodal-close' ) ) {
+				if ( $is_interactive_block ) {
+					// Replace `data-wp-on--click` with AMP state on submenu open button.
+					if ( false !== strpos( $new_block_content, 'wp-block-navigation__responsive-container-open' ) ) {
+						$new_block_content = preg_replace(
+							'/\sdata-wp-on--click="[^"]+"/',
+							sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
+							$new_block_content
+						);
+					}
+
+					// Replace `data-wp-on--click` with AMP state on submenu close button.
+					if ( false !== strpos( $new_block_content, 'wp-block-navigation__responsive-container-close' ) ) {
+						$new_block_content = preg_replace(
+							'/\sdata-wp-on--click="[^"]+"/',
+							sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
+							$new_block_content
+						);
+					}
+				} else {
+					// Replace micromodal toggle logic bound with buttons with AMP state to open the modal.
+					$new_block_content = preg_replace(
+						'/\sdata-micromodal-trigger="modal-\w+"/',
+						sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
+						$new_block_content
+					);
+
+					// Replace micromodal toggle logic bound with buttons with AMP state to close the modal.
 					$new_block_content = str_replace(
 						' data-micromodal-close',
 						sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
@@ -417,9 +440,6 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			},
 			$block_content
 		);
-
-		// Delete other micromodal-related data attributes.
-		$block_content = preg_replace( '/\sdata-micromodal-close/', '', $block_content );
 
 		// Change a responsive container class name and aria-hidden value based on the AMP state.
 		$block_content = preg_replace_callback(
