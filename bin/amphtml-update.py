@@ -361,6 +361,12 @@ def ParseRules(repo_directory, out_dir):
 
 	bento_spec_names = {}
 
+	# Extension to include `IMG` as allowed descendant.
+	allow_img_as_descendant = [
+		'amp-story-player-allowed-descendants',
+		'amp-mega-menu-allowed-descendants',
+	]
+
 	for (field_desc, field_val) in rules.ListFields():
 		if 'tags' == field_desc.name:
 			for tag_spec in field_val:
@@ -426,8 +432,8 @@ def ParseRules(repo_directory, out_dir):
 					if 'I-AMPHTML-SIZER' == val:
 						continue
 
-					# The img tag is currently exclusively to transformed AMP, except as descendant of amp-story-player.
-					if 'IMG' == val and 'amp-story-player-allowed-descendants' != _list.name:
+					# The img tag is currently exclusively to transformed AMP, except few cases.
+					if 'IMG' == val and _list.name not in allow_img_as_descendant:
 						continue
 
 					descendant_lists[_list.name].append( val.lower() )
