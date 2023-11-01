@@ -248,7 +248,7 @@ return array (
     'name' => 'Floating Button',
     'slug' => 'floating-button',
     'homepage' => 'https://wordpress.org/plugins/floating-button/',
-    'short_description' => 'Easily create a custom sticky floating buttons. The Floating Button will be the effective solution for increasing the recognition of your web resource',
+    'short_description' => 'Easily create a custom sticky floating buttons.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/floating-button/assets/icon-128x128.png?rev=2533016',
@@ -277,8 +277,8 @@ return array (
     'short_description' => 'The easy and user-friendly recipe plugin for everyone. Automatic JSON-LD metadata for food AND how-to recipes will improve your SEO!',
     'icons' => 
     array (
-      '1x' => 'https://ps.w.org/wp-recipe-maker/assets/icon-128x128.png?rev=1491788',
-      '2x' => 'https://ps.w.org/wp-recipe-maker/assets/icon-256x256.png?rev=1491788',
+      '1x' => 'https://ps.w.org/wp-recipe-maker/assets/icon-128x128.png?rev=2967063',
+      '2x' => 'https://ps.w.org/wp-recipe-maker/assets/icon-256x256.png?rev=2967063',
     ),
     'wporg' => true,
   ),
@@ -366,7 +366,7 @@ return array (
   array (
     'name' => 'Newspack Newsletters',
     'slug' => 'newspack-newsletters',
-    'homepage' => 'https://newspack.pub',
+    'homepage' => 'https://newspack.com',
     'short_description' => 'Create email newsletters with the Gutenberg editor and distribute them with your ActiveCampaign, Campaign Monitor, Constant Contact, or Mailchimp mail &hellip;',
     'icons' => 
     array (
@@ -656,7 +656,8 @@ return array (
     'short_description' => 'A WordPress block and shortcode for embedding iframes that are responsive horizontally and vertically, using the NPR Visuals Team&#039;s Pym.js.',
     'icons' => 
     array (
-      'default' => 'https://s.w.org/plugins/geopattern-icon/pym-shortcode_27c2f2.svg',
+      '1x' => 'https://ps.w.org/pym-shortcode/assets/icon.svg?rev=1944461',
+      'svg' => 'https://ps.w.org/pym-shortcode/assets/icon.svg?rev=1944461',
     ),
     'wporg' => true,
   ),
@@ -678,7 +679,7 @@ return array (
     'name' => 'MC4WP: Mailchimp for WordPress',
     'slug' => 'mailchimp-for-wp',
     'homepage' => 'https://www.mc4wp.com/#utm_source=wp-plugin&utm_medium=mailchimp-for-wp&utm_campaign=plugins-page',
-    'short_description' => 'The #1 (unofficial) Mailchimp plugin. Allows you to add various sign-up methods to your WordPress site.',
+    'short_description' => 'The #1 Mailchimp plugin for WordPress. Allows you to add a multitude of newsletter sign-up methods to your site.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/mailchimp-for-wp/assets/icon-128x128.png?rev=1224577',
@@ -761,8 +762,8 @@ return array (
     'short_description' => 'The best free Google Analytics plugin for WordPress. See how visitors find and use your website, so you can grow your business.',
     'icons' => 
     array (
-      '1x' => 'https://ps.w.org/google-analytics-for-wordpress/assets/icon.svg?rev=1598927',
-      'svg' => 'https://ps.w.org/google-analytics-for-wordpress/assets/icon.svg?rev=1598927',
+      '1x' => 'https://ps.w.org/google-analytics-for-wordpress/assets/icon.svg?rev=2976619',
+      'svg' => 'https://ps.w.org/google-analytics-for-wordpress/assets/icon.svg?rev=2976619',
     ),
     'wporg' => true,
   ),
@@ -781,7 +782,7 @@ return array (
   ),
   59 => 
   array (
-    'name' => 'Akismet Anti-Spam: Spam Protection',
+    'name' => 'Akismet Anti-spam: Spam Protection',
     'slug' => 'akismet',
     'homepage' => 'https://akismet.com/',
     'short_description' => 'The best anti-spam protection to block spam comments and spam in a contact form. The most trusted antispam solution for WordPress and WooCommerce.',
