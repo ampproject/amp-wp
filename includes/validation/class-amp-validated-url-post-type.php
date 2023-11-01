@@ -167,7 +167,7 @@ class AMP_Validated_URL_Post_Type {
 					'not_found'          => __( 'No validated URLs found', 'amp' ),
 					'not_found_in_trash' => __( 'No forgotten validated URLs', 'amp' ),
 					'search_items'       => __( 'Search validated URLs', 'amp' ),
-					'edit_item'          => '', // Overwritten in JS, so this prevents the page header from appearing and changing.
+					'edit_item'          => ' ', // Overwritten in JS, so this prevents the page header from appearing and changing.
 				],
 				'supports'     => false,
 				'public'       => false,
