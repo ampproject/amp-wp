@@ -12,10 +12,7 @@ import {
  * Internal dependencies
  */
 import { setTemplateMode } from '../../utils/amp-settings-utils';
-import {
-	assignMenuToLocation,
-	createTestMenu,
-} from '../../utils/nav-menu-utils';
+import { createTestMenu } from '../../utils/nav-menu-utils';
 import {
 	DEFAULT_BROWSER_VIEWPORT_SIZE,
 	MOBILE_BROWSER_VIEWPORT_SIZE,
@@ -42,8 +39,7 @@ describe('Twenty Twenty theme on AMP', () => {
 
 		describe('main navigation', () => {
 			beforeAll(async () => {
-				await createTestMenu();
-				await assignMenuToLocation('mobile');
+				await createTestMenu('mobile');
 			});
 
 			it('should be initially hidden', async () => {
