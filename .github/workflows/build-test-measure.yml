@@ -198,6 +198,7 @@ jobs:
       actions: write
     env:
       WP_BASE_URL: 'http://127.0.0.1:8890'
+      JEST_PUPPETEER_CONFIG: './tests/e2e/puppeteer.config.js'
     strategy:
       fail-fast: false
       matrix:
