@@ -371,6 +371,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup PHP and Composer
+        if: needs.pre-run.outputs.changed-php-count > 0
         uses: ./.github/actions/setup-php-composer
         with:
           php-version: ${{ matrix.php }}
@@ -378,6 +379,7 @@ jobs:
           tools: 'composer,phpunit:${{ matrix.phpunit }}'
 
       - name: Setup NodeJS and NPM
+        if: needs.pre-run.outputs.changed-php-count > 0
         uses: ./.github/actions/setup-node-npm
 
       - name: Build plugin
@@ -422,7 +424,7 @@ jobs:
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
       - name: Run Single Site tests
-        if: ${{ matrix.multisite == false }}
+        if: ${{ matrix.multisite == false && needs.pre-run.outputs.changed-php-count > 0 }}
         run: |
             if [[ ${{ matrix.external-http == false }} == true && ${{ matrix.coverage == false }} == true ]]; then
               phpunit --verbose
@@ -436,7 +438,7 @@ jobs:
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
       - name: Run multisite tests
-        if: ${{ matrix.multisite == true }}
+        if: ${{ matrix.multisite == true && needs.pre-run.outputs.changed-php-count > 0 }}
         run: |
           if [[ ${{ matrix.external-http == false }} == true && ${{ matrix.coverage == false }} == true ]]; then
             phpunit --verbose
