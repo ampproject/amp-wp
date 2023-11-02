@@ -223,6 +223,12 @@ jobs:
           path: ~/.jest-cache
           key: ${{ runner.os }}-jest-e2e-${{ matrix.part }}
 
+      - name: Setup puppeteer cache
+        uses: actions/cache@v3.3.2
+        with:
+          path: ~/.cache/puppeteer
+          key: ${{ runner.os }}-puppeteer
+
       - name: Start Docker environment
         run: npm run env:start:ci
         env:
