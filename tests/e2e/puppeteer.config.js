@@ -3,6 +3,9 @@
  */
 const { executablePath } = require('puppeteer');
 
+// eslint-disable-next-line no-console, jest/require-hook
+console.log(`Using Chromium from ${executablePath()}`);
+
 module.exports = {
 	launch: {
 		devtools: process.env.PUPPETEER_DEVTOOLS === 'true',
