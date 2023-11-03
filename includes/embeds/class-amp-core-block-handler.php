@@ -341,7 +341,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 
 		$is_interactive_block = str_contains(
 			preg_match( '/(?<=<nav)\s[^>]+/', $block_content, $matches ) ? $matches[0] : '',
-			'data-wp-interactive',
+			'data-wp-interactive'
 		);
 
 		$this->navigation_block_count++;
