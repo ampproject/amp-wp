@@ -3,18 +3,21 @@
  */
 const { executablePath } = require('puppeteer');
 
+/**
+ * WordPress dependencies
+ */
+const defaultPuppeteerConfig = require('@wordpress/scripts/config/puppeteer.config.js');
+
 // eslint-disable-next-line no-console, jest/require-hook
-console.log(`Using Chromium from ${executablePath()}`);
+console.log(
+	`${
+		process.env.CI ? '::notice::' : ''
+	}Using Chromium from ${executablePath()}`
+);
 
 module.exports = {
 	launch: {
-		devtools: process.env.PUPPETEER_DEVTOOLS === 'true',
-		headless: process.env.PUPPETEER_HEADLESS !== 'false',
-		slowMo: parseInt(process.env.PUPPETEER_SLOWMO) || 0,
-		args: [
-			'--enable-blink-features=ComputedAccessibilityInfo',
-			'--disable-web-security',
-		],
+		...defaultPuppeteerConfig.launch,
 		executablePath: executablePath(),
 	},
 };
