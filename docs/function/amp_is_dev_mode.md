@@ -14,7 +14,7 @@ When enabled, the `<html>` element will get the data-ampdevmode attribute and th
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1428](/includes/amp-helper-functions.php#L1428-L1451)
+:link: [includes/amp-helper-functions.php:1384](/includes/amp-helper-functions.php#L1384-L1417)
 
 <details>
 <summary>Show Code</summary>
@@ -41,6 +41,16 @@ function amp_is_dev_mode() {
 			( is_admin_bar_showing() && is_user_logged_in() )
 			||
 			is_customize_preview()
+			||
+			(
+				! is_ssl()
+				&&
+				function_exists( 'wp_get_environment_type' )
+				&&
+				'local' === wp_get_environment_type()
+				&&
+				'localhost' === wp_parse_url( home_url(), PHP_URL_HOST )
+			)
 		)
 	);
 }
