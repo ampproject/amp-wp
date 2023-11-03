@@ -43,6 +43,7 @@ use AmpProject\AmpWP\Infrastructure\CliCommand;
  * +------------------+----------------+
  *
  * @since 2.4.0
+ * @internal
  */
 final class OptionCommand implements Service, CliCommand {
 
