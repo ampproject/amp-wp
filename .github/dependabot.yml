@@ -9,6 +9,13 @@ updates:
     time: "17:00"
     timezone: America/Los_Angeles
   open-pull-requests-limit: 10
+  groups:
+    wp-cli-packages:
+      patterns:
+        - "wp-cli/*"
+  ignore:
+    # @see <https://github.com/ampproject/amp-wp/issues/7501#issuecomment-1656231088>.
+    - dependency-name: phpdocumentor/reflection
 
 - package-ecosystem: npm
   directory: "/"
