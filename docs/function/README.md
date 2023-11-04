@@ -7,10 +7,11 @@
 * ~~[`amp_frontend_add_canonical`](amp_frontend_add_canonical.md) - Add amphtml link to frontend.~~
 * [`amp_generate_script_hash`](amp_generate_script_hash.md) - Generate hash for inline amp-script.
 * [`amp_get_permalink`](amp_get_permalink.md) - Retrieves the full AMP-specific permalink for the given post ID.
+* [`amp_get_sandboxing_level`](amp_get_sandboxing_level.md) - Determine sandboxing level if enabled.
 * [`amp_get_slug`](amp_get_slug.md) - Get the slug used in AMP for the query var, endpoint, and post type support.
 * [`amp_has_paired_endpoint`](amp_has_paired_endpoint.md) - Determine a given URL is for a paired AMP request.
 * [`amp_is_available`](amp_is_available.md) - Determine whether AMP is available for the current URL.
-* [`amp_is_bento_enabled`](amp_is_bento_enabled.md) - Determine whether the use of Bento components is enabled.
+* ~~[`amp_is_bento_enabled`](amp_is_bento_enabled.md) - Determine whether the use of Bento components is enabled.~~
 * [`amp_is_canonical`](amp_is_canonical.md) - Whether this is in &#039;canonical mode&#039;.
 * [`amp_is_dev_mode`](amp_is_dev_mode.md) - Determine whether AMP dev mode is enabled.
 * [`amp_is_legacy`](amp_is_legacy.md) - Determines whether the legacy AMP post templates are being used.
