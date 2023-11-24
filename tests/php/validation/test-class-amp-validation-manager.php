@@ -535,7 +535,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->assertTrue( current_user_can( 'manage_options' ) );
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
-		$this->assertObjectHasAttribute( 'href', $admin_bar->get_node( 'amp-settings' ) );
+		$this->assertObjectHasProperty( 'href', $admin_bar->get_node( 'amp-settings' ) );
 	}
 
 	/**

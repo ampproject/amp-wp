@@ -127,7 +127,7 @@ final class SimpleInjectorTest extends TestCase {
 		$object   = $injector->make( Fixture\DummyInterface::class );
 
 		$this->assertInstanceOf( stdClass::class, $object );
-		$this->assertObjectHasAttribute( 'class_name', $object );
+		$this->assertObjectHasProperty( 'class_name', $object );
 		$this->assertEquals( Fixture\DummyInterface::class, $object->class_name );
 	}
 
@@ -148,7 +148,7 @@ final class SimpleInjectorTest extends TestCase {
 		$object   = $injector->make( Fixture\DummyInterface::class );
 
 		$this->assertInstanceOf( stdClass::class, $object );
-		$this->assertObjectHasAttribute( 'class_name', $object );
+		$this->assertObjectHasProperty( 'class_name', $object );
 		$this->assertEquals( Fixture\DummyClassWithDependency::class, $object->class_name );
 	}
 
