@@ -60,10 +60,14 @@ trait PrivateAccess {
 	 */
 	private function set_private_property( $object, $property_name, $value ) {
 		$reflection_class = new ReflectionClass( $object );
-		$property = $reflection_class->getProperty( $property_name );
+		$property         = $reflection_class->getProperty( $property_name );
 		$property->setAccessible( true );
 
-		$property->isStatic() ? $reflection_class->setStaticPropertyValue( $property_name, $value ) : $property->setValue( $object, $value );
+		if ( $property->isStatic() ) {
+			$reflection_class->setStaticPropertyValue( $property_name, $value );
+		} else {
+			$property->setValue( $object, $value );
+		}
 	}
 
 	/**
