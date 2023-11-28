@@ -131,7 +131,7 @@ export async function cleanUpValidatedUrls() {
 
 	await page.click('#doaction');
 	await page.waitForXPath(
-		'//*[contains(@class, "updated notice")]/p[contains(text(), "forgotten")]'
+		'//*[contains(@class, "notice") and contains(@class, "updated")]/p[contains(text(), "forgotten")]'
 	);
 	await switchUserToTest();
 }
