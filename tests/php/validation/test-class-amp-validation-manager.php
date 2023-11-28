@@ -1441,6 +1441,13 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		// Remove unique layout ID.
 		$rendered_block = preg_replace( '/\s*(?<= class=")?has-\d+-columns-columns-layout-\d+\s*/', ' has-2-columns', $rendered_block );
 
+		// Remove layout class name and ID.
+		$rendered_block = str_replace(
+			' is-layout-flow wp-block-quote-is-layout-flow',
+			'',
+			$rendered_block
+		);
+
 		$expected = str_replace(
 			[
 				'{{post_id}}',
