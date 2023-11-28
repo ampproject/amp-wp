@@ -1438,6 +1438,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		// Remove class name injected by gutenberg_render_layout_support_flag().
 		$rendered_block = preg_replace( '/\s*(?<= class=")?wp-container-\w+\s*/', '', $rendered_block );
 
+		// Remove unique layout ID.
+		$rendered_block = preg_replace( '/\s*(?<= class=")?has-\d+-columns-columns-layout-\d+\s*/', ' has-2-columns', $rendered_block );
+
 		$expected = str_replace(
 			[
 				'{{post_id}}',
