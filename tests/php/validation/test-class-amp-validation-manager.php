@@ -535,7 +535,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->assertTrue( current_user_can( 'manage_options' ) );
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
-		$this->assertObjectHasAttribute( 'href', $admin_bar->get_node( 'amp-settings' ) );
+		$this->assertObjectHasProperty( 'href', $admin_bar->get_node( 'amp-settings' ) );
 	}
 
 	/**
@@ -1437,6 +1437,16 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		// Remove class name injected by gutenberg_render_layout_support_flag().
 		$rendered_block = preg_replace( '/\s*(?<= class=")?wp-container-\w+\s*/', '', $rendered_block );
+
+		// Remove unique layout ID.
+		$rendered_block = preg_replace( '/\s*(?<= class=")?has-\d+-columns-columns-layout-\d+\s*/', ' has-2-columns', $rendered_block );
+
+		// Remove layout class name and ID.
+		$rendered_block = str_replace(
+			' is-layout-flow wp-block-quote-is-layout-flow',
+			'',
+			$rendered_block
+		);
 
 		$expected = str_replace(
 			[

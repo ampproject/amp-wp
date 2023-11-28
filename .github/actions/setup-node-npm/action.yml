@@ -6,13 +6,20 @@ runs:
   using: 'composite'
   steps:
     - name: Configure Node.js cache
-      uses: actions/cache@v3.3.1
+      uses: actions/cache@v3.3.2
       id: node-npm-cache
       env:
         SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
       with:
         path: node_modules
         key: ${{ runner.os }}-node_modules-${{ hashFiles('package*.json') }}-${{ hashFiles('.github/actions/setup-node-npm/action.yml') }}
+
+    # Since it gets downloaded with npm install, we need to cache it instantly.
+    - name: Setup puppeteer cache
+      uses: actions/cache@v3.3.2
+      with:
+        path: ~/.cache/puppeteer
+        key: ${{ runner.os }}-puppeteer
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
