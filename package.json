@@ -98,7 +98,7 @@
     "react-test-renderer": "18.2.0",
     "rtlcss-webpack-plugin": "4.0.7",
     "semver": "7.5.4",
-    "svgo": "3.0.2",
+    "svgo": "3.0.5",
     "webpack-remove-empty-scripts": "1.0.4",
     "webpackbar": "5.0.2",
     "wporg-api-client": "1.0.1"
