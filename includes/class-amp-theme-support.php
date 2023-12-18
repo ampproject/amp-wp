@@ -905,6 +905,10 @@ class AMP_Theme_Support {
 			},
 			0
 		);
+
+		// Prevent Interactivity API from being enqueued in the form of modules.
+		// TODO: This will need to be updated once Interactivity API is merged from Gutenberg into core.
+		remove_action( 'wp_enqueue_scripts', 'gutenberg_register_interactivity_module' );
 	}
 
 	/**
