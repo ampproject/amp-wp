@@ -440,7 +440,7 @@ final class MobileRedirection implements Service, Registerable {
 			'isAmpDevMode'       => amp_is_dev_mode(),
 		];
 
-		$source = preg_replace( '/\bAMP_MOBILE_REDIRECTION\b/', wp_json_encode( $exports ), $source );
+		$source = str_replace( 'AMP_MOBILE_REDIRECTION', wp_json_encode( $exports ), $source );
 
 		if ( function_exists( 'wp_print_inline_script_tag' ) ) {
 			wp_print_inline_script_tag( $source );

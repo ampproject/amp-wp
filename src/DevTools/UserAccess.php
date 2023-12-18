@@ -208,7 +208,7 @@ final class UserAccess implements Service, Registerable {
 	 * Provides the user's dev tools enabled setting.
 	 *
 	 * @param array $user Array of user data prepared for REST.
-	 * @return null|boolean Whether tools are enabled for the user, or null if the option has not been set.
+	 * @return bool Whether dev tools are enabled for the user.
 	 */
 	public function rest_get_dev_tools_enabled( $user ) {
 		return $this->is_user_enabled( $user['id'] );

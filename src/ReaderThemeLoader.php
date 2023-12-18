@@ -314,7 +314,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 *
 	 * The theme that was active before switching to the Reader theme.
 	 *
-	 * @return WP_Theme|null
+	 * @return WP_Theme WP_Theme instance.
 	 */
 	public function get_active_theme() {
 		return $this->active_theme;

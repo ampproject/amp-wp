@@ -257,7 +257,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	 * Updates AMP plugin options.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return array|WP_Error Array on success, or error object on failure.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function update_items( $request ) {
 		$params = $request->get_params();
