@@ -909,6 +909,10 @@ class AMP_Theme_Support {
 		// Prevent Interactivity API from being enqueued in the form of modules.
 		// TODO: This will need to be updated once Interactivity API is merged from Gutenberg into core.
 		remove_action( 'wp_enqueue_scripts', 'gutenberg_register_interactivity_module' );
+		remove_action( 'wp_head', [ 'Gutenberg_Modules', 'print_import_map' ] );
+		remove_action( 'wp_head', [ 'Gutenberg_Modules', 'print_enqueued_modules' ] );
+		remove_action( 'wp_head', [ 'Gutenberg_Modules', 'print_module_preloads' ] );
+		remove_action( 'wp_footer', [ 'Gutenberg_Modules', 'print_import_map_polyfill' ], 11 );
 	}
 
 	/**
