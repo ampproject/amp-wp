@@ -12,8 +12,13 @@ import {
 	deactivatePlugin,
 } from '../../utils/amp-settings-utils';
 
-const postPreviewBtnSelector = '.components-button.editor-post-preview';
+const postPreviewBtnSelector =
+	'.components-button.edit-post-header__post-preview-button';
 const ampPreviewBtnSelector = `${postPreviewBtnSelector} + .amp-wrapper-post-preview > .amp-editor-post-preview`;
+
+// Remove legacy selectors once changes of <https://github.com/WordPress/gutenberg/pull/56921> lands in WP core.
+const legacyPreviewBtnSelector = '.components-button.editor-post-preview';
+const legacyAmpPreviewBtnSelector = `${legacyPreviewBtnSelector} + .amp-wrapper-post-preview > .amp-editor-post-preview`;
 
 describe('AMP Preview button', () => {
 	it('is rendered on a new post', async () => {
@@ -27,9 +32,9 @@ describe('AMP Preview button', () => {
 		await deactivatePlugin('gutenberg');
 
 		await createNewPost();
-		await page.waitForSelector(postPreviewBtnSelector);
+		await page.waitForSelector(legacyPreviewBtnSelector);
 
-		await expect(page).toMatchElement(ampPreviewBtnSelector);
+		await expect(page).toMatchElement(legacyAmpPreviewBtnSelector);
 
 		await activatePlugin('gutenberg');
 	});
