@@ -39,6 +39,10 @@ export default (InitialMediaUpload, minImageDimensions) => {
 			 *
 			 * The only reason for this method is to override the select toolbar view class.
 			 *
+			 * Modified from {@link https://github.com/WordPress/wordpress-develop/blob/71cb3f861573f065c6d7d7ef1975bf98532239b4/src/js/media/views/frame/select.js#L167-L179}
+			 *
+			 * @override
+			 *
 			 * @param {Object} toolbar
 			 * @param {Object} [options={}]
 			 * @this {wp.media.controller.Region}
@@ -150,7 +154,8 @@ export default (InitialMediaUpload, minImageDimensions) => {
 		 *
 		 * @override
 		 * @description Overrides the media upload component's initialize method for featured image.
-		 * @see {@link https://github.com/WordPress/gutenberg/blob/debddee2ace15263c08c66b5f5a43a9e17bf5d0c/packages/media-utils/src/components/media-upload/index.js#L301} Original MediaUpload buildAndSetFeatureImageFrame method.
+		 *
+		 * Modified from {@link https://github.com/WordPress/gutenberg/blob/debddee2ace15263c08c66b5f5a43a9e17bf5d0c/packages/media-utils/src/components/media-upload/index.js#L301-L316|Original MediaUpload buildAndSetFeatureImageFrame method}.
 		 *
 		 * @return {void}
 		 */
