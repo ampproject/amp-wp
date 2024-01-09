@@ -689,7 +689,7 @@ jobs:
     steps:
       - name: Check if a comment was already made
         id: find-comment
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const { data: comments } = await github.rest.issues.listComments({
@@ -733,7 +733,7 @@ jobs:
 
       - name: Create comment on PR with links to plugin builds
         if: ${{ steps.find-comment.outputs.result == 'null' }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             github.rest.issues.createComment({
@@ -745,7 +745,7 @@ jobs:
 
       - name: Update comment on PR with links to plugin builds
         if: ${{ steps.find-comment.outputs.result != 'null' }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             github.rest.issues.updateComment({
