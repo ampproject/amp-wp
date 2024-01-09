@@ -156,12 +156,12 @@ export default (InitialMediaUpload, minImageDimensions) => {
 		 */
 		buildAndSetFeatureImageFrame() {
 			const { wp } = window;
-			const featuredImageFrame = getFeaturedImageMediaFrame();
+			const FeaturedImageFrame = getFeaturedImageMediaFrame();
 			const attachments = getAttachmentsCollection(this.props.value);
 			const selection = new wp.media.model.Selection(attachments.models, {
 				props: attachments.props.toJSON(),
 			});
-			this.frame = new featuredImageFrame({
+			this.frame = new FeaturedImageFrame({
 				mimeType: this.props.allowedTypes,
 				state: 'featured-image',
 				multiple: this.props.multiple,
