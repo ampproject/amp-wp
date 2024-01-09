@@ -639,13 +639,13 @@ jobs:
       prod-checksum: ${{ steps.output-checksums.outputs.prod-checksum }}
     steps:
       - name: Download dev build
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: amp-${{ needs.build-zip.outputs.branch-name }}-${{ needs.build-zip.outputs.git-sha-8 }}-dev
           path: builds/dev
 
       - name: Download prod build
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: amp-${{ needs.build-zip.outputs.branch-name }}-${{ needs.build-zip.outputs.git-sha-8 }}-prod
           path: builds/prod
