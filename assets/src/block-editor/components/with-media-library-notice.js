@@ -166,7 +166,7 @@ export default (InitialMediaUpload, minImageDimensions) => {
 				state: 'featured-image',
 				multiple: this.props.multiple,
 				selection,
-				editing: this.props.value ? true : false,
+				editing: Boolean(this.props.value),
 			});
 			wp.media.frame = this.frame;
 		}
