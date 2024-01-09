@@ -912,8 +912,11 @@ class AMP_Theme_Support {
 
 		if ( class_exists( 'Gutenberg_Modules' ) ) {
 			remove_action( 'wp_head', [ 'Gutenberg_Modules', 'print_import_map' ] );
+			remove_action( 'wp_footer', [ 'Gutenberg_Modules', 'print_import_map' ] );
 			remove_action( 'wp_head', [ 'Gutenberg_Modules', 'print_enqueued_modules' ] );
+			remove_action( 'wp_footer', [ 'Gutenberg_Modules', 'print_enqueued_modules' ] );
 			remove_action( 'wp_head', [ 'Gutenberg_Modules', 'print_module_preloads' ] );
+			remove_action( 'wp_footer', [ 'Gutenberg_Modules', 'print_module_preloads' ] );
 			remove_action( 'wp_footer', [ 'Gutenberg_Modules', 'print_import_map_polyfill' ], 11 );
 		}
 	}
