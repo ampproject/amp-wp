@@ -30,7 +30,7 @@ export function Sidebar() {
 					? select(blockValidationStore).getValidationErrors()
 					: select(
 							blockValidationStore
-					  ).getUnreviewedValidationErrors(),
+						).getUnreviewedValidationErrors(),
 				hasReviewedValidationErrors:
 					select(blockValidationStore).getReviewedValidationErrors()
 						?.length > 0,

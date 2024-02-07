@@ -297,7 +297,7 @@ function SiteScanInProgress() {
 							scannedUrlsMaxIndex + 1,
 							scannableUrls.length,
 							scannableUrls[scannedUrlsMaxIndex]?.label
-					  )}
+						)}
 			</p>
 		</>
 	);

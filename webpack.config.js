@@ -44,7 +44,7 @@ const preparePackagesSchema = (packages = []) => {
 					? 'i18n'
 					: camelCaseDash(
 							packageName.replace(WORDPRESS_NAMESPACE, '')
-					  );
+						);
 
 			const handle = packageName.replace(WORDPRESS_NAMESPACE, 'wp-');
 
@@ -54,7 +54,7 @@ const preparePackagesSchema = (packages = []) => {
 					'polyfill' === camelCaseName
 						? require.resolve(
 								'@wordpress/babel-preset-default/build/polyfill'
-						  )
+							)
 						: packageName,
 				handle,
 				packageName,

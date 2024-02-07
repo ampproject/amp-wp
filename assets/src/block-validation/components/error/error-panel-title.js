@@ -31,7 +31,7 @@ export function ErrorPanelTitle({ kept, title, error: { type } }) {
 					? __(
 							'This error has been kept, making this URL not AMP-compatible.',
 							'amp'
-					  )
+						)
 					: ''
 			}
 		>
