@@ -1448,6 +1448,13 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			$rendered_block
 		);
 
+		// Remove suffix from class name in later Gutenberg versions.
+		$rendered_block = str_replace(
+			'-columns-is-layout-1',
+			'',
+			$rendered_block
+		);
+
 		$expected = str_replace(
 			[
 				'{{post_id}}',
