@@ -99,7 +99,7 @@ export function ThemesWithAmpIncompatibility({
 										<a href={AMP_COMPATIBLE_THEMES_URL} />
 									),
 								}
-						  )
+							)
 						: ''}
 				</p>
 			)}

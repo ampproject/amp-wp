@@ -197,7 +197,7 @@ export function SupportedTemplatesCheckboxes({ supportableTemplates }) {
 						supportableTemplate.id
 					)
 				);
-		  });
+			});
 
 	return (
 		<ul>

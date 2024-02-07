@@ -94,11 +94,11 @@ export default function AMPDocumentStatusNotification() {
 							? __(
 									'Content may have changed. Trigger validation in the AMP Validation sidebar.',
 									'amp'
-							  )
+								)
 							: __(
 									'Content has changed. Trigger validation in the AMP Validation sidebar.',
 									'amp'
-							  )
+								)
 					}
 					isSmall={true}
 				/>
@@ -213,7 +213,7 @@ export default function AMPDocumentStatusNotification() {
 									'amp'
 								),
 								reviewedValidationErrorCount
-						  )
+							)
 						: __('No AMP validation issues detected.', 'amp')
 				}
 				isSmall={true}

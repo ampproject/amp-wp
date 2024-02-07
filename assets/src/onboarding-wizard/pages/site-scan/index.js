@@ -117,11 +117,11 @@ export function SiteScan() {
 							? __(
 									'Site scan found issues on your site. Proceed to the next step to follow recommendations for choosing a template mode.',
 									'amp'
-							  )
+								)
 							: __(
 									'Site scan found no issues on your site. Proceed to the next step to follow recommendations for choosing a template mode.',
 									'amp'
-							  )}
+								)}
 					</p>
 				}
 			>
@@ -175,7 +175,7 @@ export function SiteScan() {
 							isCompleted
 								? 100
 								: (scannedUrlsMaxIndex / scannableUrls.length) *
-								  100
+									100
 						}
 					/>
 					<p className="site-scan__status">
@@ -190,7 +190,7 @@ export function SiteScan() {
 									scannedUrlsMaxIndex + 1,
 									scannableUrls.length,
 									scannableUrls[scannedUrlsMaxIndex]?.label
-							  )}
+								)}
 					</p>
 				</>
 			}

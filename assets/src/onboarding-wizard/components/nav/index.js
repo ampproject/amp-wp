@@ -110,9 +110,9 @@ export function Nav({ closeLink, finishLink }) {
 							? {
 									'autofocus[panel]': 'amp_panel',
 									url: previewPermalink,
-							  }
+								}
 							: { url: previewPermalink, [AMP_QUERY_VAR]: '1' }
-				  )
+					)
 				: undefined;
 	} else if (isLastPage) {
 		nextText = __('Finish', 'amp');

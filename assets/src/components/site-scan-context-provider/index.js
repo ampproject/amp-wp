@@ -610,7 +610,7 @@ export function SiteScanContextProvider({
 						? Math.min(
 								scannableUrls.length,
 								...urlIndexesPendingScan
-						  )
+							)
 						: 0) - 1,
 				stale,
 				startSiteScan,
