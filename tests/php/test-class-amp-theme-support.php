@@ -1813,7 +1813,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		}
 
 		$this->assertStringContainsString( '<button>no-onclick</button>', $sanitized_html );
-		$this->assertCount( 5, AMP_Validation_Manager::$validation_results );
+		$this->assertCount( 5, AMP_Validation_Manager::$validation_results, 'Actual validation results: ' . wp_json_encode( AMP_Validation_Manager::$validation_results, JSON_PRETTY_PRINT ) );
 		$this->assertEquals(
 			[
 				'onclick' => 1,
