@@ -911,13 +911,20 @@ class AMP_Theme_Support {
 		remove_action( 'wp_enqueue_scripts', 'gutenberg_register_interactivity_module' );
 
 		if ( class_exists( 'Gutenberg_Modules' ) ) {
-			remove_action( 'wp_head', [ 'Gutenberg_Modules', 'print_import_map' ] );
-			remove_action( 'wp_footer', [ 'Gutenberg_Modules', 'print_import_map' ] );
-			remove_action( 'wp_head', [ 'Gutenberg_Modules', 'print_enqueued_modules' ] );
-			remove_action( 'wp_footer', [ 'Gutenberg_Modules', 'print_enqueued_modules' ] );
-			remove_action( 'wp_head', [ 'Gutenberg_Modules', 'print_module_preloads' ] );
-			remove_action( 'wp_footer', [ 'Gutenberg_Modules', 'print_module_preloads' ] );
+			foreach ( [ 'wp_head', 'wp_footer' ] as $action ) {
+				remove_action( $action, [ 'Gutenberg_Modules', 'print_import_map' ] );
+				remove_action( $action, [ 'Gutenberg_Modules', 'print_enqueued_modules' ] );
+				remove_action( $action, [ 'Gutenberg_Modules', 'print_module_preloads' ] );
+			}
 			remove_action( 'wp_footer', [ 'Gutenberg_Modules', 'print_import_map_polyfill' ], 11 );
+		}
+
+		if ( function_exists( 'wp_script_modules' ) ) {
+			foreach ( [ 'wp_head', 'wp_footer' ] as $action ) {
+				remove_action( $action, [ wp_script_modules(), 'print_import_map' ] );
+				remove_action( $action, [ wp_script_modules(), 'print_enqueued_script_modules' ] );
+				remove_action( $action, [ wp_script_modules(), 'print_script_module_preloads' ] );
+			}
 		}
 	}
 
