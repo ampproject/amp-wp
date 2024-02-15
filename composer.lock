@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cdec734bc3500d2cb84d120bdde9554a",
+    "content-hash": "b895608e131622df90c44f80ccf9a2cf",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
@@ -189,16 +189,16 @@
         },
         {
             "name": "sabberworm/php-css-parser",
-            "version": "8.5.0",
+            "version": "v8.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MyIntervals/PHP-CSS-Parser.git",
-                "reference": "4e9a54c2a368fcd73ecc6b45f98c7714b54a7db0"
+                "reference": "4a3d572b0f8b28bb6fd016ae8bbfc445facef152"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MyIntervals/PHP-CSS-Parser/zipball/4e9a54c2a368fcd73ecc6b45f98c7714b54a7db0",
-                "reference": "4e9a54c2a368fcd73ecc6b45f98c7714b54a7db0",
+                "url": "https://api.github.com/repos/MyIntervals/PHP-CSS-Parser/zipball/4a3d572b0f8b28bb6fd016ae8bbfc445facef152",
+                "reference": "4a3d572b0f8b28bb6fd016ae8bbfc445facef152",
                 "shasum": ""
             },
             "require": {
@@ -206,7 +206,6 @@
                 "php": ">=5.6.20"
             },
             "require-dev": {
-                "codacy/coverage": "^1.4.3",
                 "phpunit/phpunit": "^5.7.27"
             },
             "suggest": {
@@ -215,7 +214,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "9.0.x-dev"
+                    "dev-main": "9.0.x-dev"
                 }
             },
             "autoload": {
@@ -230,6 +229,14 @@
             "authors": [
                 {
                     "name": "Raphael Schweikert"
+                },
+                {
+                    "name": "Oliver Klee",
+                    "email": "github@oliverklee.de"
+                },
+                {
+                    "name": "Jake Hotson",
+                    "email": "jake.github@qzdesign.co.uk"
                 }
             ],
             "description": "Parser for CSS Files written in PHP",
@@ -241,9 +248,9 @@
             ],
             "support": {
                 "issues": "https://github.com/MyIntervals/PHP-CSS-Parser/issues",
-                "source": "https://github.com/MyIntervals/PHP-CSS-Parser/tree/8.5.0"
+                "source": "https://github.com/MyIntervals/PHP-CSS-Parser/tree/v8.5.1"
             },
-            "time": "2024-02-01T00:40:08+00:00"
+            "time": "2024-02-15T16:41:13+00:00"
         },
         {
             "name": "willwashburn/stream",
