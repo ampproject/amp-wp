@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c2638f309d61f5fe978e1e461346f533",
+    "content-hash": "cdec734bc3500d2cb84d120bdde9554a",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
@@ -189,16 +189,16 @@
         },
         {
             "name": "sabberworm/php-css-parser",
-            "version": "dev-master",
+            "version": "8.5.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
-                "reference": "cc791ad"
+                "url": "https://github.com/MyIntervals/PHP-CSS-Parser.git",
+                "reference": "4e9a54c2a368fcd73ecc6b45f98c7714b54a7db0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/cc791ad",
-                "reference": "cc791ad",
+                "url": "https://api.github.com/repos/MyIntervals/PHP-CSS-Parser/zipball/4e9a54c2a368fcd73ecc6b45f98c7714b54a7db0",
+                "reference": "4e9a54c2a368fcd73ecc6b45f98c7714b54a7db0",
                 "shasum": ""
             },
             "require": {
@@ -212,8 +212,12 @@
             "suggest": {
                 "ext-mbstring": "for parsing UTF-8 CSS"
             },
-            "default-branch": true,
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "9.0.x-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Sabberworm\\CSS\\": "src/"
@@ -236,10 +240,10 @@
                 "stylesheet"
             ],
             "support": {
-                "issues": "https://github.com/sabberworm/PHP-CSS-Parser/issues",
-                "source": "https://github.com/sabberworm/PHP-CSS-Parser/tree/master"
+                "issues": "https://github.com/MyIntervals/PHP-CSS-Parser/issues",
+                "source": "https://github.com/MyIntervals/PHP-CSS-Parser/tree/8.5.0"
             },
-            "time": "2023-01-25T01:20:01+00:00"
+            "time": "2024-02-01T00:40:08+00:00"
         },
         {
             "name": "willwashburn/stream",
@@ -8190,7 +8194,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "sabberworm/php-css-parser": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,
@@ -8210,5 +8213,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.2.0"
 }
