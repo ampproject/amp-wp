@@ -68,7 +68,7 @@
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "copy-webpack-plugin": "12.0.2",
     "cross-env": "7.0.3",
-    "css-minimizer-webpack-plugin": "5.0.1",
+    "css-minimizer-webpack-plugin": "6.0.0",
     "enzyme": "3.11.0",
     "eslint": "8.56.0",
     "eslint-plugin-eslint-comments": "3.2.0",
