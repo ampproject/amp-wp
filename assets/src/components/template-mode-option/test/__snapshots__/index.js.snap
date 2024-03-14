@@ -116,7 +116,16 @@ exports[`TemplateModeOption matches snapshot 1`] = `
       <button
         aria-expanded={false}
         className="components-button components-panel__body-toggle"
+        onBlur={[Function]}
         onClick={[Function]}
+        onClickCapture={[Function]}
+        onFocusCapture={[Function]}
+        onKeyDownCapture={[Function]}
+        onKeyPressCapture={[Function]}
+        onMouseDown={[Function]}
+        onMouseDownCapture={[Function]}
+        onMouseEnter={[Function]}
+        onMouseMove={[Function]}
         type="button"
       >
         <span
@@ -379,7 +388,16 @@ exports[`TemplateModeOption matches snapshot 2`] = `
       <button
         aria-expanded={true}
         className="components-button components-panel__body-toggle"
+        onBlur={[Function]}
         onClick={[Function]}
+        onClickCapture={[Function]}
+        onFocusCapture={[Function]}
+        onKeyDownCapture={[Function]}
+        onKeyPressCapture={[Function]}
+        onMouseDown={[Function]}
+        onMouseDownCapture={[Function]}
+        onMouseEnter={[Function]}
+        onMouseMove={[Function]}
         type="button"
       >
         <span
@@ -670,7 +688,16 @@ exports[`TemplateModeOption matches snapshot 3`] = `
       <button
         aria-expanded={true}
         className="components-button components-panel__body-toggle"
+        onBlur={[Function]}
         onClick={[Function]}
+        onClickCapture={[Function]}
+        onFocusCapture={[Function]}
+        onKeyDownCapture={[Function]}
+        onKeyPressCapture={[Function]}
+        onMouseDown={[Function]}
+        onMouseDownCapture={[Function]}
+        onMouseEnter={[Function]}
+        onMouseMove={[Function]}
         type="button"
       >
         <span
