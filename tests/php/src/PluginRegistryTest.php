@@ -87,6 +87,12 @@ final class PluginRegistryTest extends TestCase {
 			'Title',
 			'AuthorName',
 		];
+
+		// Add `RequiresPlugins` for WP 6.5+.
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '6.5', '>=' ) ) {
+			$expected_keys[] = 'RequiresPlugins';
+		}
+
 		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.8', '>=' ) ) {
 			$expected_keys[] = 'UpdateURI';
 		}
