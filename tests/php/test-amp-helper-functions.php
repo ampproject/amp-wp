@@ -2128,7 +2128,13 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 		/** This filter is documented in wp-admin/includes/class-custom-image-header.php */
 		$cropped = apply_filters( 'wp_create_file_in_uploads', $cropped, $attachment_id ); // For replication.
-		$object  = $wp_site_icon->create_attachment_object( $cropped, $attachment_id );
+
+		if ( function_exists( 'wp_copy_parent_attachment_properties' ) ) {
+			$object = wp_copy_parent_attachment_properties( $cropped, $attachment_id );
+		} else {
+			$object = $wp_site_icon->create_attachment_object( $cropped, $attachment_id );
+		}
+
 		unset( $object['ID'] );
 
 		// Update the attachment.
