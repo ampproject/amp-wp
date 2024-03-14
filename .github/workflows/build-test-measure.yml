@@ -186,6 +186,7 @@ jobs:
           file: build/logs/lcov.info
           flags: javascript
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -461,6 +462,7 @@ jobs:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           flags: php,unit
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
 #-----------------------------------------------------------------------------------------------------------------------
 
