@@ -181,11 +181,12 @@ jobs:
 
       - name: Upload code coverage report
         if: github.actor != 'dependabot[bot]'
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           file: build/logs/lcov.info
           flags: javascript
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -456,11 +457,12 @@ jobs:
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 && github.actor != 'dependabot[bot]' }}
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           flags: php,unit
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
 #-----------------------------------------------------------------------------------------------------------------------
 
