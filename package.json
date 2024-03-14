@@ -19,8 +19,8 @@
     "url": "https://github.com/ampproject/amp-wp/issues"
   },
   "engines": {
-    "node": ">= 18",
-    "npm": ">= 9"
+    "node": ">= 20",
+    "npm": ">= 10"
   },
   "dependencies": {
     "@wordpress/api-fetch": "6.50.0",
