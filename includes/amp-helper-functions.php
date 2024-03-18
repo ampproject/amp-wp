@@ -1652,7 +1652,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		// Mark the script output by wp_post_preview_js() as being in dev mode.
 		if ( is_preview() && get_queried_object() instanceof WP_Post ) {
 			$dev_mode_xpaths[] = sprintf(
-				'//script[ not( @src ) and contains( text(), "document.location.search" ) and contains( text(), "preview=true" ) and contains( text(), "unload" ) and contains( text(), "window.name" ) and contains( text(), "wp-preview-%d" ) ]',
+				'//script[ not( @src ) and contains( text(), "document.location.search" ) and contains( text(), "preview=true" ) and ( contains( text(), "pagehide" ) or contains( text(), "unload" ) ) and contains( text(), "window.name" ) and contains( text(), "wp-preview-%d" ) ]',
 				get_queried_object_id()
 			);
 		}
