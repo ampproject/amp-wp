@@ -95,7 +95,6 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 			$this->did_convert_elements = true;
 
 		}
-
 	}
 
 	/**

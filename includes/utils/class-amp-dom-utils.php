@@ -270,7 +270,6 @@ class AMP_DOM_Utils {
 			$child = $node->childNodes->item( $i );
 			self::recursive_force_closing_tags( $dom, $child );
 		}
-
 	}
 
 	/**

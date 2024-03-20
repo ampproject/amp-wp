@@ -386,7 +386,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 
 			add_filter(
 				'home_url',
-				static function() use ( $new_home_url ) {
+				static function () use ( $new_home_url ) {
 					return $new_home_url;
 				}
 			);

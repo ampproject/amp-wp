@@ -72,12 +72,12 @@ $alignwide_max = $content_max_width > 0 ? $content_max_width * 2 : 1920
 	}
 }
 
-@media (min-width: <?php echo sprintf( '%dpx', $alignwide_max ); ?>) {
+@media (min-width: <?php printf( '%dpx', $alignwide_max ); ?>) {
 	.alignwide {
-		width: calc(<?php echo sprintf( '%dpx', $alignwide_max ); ?> - 48px);
-		max-width: calc(<?php echo sprintf( '%dpx', $alignwide_max ); ?> - 48px);
-		margin-left: calc(calc(50% - <?php echo sprintf( '%dpx', $alignwide_max ); ?> / 2) + 24px);
-		margin-right: calc(calc(50% - <?php echo sprintf( '%dpx', $alignwide_max ); ?> / 2) + 24px);
+		width: calc(<?php printf( '%dpx', $alignwide_max ); ?> - 48px);
+		max-width: calc(<?php printf( '%dpx', $alignwide_max ); ?> - 48px);
+		margin-left: calc(calc(50% - <?php printf( '%dpx', $alignwide_max ); ?> / 2) + 24px);
+		margin-right: calc(calc(50% - <?php printf( '%dpx', $alignwide_max ); ?> / 2) + 24px);
 	}
 }
 
@@ -112,7 +112,7 @@ $alignwide_max = $content_max_width > 0 ? $content_max_width * 2 : 1920
 .amp-wp-title-bar div {
 	<?php if ( $content_max_width > 0 ) : ?>
 	margin: 0 auto;
-	max-width: <?php echo sprintf( '%dpx', $content_max_width ); ?>;
+	max-width: <?php printf( '%dpx', $content_max_width ); ?>;
 	<?php endif; ?>
 }
 

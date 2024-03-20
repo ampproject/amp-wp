@@ -488,7 +488,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		return wp_list_pluck(
 			array_filter(
 				$this->pending_stylesheets,
-				static function( $pending_stylesheet ) {
+				static function ( $pending_stylesheet ) {
 					return $pending_stylesheet['included'] && self::STYLE_AMP_CUSTOM_GROUP_INDEX === $pending_stylesheet['group'];
 				}
 			),
@@ -1087,7 +1087,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$print_priority_base = 100;
 		$admin_bar_priority  = 200;
 
-		$remove_url_scheme = static function( $url ) {
+		$remove_url_scheme = static function ( $url ) {
 			return preg_replace( '/^https?:/', '', $url );
 		};
 
@@ -1312,7 +1312,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		$parsed_url['path'] = $path;
 
-		$remove_url_scheme = static function( $schemed_url ) {
+		$remove_url_scheme = static function ( $schemed_url ) {
 			return preg_replace( '#^\w+:(?=//)#', '', $schemed_url );
 		};
 
@@ -2074,7 +2074,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$dynamic_selector_pattern = implode(
 					'|',
 					array_map(
-						static function( $selector ) {
+						static function ( $selector ) {
 							return preg_quote( $selector, '#' );
 						},
 						$this->args['dynamic_element_selectors']
@@ -2130,7 +2130,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						 */
 						$reduced_selector = preg_replace_callback(
 							'/\[([A-Za-z0-9_:-]+)(\W?=[^\]]+)?\]/',
-							static function( $matches ) use ( $selector, &$selectors_parsed ) {
+							static function ( $matches ) use ( $selector, &$selectors_parsed ) {
 								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_ATTRIBUTES ][] = $matches[1];
 								return '';
 							},
@@ -2140,7 +2140,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						// Extract class names.
 						$reduced_selector = preg_replace_callback(
 							'/\.((?:[a-zA-Z0-9_-]+|\\\\.)+)/', // The `\\\\.` will allow any char via escaping, like the colon in `.lg\:w-full`.
-							static function( $matches ) use ( $selector, &$selectors_parsed ) {
+							static function ( $matches ) use ( $selector, &$selectors_parsed ) {
 								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_CLASSES ][] = stripslashes( $matches[1] );
 								return '';
 							},
@@ -2150,7 +2150,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						// Extract IDs.
 						$reduced_selector = preg_replace_callback(
 							'/#([a-zA-Z0-9_-]+)/',
-							static function( $matches ) use ( $selector, &$selectors_parsed ) {
+							static function ( $matches ) use ( $selector, &$selectors_parsed ) {
 								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_IDS ][] = $matches[1];
 								return '';
 							},
@@ -2160,7 +2160,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						// Extract tag names.
 						$reduced_selector = preg_replace_callback(
 							'/[a-zA-Z0-9_-]+/',
-							static function( $matches ) use ( $selector, &$selectors_parsed ) {
+							static function ( $matches ) use ( $selector, &$selectors_parsed ) {
 								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_TAGS ][] = $matches[0];
 								return '';
 							},
@@ -2253,7 +2253,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		return preg_replace_callback(
 			// Match CSS url() values that don't have quoted string values.
 			'/\burl\(\s*(?=\w)(?P<url>[^}]*?\s*)\)/',
-			static function( $matches ) {
+			static function ( $matches ) {
 				return preg_replace( '/\s+/', '', $matches[0] );
 			},
 			$css
@@ -2925,7 +2925,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				 * @param Selector $old_selector Original selector.
 				 * @return Selector The new more-specific selector.
 				 */
-				static function( Selector $old_selector ) {
+				static function ( Selector $old_selector ) {
 					// Calculate the specificity multiplier for the placeholder.
 					$specificity_multiplier = AMP_Style_Sanitizer::INLINE_SPECIFICITY_MULTIPLIER + 1 + floor( $old_selector->getSpecificity() / 100 );
 					if ( $old_selector->getSpecificity() % 100 > 0 ) {
@@ -3166,7 +3166,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				wp_list_pluck(
 					array_filter(
 						$this->pending_stylesheets,
-						static function( $pending_stylesheet ) {
+						static function ( $pending_stylesheet ) {
 							return $pending_stylesheet['included'] && self::STYLE_AMP_KEYFRAMES_GROUP_INDEX === $pending_stylesheet['group'];
 						}
 					),
@@ -3618,7 +3618,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							0 === count(
 								array_filter(
 									$parsed_selector[ self::SELECTOR_EXTRACTED_IDS ],
-									function( $id ) {
+									function ( $id ) {
 										return ! $this->dom->getElementById( $id );
 									}
 								)
@@ -3730,7 +3730,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					// Include the stylesheet parts that were not marked for exclusion during tree shaking.
 					array_filter(
 						$pending_stylesheet['shaken_tokens'],
-						static function( $shaken_token ) {
+						static function ( $shaken_token ) {
 							return false !== $shaken_token[0];
 						}
 					)

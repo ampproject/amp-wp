@@ -176,7 +176,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 
 		$options[ self::SUPPRESSIBLE_PLUGINS ]   = $this->plugin_suppression->get_suppressible_plugins_with_details();
 		$options[ self::SUPPORTABLE_POST_TYPES ] = array_map(
-			static function( $slug ) {
+			static function ( $slug ) {
 				$post_type                 = (array) get_post_type_object( $slug );
 				$post_type['supports_amp'] = post_type_supports( $post_type['name'], AMP_Post_Type_Support::SLUG );
 				return $post_type;

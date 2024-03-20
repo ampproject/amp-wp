@@ -220,7 +220,7 @@ class AMP_Analytics_Options_Test extends TestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		add_filter(
 			'amp_analytics_entries',
-			static function( $analytics ) use ( $key ) {
+			static function ( $analytics ) use ( $key ) {
 				$analytics[ $key ]['type']                                = 'test';
 				$analytics[ $key ]['attributes']['data-include']          = '_till_responded';
 				$analytics[ $key ]['attributes']['data-block-on-consent'] = 'credentials';
@@ -274,7 +274,7 @@ class AMP_Analytics_Options_Test extends TestCase {
 
 		add_filter(
 			'amp_analytics_entries',
-			static function( $analytics ) use ( $key ) {
+			static function ( $analytics ) use ( $key ) {
 				$analytics[ $key ]['attributes']['data-include'] = '_till_responded';
 				return $analytics;
 			}

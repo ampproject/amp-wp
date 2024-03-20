@@ -124,7 +124,7 @@ final class URLValidationProvider implements Service {
 		$unaccepted_error_count = count(
 			array_filter(
 				$validation_errors,
-				static function( $error ) {
+				static function ( $error ) {
 					$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
 					return (
 						AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status']

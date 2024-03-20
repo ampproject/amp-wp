@@ -22,7 +22,7 @@ trait WithoutBlockPreRendering {
 
 		add_filter(
 			'render_block_data',
-			static function( $parsed_block ) {
+			static function ( $parsed_block ) {
 				global $post;
 
 				if (
@@ -42,7 +42,7 @@ trait WithoutBlockPreRendering {
 
 		add_filter(
 			'render_block_context',
-			static function( $context, $parsed_block ) {
+			static function ( $context, $parsed_block ) {
 				global $post;
 
 				// Remove the dummy post from the global scope and unset post related data from the context.

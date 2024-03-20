@@ -227,7 +227,7 @@ class Test_AMP_Service_Worker extends TestCase {
 		add_filter(
 			'wp_die_handler',
 			static function () {
-				return static function() {
+				return static function () {
 					throw new Exception( 'exited' );
 				};
 			}

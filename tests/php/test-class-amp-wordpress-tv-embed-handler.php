@@ -153,6 +153,5 @@ class Test_AMP_WordPress_TV_Embed_Handler extends TestCase {
 			$expected,
 			$handler->filter_oembed_html( $cache, $url )
 		);
-
 	}
 }

@@ -86,6 +86,5 @@ class PluginRowMetaTest extends TestCase {
 		);
 
 		$this->assertEquals( $expected_meta, $this->instance->get_plugin_row_meta( $initial_meta, 'amp/amp.php' ) );
-
 	}
 }

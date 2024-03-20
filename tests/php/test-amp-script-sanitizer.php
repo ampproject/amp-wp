@@ -373,7 +373,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 
 		add_filter(
 			'pre_http_request',
-			static function( $preempt, $request, $url ) {
+			static function ( $preempt, $request, $url ) {
 				$r = [
 					'response' => [
 						'code'    => 200,

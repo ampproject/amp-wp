@@ -36,6 +36,5 @@ trait HomeUrlLoopbackRequestMocking {
 			10,
 			3
 		);
-
 	}
 }

@@ -114,7 +114,7 @@ class AMP_Service_Worker {
 		// Add AMP scripts to runtime cache which will then get stale-while-revalidate strategy.
 		$service_workers->register(
 			'amp-cdn-runtime-caching',
-			static function() {
+			static function () {
 				$urls = AMP_Service_Worker::get_precached_script_cdn_urls();
 				if ( empty( $urls ) ) {
 					return '';
@@ -356,8 +356,8 @@ class AMP_Service_Worker {
 		// Die in a way that can be unit tested.
 		add_filter(
 			'wp_die_handler',
-			static function() {
-				return static function() {
+			static function () {
+				return static function () {
 					die();
 				};
 			},
