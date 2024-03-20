@@ -8,7 +8,7 @@ An easier path to great Page Experience for everyone. Powered by AMP.
 **Tags:** [page experience](https://wordpress.org/plugins/tags/page-experience), [performance](https://wordpress.org/plugins/tags/performance), [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization), [accelerated mobile pages](https://wordpress.org/plugins/tags/accelerated-mobile-pages)  
 **Requires at least:** 5.3  
 **Tested up to:** 6.5  
-**Stable tag:** 2.5.2  
+**Stable tag:** 2.5.3  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 7.4
 
