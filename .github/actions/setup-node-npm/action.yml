@@ -6,7 +6,7 @@ runs:
   using: 'composite'
   steps:
     - name: Configure Node.js cache
-      uses: actions/cache@v3.3.2
+      uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 #v4.0.2
       id: node-npm-cache
       env:
         SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
@@ -16,13 +16,13 @@ runs:
 
     # Since it gets downloaded with npm install, we need to cache it instantly.
     - name: Setup puppeteer cache
-      uses: actions/cache@v3.3.2
+      uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 #v4.0.2
       with:
         path: ~/.cache/puppeteer
         key: ${{ runner.os }}-puppeteer
 
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 #v4.0.2
       with:
         node-version-file: '.nvmrc'
 

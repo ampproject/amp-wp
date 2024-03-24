@@ -24,7 +24,7 @@ runs:
   using: 'composite'
   steps:
     - name: Setup PHP
-      uses: shivammathur/setup-php@v2
+      uses: shivammathur/setup-php@a4e22b60bbb9c1021113f2860347b0759f66fe5d #2.30.0
       with:
         php-version: ${{ inputs.php-version }}
         extensions: ${{ inputs.extensions }}
@@ -32,7 +32,7 @@ runs:
         tools: ${{ inputs.tools }}
 
     - name: Setup composer cache
-      uses: actions/cache@v3
+      uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 #v4.0.2
       id: php-composer-cache
       env:
         SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
