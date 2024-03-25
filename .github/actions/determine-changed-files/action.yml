@@ -50,7 +50,7 @@ runs:
         PHP_FILE_COUNT=$(php -f ./.github/actions/determine-changed-files/determine-modified-files-count.php ".+\.php|composer\.(json|lock)|phpstan\.neon\.dist" "$MODIFIED_FILES")
         CSS_FILE_COUNT=$(php -f ./.github/actions/determine-changed-files/determine-modified-files-count.php ".+\.s?css|package\.json|package-lock\.json" "$MODIFIED_FILES")
         JS_FILE_COUNT=$(php -f ./.github/actions/determine-changed-files/determine-modified-files-count.php ".+\.(js|snap)|package\.json|package-lock\.json" "$MODIFIED_FILES")
-        GHA_WORKFLOW_COUNT=$(php -f ./.github/actions/determine-changed-files/determine-modified-files-count.php "(\.github\/workflows\/.+\.yml)" "$MODIFIED_FILES")
+        GHA_WORKFLOW_COUNT=$(php -f ./.github/actions/determine-changed-files/determine-modified-files-count.php "(\.github\/workflows\/.+\.yml|\.github\/actions\/.+\.yml)" "$MODIFIED_FILES")
 
         # Set output variables.
         echo "count=$FILE_COUNT" >> $GITHUB_OUTPUT
