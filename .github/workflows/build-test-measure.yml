@@ -181,7 +181,7 @@ jobs:
 
       - name: Upload code coverage report
         if: github.actor != 'dependabot[bot]'
-        uses: codecov/codecov-action@54bcd8715eee62d40e33596ef5e8f0f48dbbccab #v4.1.0
+        uses: codecov/codecov-action@c16abc29c95fcf9174b58eb7e1abf4c866893bc8 #v4.1.1
         with:
           file: build/logs/lcov.info
           flags: javascript
@@ -457,7 +457,7 @@ jobs:
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 && github.actor != 'dependabot[bot]' }}
-        uses: codecov/codecov-action@54bcd8715eee62d40e33596ef5e8f0f48dbbccab #v4.1.0
+        uses: codecov/codecov-action@c16abc29c95fcf9174b58eb7e1abf4c866893bc8 #v4.1.1
         with:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           flags: php,unit
