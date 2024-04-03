@@ -54,8 +54,8 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 				this.initFeaturedImage();
 			} else {
 				// Restore the original`onOpen` callback as it will be overridden by the parent class.
-				this.frame.off( 'open', this.onOpen );
-				this.frame.on( 'open', super.onOpen.bind( this ) );
+				this.frame?.off( 'open', this.onOpen );
+				this.frame?.on( 'open', super.onOpen.bind( this ) );
 			}
 		}
 
