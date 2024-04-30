@@ -994,7 +994,7 @@ class AMP_Validated_URL_Post_Type {
 				'posts_per_page' => $count,
 			]
 		);
-		foreach ( $query->get_posts() as $post_id ) {
+		foreach ( $query->posts as $post_id ) {
 			if ( delete_post_meta( $post_id, self::STYLESHEETS_POST_META_KEY ) ) {
 				$deleted++;
 			}
@@ -1037,7 +1037,7 @@ class AMP_Validated_URL_Post_Type {
 				],
 			]
 		);
-		foreach ( $query->get_posts() as $post ) {
+		foreach ( $query->posts as $post ) {
 			if ( ! self::is_post_safe_to_garbage_collect( $post ) ) {
 				continue;
 			}

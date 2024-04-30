@@ -517,7 +517,7 @@ final class ScannableURLProviderTest extends TestCase {
 				'fields'         => 'ids',
 			]
 		);
-		foreach ( $query->get_posts() as $deleted_post ) {
+		foreach ( $query->posts as $deleted_post ) {
 			wp_delete_post( $deleted_post );
 		}
 		$this->assertNull( $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
