@@ -35,14 +35,14 @@ jobs:
       - name: Checkout including last 2 commits
         # Fetch last 2 commits if it's not a PR, so that we can determine the list of modified files.
         if: ${{ github.base_ref == null }}
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 #v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b #v4.1.4
         with:
           fetch-depth: 2
 
       - name: Checkout
         # Do usual checkout if it's a PR.
         if: ${{ github.base_ref != null }}
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 #v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b #v4.1.4
 
       - name: Determine modified files
         id: determine-file-counts
@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 #v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b #v4.1.4
 
       - name: Setup NodeJS and NPM
         uses: ./.github/actions/setup-node-npm
@@ -76,7 +76,7 @@ jobs:
       checks: write
     steps:
       - name: Checkout
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 #v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b #v4.1.4
 
       - name: Setup NodeJS and NPM
         uses: ./.github/actions/setup-node-npm
@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 #v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b #v4.1.4
 
       - name: Setup PHP and Composer
         uses: ./.github/actions/setup-php-composer
@@ -145,7 +145,7 @@ jobs:
     if: needs.pre-run.outputs.changed-php-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     steps:
       - name: Checkout
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 #v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b #v4.1.4
 
       - name: Setup PHP and Composer
         uses: ./.github/actions/setup-php-composer
@@ -165,7 +165,7 @@ jobs:
     if: needs.pre-run.outputs.changed-js-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     steps:
       - name: Checkout
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 #v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b #v4.1.4
 
       - name: Setup NodeJS and NPM
         uses: ./.github/actions/setup-node-npm
@@ -207,7 +207,7 @@ jobs:
           totalParts: [2]
     steps:
       - name: Checkout
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 #v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b #v4.1.4
 
       - name: Setup NodeJS and NPM
         uses: ./.github/actions/setup-node-npm
@@ -370,7 +370,7 @@ jobs:
 
       - name: Checkout
         if: needs.pre-run.outputs.changed-php-count > 0
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 #v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b #v4.1.4
 
       - name: Setup PHP and Composer
         if: needs.pre-run.outputs.changed-php-count > 0
@@ -534,7 +534,7 @@ jobs:
           fi
 
       - name: Checkout
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 #v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b #v4.1.4
 
       - name: Setup PHP and Composer
         uses: ./.github/actions/setup-php-composer
@@ -585,7 +585,7 @@ jobs:
         build: ['dev', 'prod']
     steps:
       - name: Checkout
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 #v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b #v4.1.4
 
       - name: Setup NodeJS and NPM
         uses: ./.github/actions/setup-node-npm
