@@ -92,7 +92,7 @@
     "postcss": "8.4.35",
     "postcss-import": "16.0.1",
     "postcss-nested": "6.0.1",
-    "postcss-preset-env": "9.5.1",
+    "postcss-preset-env": "9.5.9",
     "prettier": "3.2.5",
     "puppeteer": "22.4.1",
     "react-test-renderer": "18.2.0",
