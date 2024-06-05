@@ -1,8 +1,8 @@
-version: '3.1'
-
 services:
   wordpress:
-    image: wordpress
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "127.0.0.1:8890:80"
     env_file:
@@ -13,19 +13,6 @@ services:
       - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     depends_on:
       - mysql
-
-  cli:
-    image: wordpress:cli
-    user: xfs
-    volumes:
-      - wordpress_data:/var/www/html
-      - ../../:/var/www/html/wp-content/plugins/amp
-    env_file:
-      - .env.wp
-    depends_on:
-      - mysql
-      - wordpress
-    command: tail -f /dev/null
 
   mysql:
     image: mariadb:10
