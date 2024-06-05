@@ -891,8 +891,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
 	 */
 	public function init( $sanitizers ) {
-		parent::init( $sanitizers );
-
 		$this->sanitizers = $sanitizers;
 	}
 
