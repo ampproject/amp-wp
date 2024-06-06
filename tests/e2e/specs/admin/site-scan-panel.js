@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
+
+/**
  * WordPress dependencies
  */
 import { activateTheme, visitAdminPage } from '@wordpress/e2e-test-utils';

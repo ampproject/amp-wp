@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { describe, expect, it } from '@jest/globals';
+
+/**
  * Internal dependencies
  */
 import { getSourcesFromScannableUrls } from '../get-sources-from-scannable-urls';

@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
+
+/**
  * WordPress dependencies
  */
 import { loginUser } from '@wordpress/e2e-test-utils';

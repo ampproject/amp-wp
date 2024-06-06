@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { expect } from '@jest/globals';
+
 export async function testSiteScanning({ statusElementClassName, isAmpFirst }) {
 	await page.waitForSelector(`.${statusElementClassName}`);
 

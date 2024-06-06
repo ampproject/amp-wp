@@ -3,6 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { render, fireEvent } from '@testing-library/react';
+import { describe, expect, it, jest } from '@jest/globals';
 
 /**
  * Internal dependencies

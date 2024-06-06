@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { jest } from '@jest/globals';
+
 // Set up `wp.*` aliases.
 global.wp = {
 	media: {

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { get } from 'lodash';
+import { afterAll, afterEach, beforeAll, expect, jest } from '@jest/globals';
 
 /**
  * WordPress dependencies

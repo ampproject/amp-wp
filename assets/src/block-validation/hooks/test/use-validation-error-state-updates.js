@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, waitFor } from '@testing-library/react';
+import { describe, expect, it, jest } from '@jest/globals';
 
 /**
  * WordPress dependencies

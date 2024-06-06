@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { afterAll, beforeEach, describe, expect, it } from '@jest/globals';
+
+/**
  * Internal dependencies
  */
 import {
