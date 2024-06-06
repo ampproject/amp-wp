@@ -16,8 +16,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { isAMPEnabled } from '../helpers';
-import ampFilledIcon from '../../../images/amp-icon.svg';
-import ampBlackIcon from '../../../images/amp-black-icon.svg';
+import { AMPFilledIcon, AMPBlackIcon } from '../../icons';
 
 /**
  * Writes the message and graphic in the new preview window that was opened.
@@ -30,7 +29,7 @@ import ampBlackIcon from '../../../images/amp-black-icon.svg';
 function writeInterstitialMessage(targetDocument) {
 	let markup = renderToString(
 		<div className="editor-post-preview-button__interstitial-message">
-			<Icon icon={ampBlackIcon({ viewBox: '0 0 98 98' })} />
+			<Icon icon={<AMPBlackIcon viewBox="0 0 98 98" />} />
 			<p>{__('Generating AMP preview…', 'amp')}</p>
 		</div>
 	);
@@ -231,11 +230,7 @@ class AmpPreviewButton extends Component {
 					onClick={this.openPreviewWindow}
 					ref={this.buttonRef}
 				>
-					{ampFilledIcon({
-						viewBox: '0 0 62 62',
-						width: 18,
-						height: 18,
-					})}
+					<AMPFilledIcon viewBox="0 0 62 62" height={18} width={18} />
 					<VisuallyHidden as="span">
 						{
 							/* translators: accessibility text */
