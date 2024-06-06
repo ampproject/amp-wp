@@ -11,7 +11,7 @@ exports[`RedirectToggle matches snapshot 1`] = `
       className="components-base-control__field css-yj91it-StyledField ej5x27r3"
     >
       <div
-        className="components-flex components-h-stack css-79etx6-View-Flex-base-ItemsRow e19lxcc00"
+        className="components-flex components-h-stack css-1tus1dj-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
         data-wp-c16t={true}
         data-wp-component="HStack"
       >
@@ -33,7 +33,7 @@ exports[`RedirectToggle matches snapshot 1`] = `
           />
         </span>
         <label
-          className="components-flex-item components-flex-block components-toggle-control__label css-14wzr73-View-Item-sx-Base-block e19lxcc00"
+          className="components-flex-item components-flex-block components-toggle-control__label css-10m3u8l-PolymorphicDiv-Item-sx-Base-block e19lxcc00"
           data-wp-c16t={true}
           data-wp-component="FlexBlock"
           htmlFor="inspector-toggle-control-0"
