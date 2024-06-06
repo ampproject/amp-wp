@@ -152,7 +152,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	const KEY_CUSTOM_SPACING_SIZE = 'customSpacingSize';
 
 	/**
-	 * Key for `defaultSpacingSizes` boolean in theme.json (v3)
+	 * Key for `defaultSpacingSizes` boolean in theme.json (v3).
 	 *
 	 * @var string
 	 */
@@ -509,7 +509,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		$custom_spacing_size = $spacing[ self::KEY_CUSTOM_SPACING_SIZE ] ?? false;
 		$spacing_scale       = $spacing[ self::KEY_SPACING_SCALE ] ?? [];
 
-		/*
+		/**
 		 * By default check for `defaultSpacingSizes` boolean introduced in theme.json (v3)
 		 * and if it's false, then check for `steps` in `spacingScale` which is v2 default.
 		 *
