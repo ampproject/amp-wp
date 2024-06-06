@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { TextDecoder } from 'util';
 import { jest } from '@jest/globals';
 
 // Set up `wp.*` aliases.
@@ -33,3 +34,5 @@ global.wp = {
 global.ajaxurl = 'http://site.test/wp-admin/ajax.php';
 
 global.CSS = {};
+
+global.TextDecoder = TextDecoder;
