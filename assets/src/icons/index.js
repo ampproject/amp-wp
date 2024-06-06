@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { Path, SVG, Line, Circle } from '@wordpress/components';
+import { Path, SVG, Line, Circle, G, Rect, Defs } from '@wordpress/primitives';
 
 export const BellIcon = (
 	<SVG xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 20">
@@ -153,5 +153,48 @@ export const AMPToolbarIconBroken = (
 			stroke="white"
 			stroke-width="2"
 		/>
+	</SVG>
+);
+
+export const AMPValidationErrorsKeptIcon = (
+	<SVG
+		width="21"
+		height="21"
+		viewBox="0 0 21 21"
+		fill="none"
+		xmlns="http://www.w3.org/2000/svg"
+	>
+		<G clip-path="url(#clip-amp-validation-errors-kept)">
+			<Path
+				d="M10.7617 2.54102C15.1617 2.54102 18.7617 6.14102 18.7617 10.541C18.7617 12.141 18.2617 13.541 17.5617 14.741L18.9617 16.241C20.0617 14.641 20.7617 12.641 20.7617 10.541C20.7617 5.04102 16.2617 0.541016 10.7617 0.541016C8.76172 0.541016 6.86172 1.14102 5.26172 2.24102L6.66172 3.74102C7.86172 2.94102 9.26172 2.54102 10.7617 2.54102Z"
+				fill="#BB522E"
+			/>
+			<Path
+				d="M0.761719 10.541C0.761719 16.041 5.26172 20.541 10.7617 20.541C13.4617 20.541 15.8617 19.441 17.6617 17.741L3.66172 3.54102C1.86172 5.34102 0.761719 7.84102 0.761719 10.541ZM10.7617 18.541C6.36172 18.541 2.76172 14.941 2.76172 10.541C2.76172 9.04102 3.16172 7.74102 3.86172 6.54102L14.7617 17.441C13.5617 18.141 12.2617 18.541 10.7617 18.541Z"
+				fill="#BB522E"
+			/>
+			<Path
+				d="M14.2619 9.74062C14.3619 9.74062 14.3619 9.64062 14.3619 9.54062C14.3619 9.34062 14.1619 9.14062 13.9619 9.14062H11.9619L13.5619 10.7406L14.2619 9.74062Z"
+				fill="#BB522E"
+			/>
+			<Path
+				d="M12.4615 4.54102H11.6615L10.0615 7.14102L11.7615 8.84102L12.4615 4.54102Z"
+				fill="#BB522E"
+			/>
+			<Path
+				d="M7.46182 11.5414C7.46182 11.5414 7.36182 11.6414 7.36182 11.7414C7.36182 11.9414 7.56182 12.1414 7.76182 12.1414H10.0618L9.26182 16.6414H9.96182L12.5618 12.5414L9.06182 8.94141L7.46182 11.5414Z"
+				fill="#BB522E"
+			/>
+		</G>
+		<Defs>
+			<clipPath id="clip-amp-validation-errors-kept">
+				<Rect
+					width="20"
+					height="20"
+					fill="white"
+					transform="translate(0.761719 0.541016)"
+				/>
+			</clipPath>
+		</Defs>
 	</SVG>
 );
