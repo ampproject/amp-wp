@@ -517,7 +517,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		 */
 		$is_wp_generating_spacing_sizes = $spacing[ self::KEY_DEFAULT_SPACING_SIZES ] ?? false;
 
-		if ( isset( $spacing_scale[ self::KEY_STEPS ] ) ) {
+		if ( array_key_exists( self::KEY_STEPS, $spacing_scale ) ) {
 			$is_wp_generating_spacing_sizes = 0 !== $spacing_scale[ self::KEY_STEPS ];
 		}
 
