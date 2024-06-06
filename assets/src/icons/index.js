@@ -3,7 +3,7 @@
  */
 import { Path, SVG, Line, Circle, G, Rect, Defs } from '@wordpress/primitives';
 
-export const BellIcon = (
+export const BellIcon = () => (
 	<SVG xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 20">
 		<Path
 			fill="#707070"
@@ -12,7 +12,7 @@ export const BellIcon = (
 	</SVG>
 );
 
-export const JSErrorIcon = (
+export const JSErrorIcon = () => (
 	<SVG
 		width="12"
 		height="9"
@@ -31,7 +31,7 @@ export const JSErrorIcon = (
 	</SVG>
 );
 
-export const HTMLErrorIcon = (
+export const HTMLErrorIcon = () => (
 	<SVG
 		width="13"
 		height="6"
@@ -46,7 +46,7 @@ export const HTMLErrorIcon = (
 	</SVG>
 );
 
-export const CSSErrorIcon = (
+export const CSSErrorIcon = () => (
 	<SVG
 		width="8"
 		height="9"
@@ -61,7 +61,7 @@ export const CSSErrorIcon = (
 	</SVG>
 );
 
-export const AMPAlert = (
+export const AMPAlert = () => (
 	<SVG
 		width="20"
 		height="17"
@@ -76,7 +76,7 @@ export const AMPAlert = (
 	</SVG>
 );
 
-export const AMPDelete = (
+export const AMPDelete = () => (
 	<SVG
 		width="21"
 		height="21"
@@ -91,7 +91,7 @@ export const AMPDelete = (
 	</SVG>
 );
 
-export const AMPLogoIcon = (
+export const AMPLogoIcon = () => (
 	<SVG xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
 		<Path
 			fill="#0075C2"
@@ -100,7 +100,7 @@ export const AMPLogoIcon = (
 	</SVG>
 );
 
-export const AMPToolbarIcon = (
+export const AMPToolbarIcon = () => (
 	<SVG
 		width="21"
 		height="21"
@@ -112,7 +112,7 @@ export const AMPToolbarIcon = (
 	</SVG>
 );
 
-export const AMPToolbarIconBroken = (
+export const AMPToolbarIconBroken = () => (
 	<SVG
 		width="21"
 		height="21"
@@ -121,8 +121,8 @@ export const AMPToolbarIconBroken = (
 		xmlns="http://www.w3.org/2000/svg"
 	>
 		<Path
-			fill-rule="evenodd"
-			clip-rule="evenodd"
+			fillRule="evenodd"
+			clipRule="evenodd"
 			d="M0.912598 10.2832C0.912598 15.7832 5.4126 20.2832 10.9126 20.2832C16.4126 20.2832 20.9126 15.7832 20.9126 10.2832C20.9126 4.7832 16.4126 0.283203 10.9126 0.283203C5.4126 0.283203 0.912598 4.7832 0.912598 10.2832Z"
 			fill="white"
 		/>
@@ -135,7 +135,7 @@ export const AMPToolbarIconBroken = (
 			cy="10.2832"
 			r="9"
 			stroke="#BB522E"
-			stroke-width="2"
+			strokeWidth="2"
 		/>
 		<Line
 			x1="16.5185"
@@ -143,7 +143,7 @@ export const AMPToolbarIconBroken = (
 			x2="3.79056"
 			y2="4.61786"
 			stroke="#BB522E"
-			stroke-width="2"
+			strokeWidth="2"
 		/>
 		<Line
 			x1="19.8051"
@@ -151,12 +151,12 @@ export const AMPToolbarIconBroken = (
 			x2="3.28165"
 			y2="1.24851"
 			stroke="white"
-			stroke-width="2"
+			strokeWidth="2"
 		/>
 	</SVG>
 );
 
-export const AMPValidationErrorsKeptIcon = (
+export const AMPValidationErrorsKeptIcon = () => (
 	<SVG
 		width="21"
 		height="21"
@@ -164,7 +164,7 @@ export const AMPValidationErrorsKeptIcon = (
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
 	>
-		<G clip-path="url(#clip-amp-validation-errors-kept)">
+		<G clipPath="url(#clip-amp-validation-errors-kept)">
 			<Path
 				d="M10.7617 2.54102C15.1617 2.54102 18.7617 6.14102 18.7617 10.541C18.7617 12.141 18.2617 13.541 17.5617 14.741L18.9617 16.241C20.0617 14.641 20.7617 12.641 20.7617 10.541C20.7617 5.04102 16.2617 0.541016 10.7617 0.541016C8.76172 0.541016 6.86172 1.14102 5.26172 2.24102L6.66172 3.74102C7.86172 2.94102 9.26172 2.54102 10.7617 2.54102Z"
 				fill="#BB522E"
