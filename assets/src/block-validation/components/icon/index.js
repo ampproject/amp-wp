@@ -7,9 +7,11 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.css';
-import AMPLogoIcon from '../../../../images/amp-logo-icon.svg';
-import AMPToolbarIcon from '../../../../images/amp-icon-toolbar.svg';
-import AMPToolbarIconBroken from '../../../../images/amp-toolbar-icon-broken.svg';
+import {
+	AMPLogoIcon,
+	AMPToolbarIcon,
+	AMPToolbarIconBroken,
+} from '../../../icons';
 
 /**
  * Plugin icon.
