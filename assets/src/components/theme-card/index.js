@@ -14,7 +14,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.css';
-import MobileIcon from '../svg/mobile-icon.svg';
+import { MobileIcon } from '../../icons';
 import { Options } from '../options-context-provider';
 import { Selectable } from '../selectable';
 import { Phone } from '../phone';
