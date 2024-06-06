@@ -6,7 +6,6 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const RemoveEmptyScriptsPlugin = require('webpack-remove-empty-scripts');
-const RtlCssPlugin = require('rtlcss-webpack-plugin');
 const WebpackBar = require('webpackbar');
 
 /**
@@ -76,14 +75,14 @@ const sharedConfig = {
 				if (plugin.constructor.name === 'MiniCssExtractPlugin') {
 					plugin.options.filename = '../css/[name].css';
 				}
+				if (plugin.constructor.name === 'RtlCssPlugin') {
+					plugin.options.filename = '../css/[name]-rtl.css';
+				}
 				return plugin;
 			})
 			.filter(
 				(plugin) => plugin.constructor.name !== 'CleanWebpackPlugin'
 			),
-		new RtlCssPlugin({
-			filename: '../css/[name]-rtl.css',
-		}),
 		new RemoveEmptyScriptsPlugin(),
 	],
 	optimization: {
