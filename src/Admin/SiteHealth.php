@@ -169,7 +169,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				[
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'page_cache' ],
-					'permission_callback' => static function() {
+					'permission_callback' => static function () {
 						return current_user_can( 'view_site_health_checks' );
 					},
 				],
@@ -784,7 +784,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				'curl_multi_exec',
 				'curl_multi_init',
 			],
-			static function( $function_name ) {
+			static function ( $function_name ) {
 				return ! function_exists( $function_name );
 			}
 		);
@@ -835,7 +835,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 							implode(
 								', ',
 								array_map(
-									static function( $function_name ) {
+									static function ( $function_name ) {
 										return sprintf( '<code>%s()</code>', $function_name );
 									},
 									$undefined_curl_functions
@@ -1128,7 +1128,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				array_keys(
 					array_filter(
 						AMP_Theme_Support::get_supportable_templates(),
-						static function( $option ) {
+						static function ( $option ) {
 							return ! empty( $option['supported'] );
 						}
 					)

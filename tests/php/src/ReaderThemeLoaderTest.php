@@ -268,7 +268,6 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 
 		$this->assertEquals( 10, has_filter( 'customize_previewable_devices', [ $this->instance, 'customize_previewable_devices' ] ) );
 		$this->assertEquals( 11, has_action( 'customize_register', [ $this->instance, 'remove_customizer_themes_panel' ] ) );
-
 	}
 
 	/** @covers ::disable_widgets() */

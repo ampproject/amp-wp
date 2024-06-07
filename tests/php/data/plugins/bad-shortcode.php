@@ -14,7 +14,7 @@ add_action(
 
 add_shortcode(
 	'bad',
-	function() {
+	function () {
 		wp_enqueue_script( 'bad-shortcode' );
 		return '<script>document.write("Bad shortcode!!!");</script><noscript>Bad shortcode fallback!</noscript>';
 	}

@@ -585,7 +585,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		add_filter(
 			'get_custom_logo',
-			static function( $html ) {
+			static function ( $html ) {
 				$src = wp_get_attachment_image_src( get_theme_mod( 'custom_logo' ), 'full' );
 				if ( ! $src ) {
 					return $html;
@@ -659,7 +659,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function dequeue_scripts( $handles = [] ) {
 		add_action(
 			'wp_enqueue_scripts',
-			static function() use ( $handles ) {
+			static function () use ( $handles ) {
 				foreach ( $handles as $handle ) {
 					wp_dequeue_script( $handle );
 				}
@@ -798,7 +798,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		add_filter(
 			'body_class',
-			static function( $body_classes ) use ( $args ) {
+			static function ( $body_classes ) use ( $args ) {
 				if ( has_header_video() ) {
 					$body_classes[] = $args['class_name'];
 				}
@@ -832,7 +832,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		// @todo This was introduced in <https://github.com/ampproject/amp-wp/commit/e1c7462> but it doesn't seem to have any effect.
 		add_action(
 			'wp_enqueue_scripts',
-			static function() {
+			static function () {
 				ob_start();
 				?>
 				<style>
@@ -868,7 +868,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$method = __METHOD__;
 		add_filter(
 			'get_custom_logo',
-			static function( $html ) use ( $method ) {
+			static function ( $html ) use ( $method ) {
 				// Pattern sourced from AMP_Base_Embed_Handler::match_element_attributes().
 				$pattern = sprintf(
 					'/<img%s/',
@@ -936,7 +936,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		// that any subsequent style rules for images will continue to override.
 		add_action(
 			'wp_print_styles',
-			static function() use ( $method ) {
+			static function () use ( $method ) {
 				printf(
 					'<style data-src="%s">%s</style>',
 					esc_attr( $method ),
@@ -957,7 +957,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function add_twentyseventeen_masthead_styles() {
 		add_action(
 			'wp_enqueue_scripts',
-			static function() {
+			static function () {
 				$is_front_page_layout = ( is_front_page() && 'posts' !== get_option( 'show_on_front' ) ) || ( is_home() && is_front_page() );
 				ob_start();
 				?>
@@ -1124,7 +1124,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function add_nav_menu_styles( $args = [] ) {
 		add_action(
 			'wp_enqueue_scripts',
-			static function() use ( $args ) {
+			static function () use ( $args ) {
 				ob_start();
 				?>
 				<style>
@@ -1441,7 +1441,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		// Make sure the featured image gets responsive layout.
 		add_filter(
 			'wp_get_attachment_image_attributes',
-			static function( $attributes ) {
+			static function ( $attributes ) {
 				if ( preg_match( '/(^|\s)(attachment-post-thumbnail)(\s|$)/', $attributes['class'] ) ) {
 					$attributes['data-amp-layout'] = 'responsive';
 				}
@@ -1458,7 +1458,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function add_twentyfourteen_masthead_styles() {
 		add_action(
 			'wp_enqueue_scripts',
-			static function() {
+			static function () {
 				ob_start();
 				?>
 				<style>
@@ -2030,7 +2030,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function amend_twentytwentyone_dark_mode_styles() {
 		add_action(
 			'wp_enqueue_scripts',
-			static function() {
+			static function () {
 				$theme_style_handle     = 'twenty-twenty-one-style';
 				$dark_mode_style_handle = 'tt1-dark-mode';
 
@@ -2070,7 +2070,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function amend_twentytwentyone_styles() {
 		add_action(
 			'wp_enqueue_scripts',
-			static function() {
+			static function () {
 				$style_handle = 'twenty-twenty-one-style';
 
 				// Bail if the stylesheet is not enqueued.

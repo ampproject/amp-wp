@@ -69,7 +69,7 @@ class AMP_Admin_Pointers {
 					'position'        => [
 						'align' => 'middle',
 					],
-					'active_callback' => static function() {
+					'active_callback' => static function () {
 						return version_compare( strtok( AMP__VERSION, '-' ), '1.1', '<' );
 					},
 				]

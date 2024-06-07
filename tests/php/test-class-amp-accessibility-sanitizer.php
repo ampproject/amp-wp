@@ -153,7 +153,6 @@ class AMP_Accessibility_Sanitizer_Test extends TestCase {
 				'expected' => '<div id="main-container">Hello World!</div>',
 			],
 		];
-
 	}
 
 	/**
@@ -211,6 +210,5 @@ class AMP_Accessibility_Sanitizer_Test extends TestCase {
 		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->assertEqualMarkup( $expected, $actual );
-
 	}
 }

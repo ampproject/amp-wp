@@ -548,7 +548,7 @@ class Test_AMP_HTTP extends TestCase {
 		add_filter( 'wp_doing_ajax', '__return_true' );
 		add_filter(
 			'wp_die_ajax_handler',
-			static function() {
+			static function () {
 				return '__return_null';
 			}
 		);
@@ -572,7 +572,7 @@ class Test_AMP_HTTP extends TestCase {
 		add_filter( 'wp_doing_ajax', '__return_true' );
 		add_filter(
 			'wp_die_ajax_handler',
-			static function() {
+			static function () {
 				return '__return_null';
 			}
 		);
@@ -602,7 +602,7 @@ class Test_AMP_HTTP extends TestCase {
 		);
 		add_filter(
 			'amp_comment_posted_message',
-			static function( $message, WP_Comment $filter_comment ) {
+			static function ( $message, WP_Comment $filter_comment ) {
 				return sprintf( '(comment=%d,approved=%d)', $filter_comment->comment_ID, $filter_comment->comment_approved );
 			},
 			10,

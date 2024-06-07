@@ -109,7 +109,6 @@ class SupportDataTest extends DependencyInjectedTestCase {
 		$instance = new SupportData( $input );
 
 		$this->assertEquals( $expected, $instance->urls );
-
 	}
 
 	/**
@@ -471,7 +470,6 @@ class SupportDataTest extends DependencyInjectedTestCase {
 			$this->assertArrayHasKey( $key, $theme_info[0] );
 			$this->assertEquals( $active_theme[ $key ], $theme_info[0][ $key ] );
 		}
-
 	}
 
 	/**

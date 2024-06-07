@@ -88,7 +88,6 @@ class Test_AMP_Customizer_Design_Settings extends TestCase {
 
 		$this->assertEquals( $enabled ? 10 : false, has_action( 'amp_customizer_init', [ AMP_Customizer_Design_Settings::class, 'init_customizer' ] ) );
 		$this->assertEquals( $enabled ? 10 : false, has_filter( 'amp_customizer_get_settings', [ AMP_Customizer_Design_Settings::class, 'append_settings' ] ) );
-
 	}
 
 	/** @return array */

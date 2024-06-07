@@ -335,7 +335,7 @@ class AMP_Theme_Support {
 
 			add_filter(
 				'template_include',
-				static function() {
+				static function () {
 					return AMP__DIR__ . '/includes/templates/reader-template-loader.php';
 				},
 				PHP_INT_MAX
@@ -859,13 +859,13 @@ class AMP_Theme_Support {
 		// Prevent MediaElement.js scripts/styles from being enqueued.
 		add_filter(
 			'wp_video_shortcode_library',
-			static function() {
+			static function () {
 				return 'amp';
 			}
 		);
 		add_filter(
 			'wp_audio_shortcode_library',
-			static function() {
+			static function () {
 				return 'amp';
 			}
 		);
@@ -873,7 +873,7 @@ class AMP_Theme_Support {
 		// Don't show loading indicator on custom logo since it makes most sense for larger images.
 		add_filter(
 			'get_custom_logo',
-			static function( $html ) {
+			static function ( $html ) {
 				return preg_replace( '/(?<=<img\s)/', ' data-amp-noloading="" ', $html );
 			},
 			1
@@ -900,7 +900,7 @@ class AMP_Theme_Support {
 		add_filter( 'get_header_image_tag', [ __CLASS__, 'amend_header_image_with_video_header' ], PHP_INT_MAX );
 		add_action(
 			'wp_print_footer_scripts',
-			static function() {
+			static function () {
 				wp_dequeue_script( 'wp-custom-header' );
 			},
 			0
@@ -1273,14 +1273,14 @@ class AMP_Theme_Support {
 		// Emulate customize support script in PHP, to assume Customizer.
 		add_action(
 			'admin_bar_menu',
-			static function() {
+			static function () {
 				remove_action( 'wp_before_admin_bar_render', 'wp_customize_support_script' );
 			},
 			41
 		);
 		add_filter(
 			'body_class',
-			static function( $body_classes ) {
+			static function ( $body_classes ) {
 				return array_merge(
 					array_diff(
 						$body_classes,
@@ -2121,7 +2121,7 @@ class AMP_Theme_Support {
 
 			if ( count( $errors ) > 0 ) {
 				$error_messages = array_map(
-					static function( Optimizer\Error $error ) {
+					static function ( Optimizer\Error $error ) {
 						return ' - ' . $error->getCode() . ': ' . $error->getMessage();
 					},
 					iterator_to_array( $errors )

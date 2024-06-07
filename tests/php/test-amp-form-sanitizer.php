@@ -279,7 +279,7 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 		}
 
 		$actual_errors                     = [];
-		$args['validation_error_callback'] = static function( $error ) use ( &$actual_errors ) {
+		$args['validation_error_callback'] = static function ( $error ) use ( &$actual_errors ) {
 			$actual_errors[] = $error;
 			return true;
 		};

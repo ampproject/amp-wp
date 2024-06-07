@@ -218,6 +218,5 @@ class SupportLinkTest extends TestCase {
 		);
 
 		$this->assertContains( $should_have, $output );
-
 	}
 }
