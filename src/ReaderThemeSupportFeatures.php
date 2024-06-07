@@ -152,6 +152,13 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	const KEY_CUSTOM_SPACING_SIZE = 'customSpacingSize';
 
 	/**
+	 * Key for `defaultSpacingSizes` boolean in theme.json (v3).
+	 *
+	 * @var string
+	 */
+	const KEY_DEFAULT_SPACING_SIZES = 'defaultSpacingSizes';
+
+	/**
 	 * Action fired when the cached primary_theme_support should be updated.
 	 *
 	 * @var string
@@ -496,10 +503,23 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 * Print spacing sizes custom properties.
 	 */
 	private function print_spacing_sizes_custom_properties() {
-		$custom_properties              = [];
-		$spacing_sizes                  = wp_get_global_settings( [ self::KEY_SPACING, self::KEY_SPACING_SIZES ], self::KEY_THEME );
-		$is_wp_generating_spacing_sizes = 0 !== wp_get_global_settings( [ self::KEY_SPACING, self::KEY_SPACING_SCALE ], self::KEY_THEME )[ self::KEY_STEPS ];
-		$custom_spacing_size            = wp_get_global_settings( [ self::KEY_SPACING, self::KEY_CUSTOM_SPACING_SIZE ], self::KEY_THEME );
+		$custom_properties   = [];
+		$spacing             = wp_get_global_settings( [ self::KEY_SPACING ], self::KEY_THEME );
+		$spacing_sizes       = $spacing[ self::KEY_SPACING_SIZES ] ?? [];
+		$custom_spacing_size = $spacing[ self::KEY_CUSTOM_SPACING_SIZE ] ?? false;
+		$spacing_scale       = $spacing[ self::KEY_SPACING_SCALE ] ?? [];
+
+		/**
+		 * By default check for `defaultSpacingSizes` boolean introduced in theme.json (v3)
+		 * and if it's false, then check for `steps` in `spacingScale` which is v2 default.
+		 *
+		 * @see <https://github.com/WordPress/gutenberg/pull/58409#issuecomment-2078077477>.
+		 */
+		$is_wp_generating_spacing_sizes = $spacing[ self::KEY_DEFAULT_SPACING_SIZES ] ?? false;
+
+		if ( array_key_exists( self::KEY_STEPS, $spacing_scale ) ) {
+			$is_wp_generating_spacing_sizes = 0 !== $spacing_scale[ self::KEY_STEPS ];
+		}
 
 		if ( ! $is_wp_generating_spacing_sizes && $custom_spacing_size ) {
 			if ( isset( $spacing_sizes[ self::KEY_THEME ] ) ) {
