@@ -148,6 +148,8 @@ module.exports = {
 				'jest/prefer-expect-assertions': 'off',
 				'jest/prefer-inline-snapshots': 'off',
 				'jest/unbound-method': 'off',
+				// Disabling because it's not the Jest environment.
+				'jest/prefer-importing-jest-globals': 'off',
 			},
 		},
 		{
