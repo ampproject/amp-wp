@@ -1,16 +1,4 @@
 /**
- * External dependencies
- */
-import {
-	afterAll,
-	beforeAll,
-	beforeEach,
-	describe,
-	expect,
-	it,
-} from '@jest/globals';
-
-/**
  * WordPress dependencies
  */
 import { activateTheme } from '@wordpress/e2e-test-utils';

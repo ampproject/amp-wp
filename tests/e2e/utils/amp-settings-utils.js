@@ -2,7 +2,6 @@
  * External dependencies
  */
 import path from 'path';
-import { expect } from '@jest/globals';
 
 /**
  * WordPress dependencies

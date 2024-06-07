@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { describe, expect, it } from '@jest/globals';
-
-/**
  * WordPress dependencies
  */
 import { createNewPost, visitAdminPage } from '@wordpress/e2e-test-utils';

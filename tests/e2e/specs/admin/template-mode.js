@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { describe, expect, it } from '@jest/globals';
-
-/**
  * Internal dependencies
  */
 import { completeWizard } from '../../utils/onboarding-wizard-utils';
