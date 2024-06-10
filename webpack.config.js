@@ -273,6 +273,32 @@ const wpPolyfills = {
 	],
 };
 
+const reactJSXRuntimePolyfill = {
+	...sharedConfig,
+	entry: {
+		'react-jsx-runtime': {
+			import: 'react/jsx-runtime',
+		},
+	},
+	output: {
+		path: path.resolve(__dirname, 'assets/js'),
+		filename: 'react-jsx-runtime.js',
+		library: {
+			name: 'ReactJSXRuntime',
+			type: 'window',
+		},
+	},
+	plugins: [
+		new WebpackBar({
+			name: 'React JSX Runtime Polyfill',
+			color: '#61dafb',
+		}),
+	],
+	externals: {
+		react: 'React',
+	},
+};
+
 const wpDomReady = preparePackagesSchema(['@wordpress/dom-ready']);
 
 const wpDomReadyPackage = {
@@ -569,6 +595,7 @@ module.exports = [
 	admin,
 	customizer,
 	wpPolyfills,
+	reactJSXRuntimePolyfill,
 	wpDomReadyPackage,
 	onboardingWizard,
 	settingsPage,
