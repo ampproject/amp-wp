@@ -986,6 +986,24 @@ function amp_register_default_scripts( $wp_scripts ) {
 			null
 		);
 	}
+
+	/**
+	 * Register polyfill for React JSX runtime which is required by:
+	 * - amp-site-scan-notice
+	 * - amp-block-editor
+	 * - amp-block-validation
+	 *
+	 * @see <https://github.com/WordPress/wordpress-develop/pull/6678>.
+	 * @TODO: Remove this once the minimum required version of WordPress is 6.6 for the AMP plugin.
+	 */
+	if ( ! $wp_scripts->query( 'react-jsx-runtime', 'registered' ) ) {
+		$wp_scripts->add(
+			'react-jsx-runtime',
+			amp_get_asset_url( 'js/react-jsx-runtime.js' ),
+			[ 'react' ], // Since it is a polyfill for react JSX runtime, it is dependent on react.
+			AMP__VERSION
+		);
+	}
 }
 
 /**
