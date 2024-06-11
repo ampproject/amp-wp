@@ -101,11 +101,6 @@ class Test_AMP_Post_Type_Support extends TestCase {
 	 * @covers AMP_Post_Type_Support::get_eligible_post_types()
 	 */
 	public function test_get_eligible_post_types_with_filter() {
-
-		if ( version_compare( get_bloginfo( 'version' ), '5.9', '<' ) ) {
-			$this->markTestSkipped( 'Requires WordPress 5.9 or greater than that.' );
-		}
-
 		register_post_type(
 			'non_amp_book',
 			[

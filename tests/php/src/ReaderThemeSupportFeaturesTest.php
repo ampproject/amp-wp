@@ -322,11 +322,6 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 	 * @covers ::get_theme_support_features()
 	*/
 	public function test_get_theme_support_features_with_theme_json() {
-		// wp_get_global_settings() is only available in WP 5.9+.
-		if ( ! function_exists( 'wp_get_global_settings' ) ) {
-			$this->markTestSkipped( __METHOD__ . ' requires WP 5.9+' );
-		}
-
 		switch_theme( self::THEME_WITH_THEME_JSON );
 
 		$features = $this->instance->get_theme_support_features( false );
