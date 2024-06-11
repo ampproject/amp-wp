@@ -121,25 +121,8 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 	 * @covers ::enqueue_block_assets()
 	 */
 	public function test_enqueue_block_assets() {
-		// Block validation script uses features only available beginning with WP 5.6.
-		if ( version_compare( get_bloginfo( 'version' ), '5.6', '<' ) ) {
-			$this->markTestSkipped( 'The block validation script is only available in WordPress 5.6 and above.' );
-		}
-
 		set_current_screen( 'post.php' );
 		get_current_screen()->is_block_editor = true;
-
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The block editor is not available' );
-		}
-
-		if (
-			defined( 'GUTENBERG_VERSION' )
-			&&
-			version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '<' )
-		) {
-			$this->markTestSkipped( 'The version of Gutenberg installed is not compatible with the plugin.' );
-		}
 
 		// If a post type doesn't have AMP enabled, the script shouldn't be enqueued.
 		register_post_type(

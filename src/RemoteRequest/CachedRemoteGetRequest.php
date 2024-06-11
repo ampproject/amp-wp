@@ -113,12 +113,7 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 		$headers         = [];
 
 		if ( is_string( $cached_response ) ) {
-			if ( PHP_MAJOR_VERSION >= 7 ) {
-				$cached_response = unserialize( $cached_response, [ CachedResponse::class, DateTimeImmutable::class ] ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize,PHPCompatibility.FunctionUse.NewFunctionParameters.unserialize_optionsFound
-			} else {
-				// PHP 5.6 does not provide the second $options argument yet.
-				$cached_response = unserialize( $cached_response ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
-			}
+			$cached_response = unserialize( $cached_response, [ CachedResponse::class, DateTimeImmutable::class ] ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize,PHPCompatibility.FunctionUse.NewFunctionParameters.unserialize_optionsFound
 		}
 
 		if ( ! $cached_response instanceof CachedResponse || $cached_response->is_expired() ) {

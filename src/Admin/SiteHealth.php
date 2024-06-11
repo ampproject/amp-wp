@@ -113,16 +113,12 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	/**
 	 * Detect whether async tests can be used.
 	 *
-	 * Returns true if on WP 5.6+ and *not* on version of Health Check plugin which doesn't support REST async tests.
+	 * Returns true if *not* on version of Health Check plugin which doesn't support REST async tests.
 	 *
 	 * @param array $tests Tests.
 	 * @return bool
 	 */
 	private function supports_async_rest_tests( $tests ) {
-		if ( version_compare( get_bloginfo( 'version' ), '5.6', '<' ) ) {
-			return false;
-		}
-
 		if ( defined( 'HEALTH_CHECK_PLUGIN_VERSION' ) ) {
 			$core_async_tests = [
 				'dotorg_communication',
