@@ -17,23 +17,6 @@
  */
 
 /**
- * Errors to be ignored in class-amp-allowed-tags-generated.php
- * Note: class-amp-allowed-tags-generated.php is a auto-generated file.
- */
-$ignore_errors_in_class_amp_allowed_tags_generated = [
-	[
-		'message' => '#^Static property AMP_Allowed_Tags_Generated\\:\\:\\$minimum_validator_revision_required is never read, only written\\.$#',
-		'count'   => 1,
-		'path'    => __DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generated.php',
-	],
-	[
-		'message' => '#^Static property AMP_Allowed_Tags_Generated\\:\\:\\$spec_file_revision is never read, only written\\.$#',
-		'count'   => 1,
-		'path'    => __DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generated.php',
-	],
-];
-
-/**
  * Errors due `function_exists() and method_exists() always evaluating to true` in PHPStan.
  *
  * @see https://github.com/phpstan/phpstan/issues/8980
@@ -57,17 +40,11 @@ $ignore_errors_due_to_function_and_method_exists_always_evaluating_to_true = [
 		'count'   => 1,
 		'path'    => __DIR__ . '/src/Admin/SiteHealth.php',
 	],
-	[
-		'message' => '#^Call to function method_exists\\(\\) with ReflectionType and \'isBuiltin\' will always evaluate to true\\.$#',
-		'count'   => 1,
-		'path'    => __DIR__ . '/src/Infrastructure/Injector/SimpleInjector.php',
-	],
 ];
 
 return [
 	'parameters' => [
 		'ignoreErrors' => array_merge(
-			$ignore_errors_in_class_amp_allowed_tags_generated,
 			$ignore_errors_due_to_function_and_method_exists_always_evaluating_to_true
 		),
 	],
