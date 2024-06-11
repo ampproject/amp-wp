@@ -7,7 +7,7 @@
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
  * Version: 2.5.4-alpha
  * License: GPLv2 or later
- * Requires at least: 5.3
+ * Requires at least: 6.3
  * Requires PHP: 7.4
  *
  * @package AMP

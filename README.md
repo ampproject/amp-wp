@@ -6,7 +6,7 @@ An easier path to great Page Experience for everyone. Powered by AMP.
 
 **Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [rtcamp](https://profiles.wordpress.org/rtcamp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [albertomedina](https://profiles.wordpress.org/albertomedina), [schlessera](https://profiles.wordpress.org/schlessera), [delawski](https://profiles.wordpress.org/delawski/), [swissspidy](https://profiles.wordpress.org/swissspidy), [pierlo](https://profiles.wordpress.org/pierlo), [joshuawold](https://profiles.wordpress.org/joshuawold), [thelovekesh](https://profiles.wordpress.org/thelovekesh/)  
 **Tags:** [page experience](https://wordpress.org/plugins/tags/page-experience), [performance](https://wordpress.org/plugins/tags/performance), [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization)  
-**Requires at least:** 5.3  
+**Requires at least:** 6.3  
 **Tested up to:** 6.5  
 **Stable tag:** 2.5.3  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
@@ -38,8 +38,8 @@ The official AMP plugin for WordPress is a powerful tool that helps you build us
 
 This plugin can be used by both developers and non-developer users:
 
-- If you are a developer or tech savvy user, you can take advantage of advanced developer tools provided by the AMP plugin to fix validation issues your site may have and reach full AMP compatibility.
-- If you are not a developer or tech savvy user, or you just simply don't want to deal with validation issues and tackling development tasks, the AMP plugin allows you to assemble fully AMP-compatible sites with different configurations taking advantage of AMP-compatible components. The plugin helps you to deal with validation issues by removing invalid AMP markup in cases where it is possible, or altogether suppressing AMP-incompatible plugins on AMP pages.
+-   If you are a developer or tech savvy user, you can take advantage of advanced developer tools provided by the AMP plugin to fix validation issues your site may have and reach full AMP compatibility.
+-   If you are not a developer or tech savvy user, or you just simply don't want to deal with validation issues and tackling development tasks, the AMP plugin allows you to assemble fully AMP-compatible sites with different configurations taking advantage of AMP-compatible components. The plugin helps you to deal with validation issues by removing invalid AMP markup in cases where it is possible, or altogether suppressing AMP-incompatible plugins on AMP pages.
 
 The bottom line is that regardless of your technical expertise, the AMP plugin can be useful to you.
 
