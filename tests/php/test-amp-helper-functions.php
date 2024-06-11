@@ -132,21 +132,11 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		}
 	}
 
-	/** @return array */
-	public function get_data_to_test_amp_bootstrap_plugin() {
-		return [
-			'5.4' => [ '5.4', true ],
-			'5.5' => [ '5.5', false ],
-		];
-	}
-
 	/**
-	 * @dataProvider get_data_to_test_amp_bootstrap_plugin
 	 * @covers ::amp_bootstrap_plugin()
 	 */
-	public function test_amp_bootstrap_plugin( $wp_version, $needs_script_loader_tag_filter ) {
+	public function test_amp_bootstrap_plugin() {
 		$this->remove_bootstrapped_hooks();
-		$GLOBALS['wp_version'] = $wp_version;
 		amp_bootstrap_plugin();
 
 		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'amp_register_default_scripts' ) );
@@ -155,15 +145,6 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->assertEquals( 9, has_action( 'plugins_loaded', '_amp_bootstrap_customizer' ) );
 
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
-
-		if ( $needs_script_loader_tag_filter ) {
-			$this->assertEquals(
-				defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, // phpcs:ignore PHPCompatibility.Constants.NewConstants
-				has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag' )
-			);
-		} else {
-			$this->assertFalse( has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag' ) );
-		}
 		$this->assertEquals( 10, has_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous' ) );
 		$this->assertEquals( 10, has_filter( 'all_plugins', 'amp_modify_plugin_description' ) );
 	}
