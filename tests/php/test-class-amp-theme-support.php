@@ -384,14 +384,6 @@ class Test_AMP_Theme_Support extends TestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_validate_non_amp_theme() {
-		// Remove ID attributes which were added in WP 5.5.
-		add_filter(
-			'script_loader_tag',
-			static function ( $script ) {
-				return preg_replace( "/ id='amp-[^']+?'/", '', $script );
-			}
-		);
-
 		wp_scripts();
 		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
@@ -2061,14 +2053,6 @@ class Test_AMP_Theme_Support extends TestCase {
 	 * Initializes and returns the original HTML.
 	 */
 	private function get_original_html() {
-		// Remove ID attributes which were added in WP 5.5.
-		add_filter(
-			'script_loader_tag',
-			static function ( $script ) {
-				return preg_replace( '/ id=(["\'])amp-.*?\1/', '', $script );
-			}
-		);
-
 		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		global $wp_widget_factory, $wp_scripts, $wp_styles;
 		$wp_scripts = null;

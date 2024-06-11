@@ -60,9 +60,6 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			'plugin_file_pattern',
 			null
 		);
-
-		// Work around issue with WP 5.5 compatibility where a failure occurs for undefined property: WP_Block_Type::$supports.
-		remove_filter( 'render_block', 'gutenberg_experimental_apply_classnames_and_styles' );
 	}
 
 	/**

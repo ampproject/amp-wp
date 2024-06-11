@@ -1212,11 +1212,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 			'wp_editor_has_scripts_attributed'           => [
 				function () {
-					if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
-						// @see <https://github.com/WordPress/wordpress-develop/commit/d241ab3b55b06fed59e7ea03318e9f872399b390>
-						$this->markTestSkipped( 'The script ID attribute with before, after and extra was only added to scripts in WP 5.5.' );
-					}
-
 					add_action(
 						'wp_enqueue_scripts',
 						static function () {
@@ -1254,12 +1249,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			],
 			'wp_editor_has_scripts_attributed_on_old_wp_versions' => [
 				function () {
-					if ( version_compare( get_bloginfo( 'version' ), '5.5', '>' ) ) {
-						// @see <https://github.com/WordPress/wordpress-develop/commit/d241ab3b55b06fed59e7ea03318e9f872399b390>
-						//@see <https://github.com/WordPress/wordpress-develop/commit/d241ab3b55b06fed59e7ea03318e9f872399b390>
-						$this->markTestSkipped( 'The script ID attribute with before, after and extra was only added to scripts in WP 5.5.' );
-					}
-
 					add_action(
 						'wp_enqueue_scripts',
 						static function () {
@@ -1928,7 +1917,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			$sources[] = [
 				'type'     => 'core',
 				'name'     => 'wp-includes',
-				'function' => version_compare( get_bloginfo( 'version' ), '5.5-alpha', '>' ) ? 'wp_filter_content_tags' : 'wp_make_content_images_responsive',
+				'function' => 'wp_filter_content_tags',
 			];
 		}
 
