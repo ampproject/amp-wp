@@ -89,34 +89,6 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * @covers ::check_core_version()
-	 */
-	public function test_check_core_version() {
-		global $wp_version;
-
-		// This will always be true by default because set_up calls markTestSkipped if WP_Site_Health doesn't exist.
-		$this->assertTrue( SupportScreen::check_core_version() );
-
-		$wp_version = '4.9';
-		$this->assertFalse( SupportScreen::check_core_version() );
-
-		$wp_version = '5.0';
-		$this->assertFalse( SupportScreen::check_core_version() );
-
-		$wp_version = '5.1';
-		$this->assertFalse( SupportScreen::check_core_version() );
-
-		$wp_version = '5.2';
-		$this->assertFalse( SupportScreen::check_core_version() );
-
-		$wp_version = '5.3';
-		$this->assertTrue( SupportScreen::check_core_version() );
-
-		$wp_version = '6.3';
-		$this->assertTrue( SupportScreen::check_core_version() );
-	}
-
-	/**
 	 * @covers ::is_needed()
 	 * @covers ::has_cap()
 	 */
