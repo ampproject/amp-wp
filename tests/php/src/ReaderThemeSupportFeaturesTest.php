@@ -474,22 +474,18 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 			$output = get_echo( [ $this->instance, 'print_theme_support_styles' ] );
 
 			// Assert fluid typography styles.
-			if ( function_exists( 'wp_get_typography_font_size_value' ) ) {
-				$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
-				$this->assertStringContainsString( 'font-size: clamp(', $output );
-				$this->assertStringContainsString( '+ ((', $output );
-				$this->assertStringContainsString( ':root .has-small-font-size { font-size: clamp(0.875rem', $output );
-			}
+			$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
+			$this->assertStringContainsString( 'font-size: clamp(', $output );
+			$this->assertStringContainsString( '+ ((', $output );
+			$this->assertStringContainsString( ':root .has-small-font-size { font-size: clamp(0.875rem', $output );
 
 			// Assert spacing size custom properties.
-			if ( $this->call_private_method( $this->instance, 'theme_has_theme_json' ) && function_exists( 'wp_get_global_settings' ) ) {
-				$this->assertStringContainsString( '<style id="amp-wp-theme-support-spacing-sizes-custom-properties">', $output );
-				$this->assertStringContainsString( ':root {', $output );
-				$this->assertStringContainsString( '--wp--preset--spacing--30:', $output );
-				$this->assertStringContainsString( '--wp--preset--spacing--80:', $output );
-				$this->assertStringContainsString( '}', $output );
-				$this->assertStringContainsString( '</style>', $output );
-			}
+			$this->assertStringContainsString( '<style id="amp-wp-theme-support-spacing-sizes-custom-properties">', $output );
+			$this->assertStringContainsString( ':root {', $output );
+			$this->assertStringContainsString( '--wp--preset--spacing--30:', $output );
+			$this->assertStringContainsString( '--wp--preset--spacing--80:', $output );
+			$this->assertStringContainsString( '}', $output );
+			$this->assertStringContainsString( '</style>', $output );
 		}
 	}
 

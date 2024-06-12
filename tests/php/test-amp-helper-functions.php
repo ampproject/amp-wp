@@ -162,62 +162,6 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		}
 	}
 
-	/** @covers ::amp_ensure_id_attribute_on_script_loader_tag() */
-	public function test_amp_ensure_id_attribute_on_script_loader_tag() {
-		$this->assertEquals(
-			'<script src="foo.js" id="foo-js"></script>',
-			amp_ensure_id_attribute_on_script_loader_tag( '<script src="foo.js"></script>', 'foo' )
-		);
-
-		$this->assertEquals(
-			'<script data-before src="foo.js" id="foo-js" data-after></script>',
-			amp_ensure_id_attribute_on_script_loader_tag( '<script data-before src="foo.js" data-after></script>', 'foo' )
-		);
-
-		$this->assertEquals(
-			'<script data-before src="foo.js?bar=\'baz\'" id="foo-js" data-after></script>',
-			amp_ensure_id_attribute_on_script_loader_tag( '<script data-before src="foo.js?bar=\'baz\'" data-after></script>', 'foo' )
-		);
-
-		$this->assertEquals(
-			"<script data-before src='foo.js?bar=\"baz\"' id=\"foo-js\" data-after></script>",
-			amp_ensure_id_attribute_on_script_loader_tag( "<script data-before src='foo.js?bar=\"baz\"' data-after></script>", 'foo' )
-		);
-
-		$this->assertEquals(
-			'<script type=\'text/javascript\' src=\'https://wordpress-stable.lndo.site/wp-includes/js/comment-reply.min.js?ver=5.0.14\' id="comment-reply-js"></script>',
-			amp_ensure_id_attribute_on_script_loader_tag( '<script type=\'text/javascript\' src=\'https://wordpress-stable.lndo.site/wp-includes/js/comment-reply.min.js?ver=5.0.14\'></script>', 'comment-reply' )
-		);
-
-		$inline_script_before = '<script>/* inline script id="hello" */</script>';
-		$inline_script_after  = '<script id="after">/* inline script */</script>';
-		$this->assertEquals(
-			$inline_script_before . '<script src="foo.js" id="foo-js"></script>' . $inline_script_after,
-			amp_ensure_id_attribute_on_script_loader_tag(
-				$inline_script_before . '<script src="foo.js"></script>' . $inline_script_after,
-				'foo'
-			)
-		);
-
-		$foo_script = '<script src="foo.js" id="bar"></script>';
-		$this->assertEquals(
-			$foo_script,
-			amp_ensure_id_attribute_on_script_loader_tag( $foo_script, 'foo' )
-		);
-
-		$foo_script = '<script id=\'bar\' src=\'foo.js\'></script>';
-		$this->assertEquals(
-			$foo_script,
-			amp_ensure_id_attribute_on_script_loader_tag( $foo_script, 'foo' )
-		);
-
-		$amp_runtime_script = '<script src="https://cdn.ampproject.org/v0.js" id="amp-runtime-js"></script>';
-		$this->assertEquals(
-			$amp_runtime_script,
-			amp_ensure_id_attribute_on_script_loader_tag( $amp_runtime_script, 'amp-runtime' )
-		);
-	}
-
 	/** @covers ::amp_init() */
 	public function test_amp_init_migration() {
 		global $wp_actions;
