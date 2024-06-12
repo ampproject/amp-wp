@@ -8,54 +8,13 @@ module.exports = function (api) {
 
 	return {
 		...config,
-		plugins: [
-			...config.plugins,
-			'@babel/plugin-proposal-class-properties',
-			[
-				'inline-react-svg',
-				{
-					svgo: {
-						plugins: [
-							{
-								name: 'preset-default',
-								params: {
-									overrides: {
-										cleanupIDs: {
-											minify: false, // Prevent duplicate SVG IDs from minification.
-										},
-									},
-								},
-							},
-						],
-					},
-				},
-			],
-		],
+		plugins: [...config.plugins, '@babel/plugin-proposal-class-properties'],
 		sourceMaps: true,
 		env: {
 			production: {
 				plugins: [
 					...config.plugins,
 					'@babel/plugin-proposal-class-properties',
-					[
-						'inline-react-svg',
-						{
-							svgo: {
-								plugins: [
-									{
-										name: 'preset-default',
-										params: {
-											overrides: {
-												cleanupIDs: {
-													minify: false, // Prevent duplicate SVG IDs from minification.
-												},
-											},
-										},
-									},
-								],
-							},
-						},
-					],
 					'transform-react-remove-prop-types',
 				],
 			},
