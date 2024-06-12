@@ -69,7 +69,7 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 	 *
 	 * @param BackgroundTaskDeactivator $background_task_deactivator Deactivator.
 	 */
-	public function __construct( BackgroundTaskDeactivator $background_task_deactivator ) {
+	public function __construct( BackgroundTaskDeactivator $background_task_deactivator ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
 		parent::__construct( $background_task_deactivator );
 	}
 
@@ -232,7 +232,7 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 		// Note: We cannot use the is_css_transient_caching_disabled method because we need to get the underlying stored value.
 		$disabled = AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
 
-		if ( empty( $disabled ) ) {
+		if ( $disabled ) {
 			return;
 		}
 
