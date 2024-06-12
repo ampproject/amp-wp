@@ -67,7 +67,6 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 */
 	public function register() {
 		add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
-		add_action( 'rest_api_init', [ $this, 'register_async_test_endpoints' ] );
 		add_filter( 'debug_information', [ $this, 'add_debug_information' ] );
 		add_filter( 'site_status_test_result', [ $this, 'modify_test_result' ] );
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
