@@ -21,8 +21,7 @@ const cropImageText = 'Crop Image';
 describe('Featured Image Notice', () => {
 	beforeEach(async () => {
 		await createNewPost({ postType: 'post' });
-		await clickButton('Featured image');
-		await clickButton('Set featured image');
+		await clickButton('Set featured image'); // Prior to WP 6.6 and in older Gutenberg versions, this button was called "Featured image".
 	});
 
 	it('should not display a notice, nor suggest cropping, when the image is the expected size', async () => {
@@ -34,8 +33,6 @@ describe('Featured Image Notice', () => {
 
 		// This should not suggest cropping.
 		await expect(page).not.toMatch(cropImageText);
-
-		await clickButton('Featured image');
 	});
 
 	it('should display a notice when the image is too small, but not suggest cropping', async () => {
