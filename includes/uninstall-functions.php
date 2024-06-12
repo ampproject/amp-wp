@@ -92,13 +92,6 @@ function delete_posts() {
  * @internal
  */
 function delete_terms() {
-
-	// Abort if term splitting has not been done. This is done by WooCommerce so it's
-	// it's also done here for good measure, even though we require WP 4.9+.
-	if ( version_compare( get_bloginfo( 'version' ), '4.2', '<' ) ) {
-		return;
-	}
-
 	/** @var \wpdb */
 	global $wpdb;
 
