@@ -2970,7 +2970,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$script                = wp_scripts()->registered[ $slug ];
 		$expected_dependencies = [
 			'lodash',
-			'react',
+			'react-jsx-runtime',
 			'wp-api-fetch',
 			'wp-block-editor',
 			'wp-components',
@@ -2981,6 +2981,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			'wp-hooks',
 			'wp-i18n',
 			'wp-plugins',
+			'wp-primitives',
 			'wp-url',
 		];
 

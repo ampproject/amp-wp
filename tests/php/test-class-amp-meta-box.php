@@ -147,7 +147,7 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 			[
 				'lodash',
 				'moment',
-				'react',
+				'react-jsx-runtime',
 				'wp-block-editor',
 				'wp-blocks',
 				'wp-components',
@@ -159,6 +159,7 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 				'wp-hooks',
 				'wp-i18n',
 				'wp-plugins',
+				'wp-primitives',
 			],
 			$block_script->deps
 		);
