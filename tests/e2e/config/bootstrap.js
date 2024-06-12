@@ -22,6 +22,7 @@ import {
  */
 import { cleanUpSettings } from '../utils/onboarding-wizard-utils';
 import {
+	activatePlugin,
 	deactivatePlugin,
 	installLocalPlugin,
 } from '../utils/amp-settings-utils';
@@ -265,6 +266,7 @@ async function setupThemesAndPlugins() {
 	await installTheme('hestia');
 	await installTheme('twentytwenty'); // Ensure that twentytwenty theme is installed.
 	await activateTheme('twentytwenty');
+	await activatePlugin('gutenberg');
 }
 
 /**
