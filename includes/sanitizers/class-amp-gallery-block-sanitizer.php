@@ -64,12 +64,19 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * The markup structure has changed over time:
 	 *
+	 *  - WordPress<5.2: ul.wp-block-gallery > li
+	 *  - WordPress<5.9: figure.wp-block-gallery > ul > li > figure > img
 	 *  - WordPress≥5.9: figure.wp-block-gallery > figure.wp-block-image > img
 	 *
 	 * @since 0.2
 	 */
 	public function sanitize() {
-		$gallery_elements = $this->dom->xpath->query( './/figure[contains( concat( " ", normalize-space( @class ), " " ), " wp-block-gallery " )]', $this->dom->body );
+		$class_query = 'contains( concat( " ", normalize-space( @class ), " " ), " wp-block-gallery " )';
+
+		$gallery_elements = $this->dom->xpath->query(
+			sprintf( './/ul[ %1$s ] | .//figure[ %1$s ]', $class_query ),
+			$this->dom->body
+		);
 
 		foreach ( $gallery_elements as $gallery_element ) {
 			/** @var Element $gallery_element */
