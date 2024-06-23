@@ -79,7 +79,6 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 	 * @return void
 	 */
 	public function register() {
-		add_action( 'amp_plugin_update', [ $this, 'handle_plugin_update' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_disabled_option' ], 10, 2 );
 		parent::register();
 	}
@@ -221,22 +220,6 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 		return (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_amp-parsed-stylesheet%'"
 		);
-	}
-
-	/**
-	 * Handle update to plugin.
-	 *
-	 * @param string $old_version Old version.
-	 */
-	public function handle_plugin_update( $old_version ) {
-		// Note: We cannot use the is_css_transient_caching_disabled method because we need to get the underlying stored value.
-		$disabled = AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
-
-		if ( $disabled ) {
-			return;
-		}
-
-		$this->enable_css_transient_caching();
 	}
 
 	/**
