@@ -56,7 +56,6 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 	public function test_register() {
 		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
 		$monitor->register();
-		$this->assertEquals( 10, has_action( 'amp_plugin_update', [ $monitor, 'handle_plugin_update' ] ) );
 		$this->assertEquals( 10, has_filter( 'amp_options_updating', [ $monitor, 'sanitize_disabled_option' ] ) );
 	}
 
@@ -318,55 +317,6 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 		$style_sanitizer->sanitize();
 
 		$this->assertEquals( 3, $monitor->query_css_transient_count() );
-	}
-
-	/** @return array */
-	public function get_data_to_test_handle_plugin_update() {
-		return [
-			'not_disabled'                     => [
-				function ( MonitorCssTransientCaching $monitor ) {
-					$monitor->enable_css_transient_caching();
-					$this->assertFalse( $monitor->is_css_transient_caching_disabled() );
-					$monitor->handle_plugin_update( '' );
-				},
-				false,
-			],
-			'disabled'                         => [
-				function ( MonitorCssTransientCaching $monitor ) {
-					AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
-					$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
-					$monitor->handle_plugin_update( '' );
-				},
-				true,
-			],
-			'not_disabled_after_plugin_update' => [
-				function ( MonitorCssTransientCaching $monitor ) {
-					AMP_Options_Manager::update_option(
-						Option::DISABLE_CSS_TRANSIENT_CACHING,
-						[
-							MonitorCssTransientCaching::WP_VERSION => '999.9',
-							MonitorCssTransientCaching::GUTENBERG_VERSION => '999.9',
-						]
-					);
-					$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
-					$monitor->handle_plugin_update( '' );
-				},
-				true,
-			],
-		];
-	}
-
-	/**
-	 * @dataProvider get_data_to_test_handle_plugin_update
-	 * @covers ::handle_plugin_update()
-	 *
-	 * @param callable $set_up
-	 * @param bool     $expected_disabled
-	 */
-	public function test_handle_plugin_update( $set_up, $expected_disabled ) {
-		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
-		$set_up( $monitor );
-		$this->assertSame( $expected_disabled, $monitor->is_css_transient_caching_disabled() );
 	}
 
 	/**
