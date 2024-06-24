@@ -386,19 +386,19 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 				}
 
 				if ( $is_interactive_block ) {
-					// Replace `data-wp-on--click` with AMP state on submenu open button.
+					// Replace `data-wp-on--click` or `data-wp-on-async--click` with AMP state on submenu open button.
 					if ( false !== strpos( $new_block_content, 'wp-block-navigation__responsive-container-open' ) ) {
 						$new_block_content = preg_replace(
-							'/\sdata-wp-on--click="[^"]+"/',
+							'/\sdata-wp-on-(?:-click|async--click)="[^"]+"/',
 							sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
 							$new_block_content
 						);
 					}
 
-					// Replace `data-wp-on--click` with AMP state on submenu close button.
+					// Replace `data-wp-on--click` or `data-wp-on-async--click` with AMP state on submenu close button.
 					if ( false !== strpos( $new_block_content, 'wp-block-navigation__responsive-container-close' ) ) {
 						$new_block_content = preg_replace(
-							'/\sdata-wp-on--click="[^"]+"/',
+							'/\sdata-wp-on-(?:-click|async--click)="[^"]+"/',
 							sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
 							$new_block_content
 						);
