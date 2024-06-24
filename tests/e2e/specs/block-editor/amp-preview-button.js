@@ -13,12 +13,10 @@ import {
 } from '../../utils/amp-settings-utils';
 
 const postPreviewBtnSelector =
-	'.components-button.edit-post-header__post-preview-button';
-const ampPreviewBtnSelector = `${postPreviewBtnSelector} + .amp-wrapper-post-preview > .amp-editor-post-preview`;
+	'.components-button.editor-header__post-preview-button';
 
-// Remove legacy selectors once changes of <https://github.com/WordPress/gutenberg/pull/56921> lands in WP core.
-const legacyPreviewBtnSelector = '.components-button.editor-post-preview';
-const legacyAmpPreviewBtnSelector = `${legacyPreviewBtnSelector} + .amp-wrapper-post-preview > .amp-editor-post-preview`;
+// Use ~ since there can be visually hidden elements for the post preview button as direct siblings in latest Gutenberg.
+const ampPreviewBtnSelector = `${postPreviewBtnSelector} ~ .amp-wrapper-post-preview > .amp-editor-post-preview`;
 
 describe('AMP Preview button', () => {
 	it('is rendered on a new post', async () => {
@@ -32,9 +30,16 @@ describe('AMP Preview button', () => {
 		await deactivatePlugin('gutenberg');
 
 		await createNewPost();
-		await page.waitForSelector(legacyPreviewBtnSelector);
 
-		await expect(page).toMatchElement(legacyAmpPreviewBtnSelector);
+		// @TODO: Replace selector value with `postPreviewBtnSelector` once WP 6.6 is released.
+		await page.waitForSelector(
+			'.components-button.edit-post-header__post-preview-button'
+		);
+
+		// @TODO: Replace selector value with `ampPreviewBtnSelector` once WP 6.6 is released.
+		await expect(page).toMatchElement(
+			'.components-button.edit-post-header__post-preview-button + .amp-wrapper-post-preview > .amp-editor-post-preview'
+		);
 
 		await activatePlugin('gutenberg');
 	});

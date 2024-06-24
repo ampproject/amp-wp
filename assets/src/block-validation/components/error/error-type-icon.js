@@ -12,9 +12,7 @@ import {
 /**
  * Internal dependencies
  */
-import HTMLErrorIcon from '../../../../images/amp-html-error-icon.svg';
-import JSErrorIcon from '../../../../images/amp-js-error-icon.svg';
-import CSSErrorIcon from '../../../../images/amp-css-error-icon.svg';
+import { JSErrorIcon, HTMLErrorIcon, CSSErrorIcon } from '../../../icons';
 
 /**
  * Component rendering an icon representing JS, CSS, or HTML.

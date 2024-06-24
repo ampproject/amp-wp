@@ -716,6 +716,82 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 					</nav>
 				',
 			],
+			'interactivity_api_enabled_with_async_click' => [
+				'block_attrs'     => [
+					'overlayMenu'         => 'mobile',
+					'openSubmenusOnClick' => true,
+				],
+				'block_markup'    => '
+					<nav class="is-responsive items-justified-right wp-block-navigation is-horizontal is-content-justification-right is-layout-flex wp-container-core-navigation-layout-1 wp-block-navigation-is-layout-flex" aria-label="Navigation" data-wp-interactive="" data-wp-context="{&quot;core&quot;:{&quot;navigation&quot;:{&quot;overlayOpenedBy&quot;:[],&quot;type&quot;:&quot;overlay&quot;,&quot;roleAttribute&quot;:&quot;&quot;,&quot;ariaLabel&quot;:&quot;Menu&quot;}}}">
+						<button aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open" data-wp-on-async--click="actions.core.navigation.openMenuOnClick" data-wp-on--keydown="actions.core.navigation.handleMenuKeydown">
+							<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+								<rect x="4" y="7.5" width="16" height="1.5"></rect>
+								<rect x="4" y="15" width="16" height="1.5"></rect>
+							</svg>
+						</button>
+						<div class="wp-block-navigation__responsive-container" style="" id="modal-1" data-wp-class--has-modal-open="selectors.core.navigation.isMenuOpen" data-wp-class--is-menu-open="selectors.core.navigation.isMenuOpen" data-wp-effect="effects.core.navigation.initMenu" data-wp-on--keydown="actions.core.navigation.handleMenuKeydown" data-wp-on--focusout="actions.core.navigation.handleMenuFocusout" tabindex="-1">
+							<div class="wp-block-navigation__responsive-close" tabindex="-1">
+								<div class="wp-block-navigation__responsive-dialog" data-wp-bind--aria-modal="selectors.core.navigation.ariaModal" data-wp-bind--aria-label="selectors.core.navigation.ariaLabel" data-wp-bind--role="selectors.core.navigation.roleAttribute" data-wp-effect="effects.core.navigation.focusFirstElement">
+									<button aria-label="Close menu" class="wp-block-navigation__responsive-container-close" data-wp-on-async--click="actions.core.navigation.closeMenuOnClick">
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+											<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
+										</svg>
+									</button>
+									<div class="wp-block-navigation__responsive-container-content" id="modal-1-content">
+										<ul class="wp-block-navigation__container is-responsive items-justified-right wp-block-navigation">
+											<li class=" wp-block-navigation-item wp-block-navigation-link">
+												<a class="wp-block-navigation-item__content" href="https://example.com/sample-page/">
+													<span class="wp-block-navigation-item__label">Sample Page</span>
+												</a>
+											</li>
+											<li class=" wp-block-navigation-item wp-block-navigation-link">
+												<a class="wp-block-navigation-item__content" href="https://example.com/2023/10/16/hello-world/">
+													<span class="wp-block-navigation-item__label">Hello world!</span>
+												</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</nav>
+				',
+				'expected_markup' => '
+					<nav class="is-responsive items-justified-right wp-block-navigation is-horizontal is-content-justification-right is-layout-flex wp-container-core-navigation-layout-1 wp-block-navigation-is-layout-flex" aria-label="Navigation" data-wp-interactive data-wp-context="{&quot;core&quot;:{&quot;navigation&quot;:{&quot;overlayOpenedBy&quot;:[],&quot;type&quot;:&quot;overlay&quot;,&quot;roleAttribute&quot;:&quot;&quot;,&quot;ariaLabel&quot;:&quot;Menu&quot;}}}">
+						<button aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open" on="tap:AMP.setState({ modal_1_expanded: !modal_1_expanded })" data-wp-on--keydown="actions.core.navigation.handleMenuKeydown">
+							<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+								<rect x="4" y="7.5" width="16" height="1.5"></rect>
+								<rect x="4" y="15" width="16" height="1.5"></rect>
+							</svg>
+						</button>
+						<div [aria-hidden]="modal_1_expanded ? \'false\' : \'true\'" aria-hidden="true" [class]="modal_1_expanded ? \'wp-block-navigation__responsive-container is-menu-open has-modal-open\' : \'wp-block-navigation__responsive-container\'" class="wp-block-navigation__responsive-container" style id="modal-1" data-wp-class--has-modal-open="selectors.core.navigation.isMenuOpen" data-wp-class--is-menu-open="selectors.core.navigation.isMenuOpen" data-wp-effect="effects.core.navigation.initMenu" data-wp-on--keydown="actions.core.navigation.handleMenuKeydown" data-wp-on--focusout="actions.core.navigation.handleMenuFocusout" tabindex="-1">
+							<div class="wp-block-navigation__responsive-close" tabindex="-1">
+							<div class="wp-block-navigation__responsive-dialog" data-wp-bind--aria-modal="selectors.core.navigation.ariaModal" data-wp-bind--aria-label="selectors.core.navigation.ariaLabel" data-wp-bind--role="selectors.core.navigation.roleAttribute" data-wp-effect="effects.core.navigation.focusFirstElement">
+									<button aria-label="Close menu" class="wp-block-navigation__responsive-container-close" on="tap:AMP.setState({ modal_1_expanded: !modal_1_expanded })">
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+											<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
+										</svg>
+									</button>
+									<div class="wp-block-navigation__responsive-container-content" id="modal-1-content">
+										<ul class="wp-block-navigation__container is-responsive items-justified-right wp-block-navigation">
+											<li class=" wp-block-navigation-item wp-block-navigation-link">
+												<a class="wp-block-navigation-item__content" href="https://example.com/sample-page/">
+													<span class="wp-block-navigation-item__label">Sample Page</span>
+												</a>
+											</li>
+											<li class=" wp-block-navigation-item wp-block-navigation-link">
+												<a class="wp-block-navigation-item__content" href="https://example.com/2023/10/16/hello-world/">
+													<span class="wp-block-navigation-item__label">Hello world!</span>
+												</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</nav>
+				',
+			],
 		];
 	}
 

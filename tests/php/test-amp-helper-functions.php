@@ -132,21 +132,11 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		}
 	}
 
-	/** @return array */
-	public function get_data_to_test_amp_bootstrap_plugin() {
-		return [
-			'5.4' => [ '5.4', true ],
-			'5.5' => [ '5.5', false ],
-		];
-	}
-
 	/**
-	 * @dataProvider get_data_to_test_amp_bootstrap_plugin
 	 * @covers ::amp_bootstrap_plugin()
 	 */
-	public function test_amp_bootstrap_plugin( $wp_version, $needs_script_loader_tag_filter ) {
+	public function test_amp_bootstrap_plugin() {
 		$this->remove_bootstrapped_hooks();
-		$GLOBALS['wp_version'] = $wp_version;
 		amp_bootstrap_plugin();
 
 		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'amp_register_default_scripts' ) );
@@ -155,15 +145,6 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->assertEquals( 9, has_action( 'plugins_loaded', '_amp_bootstrap_customizer' ) );
 
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
-
-		if ( $needs_script_loader_tag_filter ) {
-			$this->assertEquals(
-				defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, // phpcs:ignore PHPCompatibility.Constants.NewConstants
-				has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag' )
-			);
-		} else {
-			$this->assertFalse( has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag' ) );
-		}
 		$this->assertEquals( 10, has_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous' ) );
 		$this->assertEquals( 10, has_filter( 'all_plugins', 'amp_modify_plugin_description' ) );
 	}
@@ -179,62 +160,6 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		foreach ( self::BOOTSTRAPPED_FILTERS as $filter ) {
 			$this->assertFalse( has_filter( $filter ) );
 		}
-	}
-
-	/** @covers ::amp_ensure_id_attribute_on_script_loader_tag() */
-	public function test_amp_ensure_id_attribute_on_script_loader_tag() {
-		$this->assertEquals(
-			'<script src="foo.js" id="foo-js"></script>',
-			amp_ensure_id_attribute_on_script_loader_tag( '<script src="foo.js"></script>', 'foo' )
-		);
-
-		$this->assertEquals(
-			'<script data-before src="foo.js" id="foo-js" data-after></script>',
-			amp_ensure_id_attribute_on_script_loader_tag( '<script data-before src="foo.js" data-after></script>', 'foo' )
-		);
-
-		$this->assertEquals(
-			'<script data-before src="foo.js?bar=\'baz\'" id="foo-js" data-after></script>',
-			amp_ensure_id_attribute_on_script_loader_tag( '<script data-before src="foo.js?bar=\'baz\'" data-after></script>', 'foo' )
-		);
-
-		$this->assertEquals(
-			"<script data-before src='foo.js?bar=\"baz\"' id=\"foo-js\" data-after></script>",
-			amp_ensure_id_attribute_on_script_loader_tag( "<script data-before src='foo.js?bar=\"baz\"' data-after></script>", 'foo' )
-		);
-
-		$this->assertEquals(
-			'<script type=\'text/javascript\' src=\'https://wordpress-stable.lndo.site/wp-includes/js/comment-reply.min.js?ver=5.0.14\' id="comment-reply-js"></script>',
-			amp_ensure_id_attribute_on_script_loader_tag( '<script type=\'text/javascript\' src=\'https://wordpress-stable.lndo.site/wp-includes/js/comment-reply.min.js?ver=5.0.14\'></script>', 'comment-reply' )
-		);
-
-		$inline_script_before = '<script>/* inline script id="hello" */</script>';
-		$inline_script_after  = '<script id="after">/* inline script */</script>';
-		$this->assertEquals(
-			$inline_script_before . '<script src="foo.js" id="foo-js"></script>' . $inline_script_after,
-			amp_ensure_id_attribute_on_script_loader_tag(
-				$inline_script_before . '<script src="foo.js"></script>' . $inline_script_after,
-				'foo'
-			)
-		);
-
-		$foo_script = '<script src="foo.js" id="bar"></script>';
-		$this->assertEquals(
-			$foo_script,
-			amp_ensure_id_attribute_on_script_loader_tag( $foo_script, 'foo' )
-		);
-
-		$foo_script = '<script id=\'bar\' src=\'foo.js\'></script>';
-		$this->assertEquals(
-			$foo_script,
-			amp_ensure_id_attribute_on_script_loader_tag( $foo_script, 'foo' )
-		);
-
-		$amp_runtime_script = '<script src="https://cdn.ampproject.org/v0.js" id="amp-runtime-js"></script>';
-		$this->assertEquals(
-			$amp_runtime_script,
-			amp_ensure_id_attribute_on_script_loader_tag( $amp_runtime_script, 'amp-runtime' )
-		);
 	}
 
 	/** @covers ::amp_init() */
@@ -1422,14 +1347,6 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 * @global WP_Scripts $wp_scripts
 	 */
 	public function test_script_registering() {
-		// Remove ID attributes which were added in WP 5.5.
-		add_filter(
-			'script_loader_tag',
-			static function ( $script ) {
-				return preg_replace( '/ id=(["\'])amp-.*?\1/', '', $script );
-			}
-		);
-
 		global $wp_scripts;
 		$wp_scripts = null;
 		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'amp_register_default_scripts' ) );

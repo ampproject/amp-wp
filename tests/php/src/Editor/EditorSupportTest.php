@@ -2,13 +2,10 @@
 
 namespace AmpProject\AmpWP\Tests\Editor;
 
-use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Editor\EditorSupport;
-use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\WithBlockEditorSupport;
 use AmpProject\AmpWP\Tests\TestCase;
-use AmpProject\AmpWP\Tests\Admin\PolyfillsTest;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Editor\EditorSupport */
 final class EditorSupportTest extends TestCase {
@@ -21,7 +18,7 @@ final class EditorSupportTest extends TestCase {
 	public function set_up() {
 		parent::set_up();
 
-		$this->instance = new EditorSupport( new DependencySupport() );
+		$this->instance = new EditorSupport();
 
 		unset( $GLOBALS['current_screen'], $GLOBALS['wp_scripts'] );
 	}
@@ -29,14 +26,6 @@ final class EditorSupportTest extends TestCase {
 	public function test_it_can_be_initialized() {
 		$this->assertInstanceOf( EditorSupport::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
-		$this->assertInstanceOf( Registerable::class, $this->instance );
-	}
-
-	/** @covers ::register() */
-	public function test_register() {
-		$this->instance->register();
-
-		$this->assertEquals( 99, has_action( 'admin_enqueue_scripts', [ $this->instance, 'maybe_show_notice' ] ) );
 	}
 
 	/**
@@ -67,66 +56,5 @@ final class EditorSupportTest extends TestCase {
 		// Note: Without Gutenberg being installed on WP 4.9, the expected result would be `false`
 		// when `$post_type_uses_block_editor` and `$post_type_supports_amp` are `true`.
 		$this->assertSame( $expected_result, $this->instance->is_current_screen_block_editor_for_amp_enabled_post_type() );
-	}
-
-	/** @covers ::maybe_show_notice() */
-	public function test_dont_show_notice_if_no_screen_defined() {
-		$this->instance->maybe_show_notice();
-		$this->assertFalse( PolyfillsTest::get_inline_script( 'wp-edit-post', 'after' ) );
-	}
-
-	/** @covers ::maybe_show_notice() */
-	public function test_dont_show_notice_for_unsupported_post_type() {
-		$this->setup_environment( true, false );
-
-		$this->instance->maybe_show_notice();
-		$this->assertFalse( PolyfillsTest::get_inline_script( 'wp-edit-post', 'after' ) );
-	}
-
-	/** @covers ::maybe_show_notice() */
-	public function test_show_notice_for_supported_post_type() {
-		if ( version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '<' ) ) {
-			$this->markTestSkipped();
-		}
-
-		$this->setup_environment( true, true );
-
-		$this->instance->maybe_show_notice();
-		if ( $this->instance->is_current_screen_block_editor_for_amp_enabled_post_type() ) {
-			$this->assertFalse( PolyfillsTest::get_inline_script( 'wp-edit-post', 'after' ) );
-		} else {
-			$this->assertStringContainsString(
-				'AMP functionality is not available',
-				PolyfillsTest::get_inline_script( 'wp-edit-post', 'after' )
-			);
-		}
-	}
-
-	/** @covers ::maybe_show_notice() */
-	public function test_maybe_show_notice_for_unsupported_user() {
-		$this->setup_environment( true, true );
-		wp_set_current_user( self::factory()->user->create() );
-
-		$this->instance->maybe_show_notice();
-
-		$this->assertFalse( PolyfillsTest::get_inline_script( 'wp-edit-post', 'after' ) );
-	}
-
-	/** @covers ::maybe_show_notice() */
-	public function test_maybe_show_notice_for_gutenberg_4_9() {
-		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '4.9.0', '>' ) ) {
-			$this->markTestSkipped( 'Test only applicable to Gutenberg v4.9.0 and older.' );
-		}
-
-		$this->setup_environment( true, true );
-		// WP < 5.0 doesn't include the block editor, but Gutenberg would be installed, so it should be supported.
-		$this->assertTrue( $this->instance->is_current_screen_block_editor_for_amp_enabled_post_type() );
-
-		gutenberg_register_packages_scripts();
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-
-		$this->instance->maybe_show_notice();
-		$inline_script = PolyfillsTest::get_inline_script( 'wp-edit-post', 'after' );
-		$this->assertStringContainsString( 'AMP functionality is not available', $inline_script );
 	}
 }

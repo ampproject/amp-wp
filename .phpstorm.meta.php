@@ -24,7 +24,6 @@ namespace PHPSTORM_META {
 			'admin.amp_themes'                   => \AmpProject\AmpWP\Admin\AmpThemes::class,
 			'amp_slug_customization_watcher'     => \AmpProject\AmpWP\AmpSlugCustomizationWatcher::class,
 			'background_task_deactivator'        => \AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator::class,
-			'block_uniqid_transformer'           => \AmpProject\AmpWP\BlockUniqidTransformer::class,
 			'cli.command_namespace'              => \AmpProject\AmpWP\Cli\CommandNamespaceRegistration::class,
 			'cli.optimizer_command'              => \AmpProject\AmpWP\Cli\OptimizerCommand::class,
 			'cli.transformer_command'            => \AmpProject\AmpWP\Cli\TransformerCommand::class,

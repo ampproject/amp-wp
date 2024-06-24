@@ -425,7 +425,6 @@ class Test_Uninstall extends TestCase {
 		set_transient( 'amp-parsed-stylesheet-v10-3', [ '...' ], MONTH_IN_SECONDS );
 		set_transient( 'amp-parsed-stylesheet-v10-3', [ '...' ], MONTH_IN_SECONDS );
 		set_transient( 'amp_error_index_counts', '...' );
-		set_transient( 'amp_has_page_caching', '...' );
 		set_transient( 'amp_img_123abc', '...' );
 		set_transient( 'amp_lock_123abc', '...' );
 		set_transient( 'amp_new_validation_error_urls_count', '...' );

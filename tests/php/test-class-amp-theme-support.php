@@ -384,14 +384,6 @@ class Test_AMP_Theme_Support extends TestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_validate_non_amp_theme() {
-		// Remove ID attributes which were added in WP 5.5.
-		add_filter(
-			'script_loader_tag',
-			static function ( $script ) {
-				return preg_replace( "/ id='amp-[^']+?'/", '', $script );
-			}
-		);
-
 		wp_scripts();
 		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
@@ -1755,14 +1747,14 @@ class Test_AMP_Theme_Support extends TestCase {
 			'<meta name="generator" content="AMP Plugin',
 			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 
-			'<script type="module" src="https://cdn.ampproject.org/v0.mjs" async crossorigin="anonymous"></script>',
+			'<script type="module" src="https://cdn.ampproject.org/v0.mjs" id="amp-runtime-js" async crossorigin="anonymous"></script>',
 			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.mjs" type="module" crossorigin="anonymous"></script>',
 			'<script src="https://cdn.ampproject.org/v0/amp-experiment-0.1.mjs" async="" custom-element="amp-experiment" type="module" crossorigin="anonymous"></script>',
 
 			'<script src="https://cdn.ampproject.org/v0/amp-ad-0.1.mjs" async="" custom-element="amp-ad" type="module" crossorigin="anonymous"></script>',
 			'<script src="https://cdn.ampproject.org/v0/amp-audio-0.1.mjs" async="" custom-element="amp-audio" type="module" crossorigin="anonymous"></script>',
-			'<script type="module" src="https://cdn.ampproject.org/v0/amp-list-0.1.mjs" async custom-element="amp-list" crossorigin="anonymous"></script>',
-			'<script type="module" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.mjs" async custom-element="amp-mathml" crossorigin="anonymous"></script>',
+			'<script type="module" src="https://cdn.ampproject.org/v0/amp-list-0.1.mjs" id="amp-list-js" async custom-element="amp-list" crossorigin="anonymous"></script>',
+			'<script type="module" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.mjs" id="amp-mathml-js" async custom-element="amp-mathml" crossorigin="anonymous"></script>',
 
 			'<link rel="icon" href="' . home_url( '/favicon.png', 'https' ) . '" sizes="32x32">',
 			'<link rel="icon" href="' . home_url( '/favicon.png', 'https' ) . '" sizes="192x192">',
@@ -2061,14 +2053,6 @@ class Test_AMP_Theme_Support extends TestCase {
 	 * Initializes and returns the original HTML.
 	 */
 	private function get_original_html() {
-		// Remove ID attributes which were added in WP 5.5.
-		add_filter(
-			'script_loader_tag',
-			static function ( $script ) {
-				return preg_replace( '/ id=(["\'])amp-.*?\1/', '', $script );
-			}
-		);
-
 		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		global $wp_widget_factory, $wp_scripts, $wp_styles;
 		$wp_scripts = null;

@@ -3,6 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { noop } from 'lodash';
+import { beforeAll, describe, expect, it, jest } from '@jest/globals';
 
 /**
  * WordPress dependencies

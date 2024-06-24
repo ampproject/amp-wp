@@ -86,7 +86,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'admin.amp_themes'                   => Admin\AmpThemes::class,
 		'amp_slug_customization_watcher'     => AmpSlugCustomizationWatcher::class,
 		'background_task_deactivator'        => BackgroundTaskDeactivator::class,
-		'block_uniqid_transformer'           => BlockUniqidTransformer::class,
 		'cli.command_namespace'              => Cli\CommandNamespaceRegistration::class,
 		'cli.optimizer_command'              => Cli\OptimizerCommand::class,
 		'cli.transformer_command'            => Cli\TransformerCommand::class,

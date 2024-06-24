@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { describe, expect, it } from '@jest/globals';
+
+/**
  * WordPress dependencies
  */
 import { sprintf } from '@wordpress/i18n';

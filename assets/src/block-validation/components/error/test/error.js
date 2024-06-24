@@ -9,6 +9,7 @@ import {
 	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 	VALIDATION_ERROR_NEW_REJECTED_STATUS,
 } from 'amp-block-validation';
+import { beforeAll, describe, expect, it } from '@jest/globals';
 
 /**
  * WordPress dependencies

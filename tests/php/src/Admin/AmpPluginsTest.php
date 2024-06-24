@@ -157,11 +157,11 @@ class AmpPluginsTest extends TestCase {
 		$this->assertFalse( AmpPlugins::is_needed() );
 
 		// Test 2: Check with older version of WordPress.
-		$wp_version = '4.9';
+		$wp_version = '5.6';
 		$this->assertFalse( AmpPlugins::is_needed() );
 
 		// Test 3: Admin request in supported WordPress .
-		$wp_version = '5.6';
+		$wp_version = '6.3';
 		set_current_screen( 'index.php' );
 		$this->assertTrue( AmpPlugins::is_needed() );
 

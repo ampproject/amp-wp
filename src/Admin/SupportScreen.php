@@ -33,13 +33,6 @@ class SupportScreen implements Conditional, Delayed, Service, Registerable {
 	const ASSET_HANDLE = 'amp-support';
 
 	/**
-	 * The minimum version of WordPress support for the "Support page".
-	 *
-	 * @var string
-	 */
-	const WP_MIN_VERSION = '5.3';
-
-	/**
 	 * Injector.
 	 *
 	 * @var Injector
@@ -104,23 +97,12 @@ class SupportScreen implements Conditional, Delayed, Service, Registerable {
 	}
 
 	/**
-	 * Returns whether minimum WordPress version is available for support page or not.
-	 *
-	 * @return bool True if current WordPress's version is greater than or equal to minimum version.
-	 */
-	public static function check_core_version() {
-		return version_compare( get_bloginfo( 'version' ), self::WP_MIN_VERSION, '>=' );
-	}
-
-	/**
 	 * Check whether the conditional object is currently needed.
 	 *
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
 		return (
-			self::check_core_version()
-			&&
 			is_admin()
 			&&
 			self::has_cap()

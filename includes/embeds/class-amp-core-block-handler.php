@@ -66,14 +66,6 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		/*
-		 * Disable interactivity API on core/navigation block.
-		 * Currently this support is added by Gutenberg plugin, but it will be a part of WP 6.3 as well.
-		 *
-		 * @TODO: Need to revisit once Interactivity API is landed in WP Core.
-		*/
-		add_filter( 'gutenberg_should_block_use_interactivity_api', '__return_false' );
-
 		add_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0, 2 );
 		add_filter( 'widget_text_content', [ $this, 'preserve_widget_text_element_dimensions' ], PHP_INT_MAX );
 	}
@@ -82,7 +74,6 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'gutenberg_should_block_use_interactivity_api', '__return_false' );
 		remove_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0 );
 		remove_filter( 'widget_text_content', [ $this, 'preserve_widget_text_element_dimensions' ], PHP_INT_MAX );
 	}
@@ -395,19 +386,19 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 				}
 
 				if ( $is_interactive_block ) {
-					// Replace `data-wp-on--click` with AMP state on submenu open button.
+					// Replace `data-wp-on--click` or `data-wp-on-async--click` with AMP state on submenu open button.
 					if ( false !== strpos( $new_block_content, 'wp-block-navigation__responsive-container-open' ) ) {
 						$new_block_content = preg_replace(
-							'/\sdata-wp-on--click="[^"]+"/',
+							'/\sdata-wp-on(?:-async)?--click="[^"]+"/',
 							sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
 							$new_block_content
 						);
 					}
 
-					// Replace `data-wp-on--click` with AMP state on submenu close button.
+					// Replace `data-wp-on--click` or `data-wp-on-async--click` with AMP state on submenu close button.
 					if ( false !== strpos( $new_block_content, 'wp-block-navigation__responsive-container-close' ) ) {
 						$new_block_content = preg_replace(
-							'/\sdata-wp-on--click="[^"]+"/',
+							'/\sdata-wp-on(?:-async)?--click="[^"]+"/',
 							sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
 							$new_block_content
 						);

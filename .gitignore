@@ -3,6 +3,7 @@ node_modules
 
 /vendor
 /build
+/artifacts
 /wiki
 /amp.zip
 /assets/css/*

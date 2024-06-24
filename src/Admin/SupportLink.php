@@ -38,11 +38,7 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-		return (
-			SupportScreen::check_core_version()
-			&&
-			SupportScreen::has_cap()
-		);
+		return SupportScreen::has_cap();
 	}
 
 	/**

@@ -23,14 +23,14 @@ class DependencySupport implements Service {
 	 *
 	 * @var string
 	 */
-	const GB_MIN_VERSION = '9.2.0';
+	const GB_MIN_VERSION = '17.2.0';
 
 	/**
 	 * The minimum version of WordPress supported.
 	 *
 	 * @var string
 	 */
-	const WP_MIN_VERSION = '5.6';
+	const WP_MIN_VERSION = '6.3';
 
 	/**
 	 * Determines whether core or Gutenberg provides minimal support.

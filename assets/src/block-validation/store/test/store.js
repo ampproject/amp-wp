@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { describe, expect, it } from '@jest/globals';
+
+/**
  * WordPress dependencies
  */
 import { dispatch, select } from '@wordpress/data';

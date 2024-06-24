@@ -92,13 +92,6 @@ function delete_posts() {
  * @internal
  */
 function delete_terms() {
-
-	// Abort if term splitting has not been done. This is done by WooCommerce so it's
-	// it's also done here for good measure, even though we require WP 4.9+.
-	if ( version_compare( get_bloginfo( 'version' ), '4.2', '<' ) ) {
-		return;
-	}
-
 	/** @var \wpdb */
 	global $wpdb;
 
@@ -178,7 +171,6 @@ function delete_transients() {
 		'AmpProject\AmpWP\DevTools\BlockSourcesamp_block_sources',
 		'amp-parsed-stylesheet-v%',
 		'amp_error_index_counts',
-		'amp_has_page_caching',
 		'amp_img_%',
 		'amp_lock_%',
 		'amp_new_validation_error_urls_count',
