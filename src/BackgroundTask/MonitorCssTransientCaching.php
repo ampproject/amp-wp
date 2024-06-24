@@ -65,15 +65,6 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 	const GUTENBERG_VERSION = 'gutenberg_version';
 
 	/**
-	 * Constructor.
-	 *
-	 * @param BackgroundTaskDeactivator $background_task_deactivator Deactivator.
-	 */
-	public function __construct( BackgroundTaskDeactivator $background_task_deactivator ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
-		parent::__construct( $background_task_deactivator );
-	}
-
-	/**
 	 * Register the service with the system.
 	 *
 	 * @return void
