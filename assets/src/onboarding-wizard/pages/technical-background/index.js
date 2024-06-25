@@ -61,10 +61,7 @@ export function TechnicalBackground() {
 					className={`technical-background-option-container`}
 					selected={true === developerToolsOption}
 				>
-					<label
-						htmlFor={enableInputID}
-						className="technical-background-option"
-					>
+					<div className="technical-background-option">
 						<div className="technical-background-option__input-container">
 							<input
 								type="radio"
@@ -76,7 +73,10 @@ export function TechnicalBackground() {
 							/>
 						</div>
 						<User1 />
-						<div className="technical-background-option__description">
+						<label
+							htmlFor={enableInputID}
+							className="technical-background-option__description"
+						>
 							<h2>
 								{__('Developer or technically savvy', 'amp')}
 							</h2>
@@ -86,15 +86,15 @@ export function TechnicalBackground() {
 									'amp'
 								)}
 							</p>
-						</div>
-					</label>
+						</label>
+					</div>
 				</Selectable>
 
 				<Selectable
 					className={`technical-background-option-container`}
 					selected={false === developerToolsOption}
 				>
-					<label
+					<div
 						htmlFor={disableInputID}
 						className="technical-background-option"
 					>
@@ -109,7 +109,10 @@ export function TechnicalBackground() {
 							/>
 						</div>
 						<User2 />
-						<div className="technical-background-option__description">
+						<label
+							htmlFor={disableInputID}
+							className="technical-background-option__description"
+						>
 							<h2>
 								{__(
 									'Non-technical or wanting a simpler setup',
@@ -122,8 +125,8 @@ export function TechnicalBackground() {
 									'amp'
 								)}
 							</p>
-						</div>
-					</label>
+						</label>
+					</div>
 				</Selectable>
 			</form>
 		</div>
