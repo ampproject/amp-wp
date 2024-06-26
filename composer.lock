@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "13a501ce8480c085c7657bc84069238a",
+    "content-hash": "90b15f8c2698f5c4afa74adc777d68b4",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
@@ -738,27 +738,27 @@
         },
         {
             "name": "civicrm/composer-downloads-plugin",
-            "version": "v3.0.1",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/civicrm/composer-downloads-plugin.git",
-                "reference": "3aabb6d259a86158d01829fc2c62a2afb9618877"
+                "reference": "7af08ca4a78607ac2bad3215c05a10390da9c673"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/civicrm/composer-downloads-plugin/zipball/3aabb6d259a86158d01829fc2c62a2afb9618877",
-                "reference": "3aabb6d259a86158d01829fc2c62a2afb9618877",
+                "url": "https://api.github.com/repos/civicrm/composer-downloads-plugin/zipball/7af08ca4a78607ac2bad3215c05a10390da9c673",
+                "reference": "7af08ca4a78607ac2bad3215c05a10390da9c673",
                 "shasum": ""
             },
             "require": {
-                "composer-plugin-api": "^1.1 || ^2.0",
-                "php": ">=5.6",
-                "togos/gitignore": "~1.1.1"
+                "civicrm/gitignore": "~1.2.0",
+                "composer-plugin-api": "^2.0",
+                "php": ">=7.2"
             },
             "require-dev": {
-                "composer/composer": "~1.0 || ~2.0",
+                "composer/composer": "~2.0",
                 "friendsofphp/php-cs-fixer": "^2.3",
-                "phpunit/phpunit": "^5.7",
+                "phpunit/phpunit": "^8.5 || ^9.5",
                 "totten/process-helper": "^1.0.1"
             },
             "type": "composer-plugin",
@@ -786,9 +786,48 @@
             ],
             "description": "Composer plugin for downloading additional files within any composer package.",
             "support": {
-                "source": "https://github.com/civicrm/composer-downloads-plugin/tree/v3.0.1"
+                "source": "https://github.com/civicrm/composer-downloads-plugin/tree/v4.0.0"
             },
-            "time": "2020-11-02T05:26:23+00:00"
+            "time": "2024-04-09T20:34:36+00:00"
+        },
+        {
+            "name": "civicrm/gitignore",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/civicrm/PHPGitIgnore.git",
+                "reference": "7491782ee89c4e14bbcc9b30bebb90389054cb2e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/civicrm/PHPGitIgnore/zipball/7491782ee89c4e14bbcc9b30bebb90389054cb2e",
+                "reference": "7491782ee89c4e14bbcc9b30bebb90389054cb2e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6"
+            },
+            "replace": {
+                "togos/gitignore": "1.*"
+            },
+            "require-dev": {
+                "togos/simpler-test": "1.1.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "TOGoS_GitIgnore_": "src/main/php/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Parser for .gitignore (and sparse-checkout, and anything else using the same format) files",
+            "support": {
+                "source": "https://github.com/civicrm/PHPGitIgnore/tree/1.2.0"
+            },
+            "time": "2024-04-09T07:07:33+00:00"
         },
         {
             "name": "composer/semver",
@@ -7597,43 +7636,6 @@
                 }
             ],
             "time": "2024-03-03T12:36:25+00:00"
-        },
-        {
-            "name": "togos/gitignore",
-            "version": "1.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/TOGoS/PHPGitIgnore.git",
-                "reference": "32bc0830e4123f670adcbf5ddda5bef362f4f4d4"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/TOGoS/PHPGitIgnore/zipball/32bc0830e4123f670adcbf5ddda5bef362f4f4d4",
-                "reference": "32bc0830e4123f670adcbf5ddda5bef362f4f4d4",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.2"
-            },
-            "require-dev": {
-                "togos/simpler-test": "1.1.1"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "TOGoS_GitIgnore_": "src/main/php/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "Parser for .gitignore (and sparse-checkout, and anything else using the same format) files",
-            "support": {
-                "issues": "https://github.com/TOGoS/PHPGitIgnore/issues",
-                "source": "https://github.com/TOGoS/PHPGitIgnore/tree/master"
-            },
-            "time": "2019-04-19T19:16:58+00:00"
         },
         {
             "name": "wp-cli/config-command",

@@ -21,7 +21,7 @@
   },
   "require-dev": {
     "automattic/vipwpcs": "^3.0",
-    "civicrm/composer-downloads-plugin": "^3.0",
+    "civicrm/composer-downloads-plugin": "^4.0",
     "google/cloud-storage": "^1.0",
     "mikey179/vfsstream": "1.6.11",
     "mustache/mustache": "^2",
