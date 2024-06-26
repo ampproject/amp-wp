@@ -103,7 +103,7 @@ jobs:
         if: >
           ! ( github.event.pull_request.head.repo.fork == true ||
           github.event.pull_request.user.login == 'dependabot[bot]' )
-        uses: ataylorme/eslint-annotate-action@5f4dc2e3af8d3c21b727edb597e5503510b1dc9c #2.2.0
+        uses: ataylorme/eslint-annotate-action@d57a1193d4c59cbfbf3f86c271f42612f9dbd9e9 #3.0.0
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
           report-json: 'lint-js-report.json'
