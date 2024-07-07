@@ -3518,8 +3518,18 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					$this->assertStringContainsString( 'admin-bar', $original_dom->body->getAttribute( 'class' ) );
 					$this->assertStringContainsString( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
 
-					$this->assertStringContainsString( '.wp-block-audio figcaption', $amphtml_source, 'Expected block-library/style.css' );
-					$this->assertStringContainsString( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
+					if ( defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, '18.7', '>=' ) ) {
+						$this->assertStringContainsString( '.wp-block-audio :where(figcaption)', $amphtml_source, 'Expected block-library/style.css' );
+					} else {
+						$this->assertStringContainsString( '.wp-block-audio figcaption', $amphtml_source, 'Expected block-library/style.css' );
+					}
+
+					if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '6.6', '>=' ) ) {
+						$this->assertStringContainsString( '[class^="wp-block-"]:not(.wp-block-gallery) > figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
+					} else {
+						$this->assertStringContainsString( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
+					}
+
 					$amphtml_source = preg_replace( '/\s*>\s*/', '>', $amphtml_source ); // Account for variance in postcss.
 					$this->assertStringContainsString( '.amp-wp-default-form-message>p', $amphtml_source, 'Expected amp-default.css' );
 					$this->assertStringContainsString( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
