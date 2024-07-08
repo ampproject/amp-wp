@@ -679,7 +679,7 @@ class SupportData {
 			];
 
 			$query               = new WP_Query( $query_args );
-			$amp_validated_posts = $query->get_posts();
+			$amp_validated_posts = $query->posts;
 
 			foreach ( $amp_validated_posts as $amp_validated_post ) {
 				$validation_data = $this->process_raw_post_errors( $amp_validated_post );
