@@ -131,7 +131,8 @@
 .amp svg.components-checkbox-control__checked {
 	width: 18px;
 	height: 22px;
-	left: 0;
+	fill: rgb(255, 255, 255);
+	position: absolute;
 }
 
 /* For WP 5.0. Some of these styles are redundant in later WP versions. */
@@ -146,12 +147,6 @@
 	position: relative;
 	display: inline-block;
 	vertical-align: middle;
-}
-
-.amp svg.components-checkbox-control__checked {
-	fill: rgb(255, 255, 255);
-	position: absolute;
-	top: -2px;
 }
 
 /**
