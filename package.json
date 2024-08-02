@@ -96,7 +96,7 @@
     "prettier": "3.3.2",
     "puppeteer": "22.12.1",
     "react-test-renderer": "18.3.1",
-    "semver": "7.6.2",
+    "semver": "7.6.3",
     "webpack-remove-empty-scripts": "1.0.4",
     "webpackbar": "6.0.1",
     "wporg-api-client": "1.0.1"
