@@ -249,7 +249,7 @@ jobs:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
       - name: Archive debug artifacts (screenshots, HTML snapshots)
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b #v4.3.4
         if: always()
         with:
           name: e2e-failure-artifacts
@@ -622,7 +622,7 @@ jobs:
         run: echo "sha8=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_OUTPUT
 
       - name: Upload build as artifact
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b #v4.3.4
         with:
           name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}-${{ matrix.build }}
           path: builds/${{ matrix.build }}
