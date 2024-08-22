@@ -1166,7 +1166,7 @@ class AMP_Validation_Manager {
 
 						$has_non_core = false;
 						foreach ( $extra_sources as $extra_source ) {
-							if ( 'core' !== $extra_source['type'] ) {
+							if ( isset( $extra_source['type'] ) && 'core' !== $extra_source['type'] ) {
 								$has_non_core = true;
 								break;
 							}
