@@ -161,7 +161,7 @@ class AmpPluginsTest extends TestCase {
 		$this->assertFalse( AmpPlugins::is_needed() );
 
 		// Test 3: Admin request in supported WordPress .
-		$wp_version = '6.3';
+		$wp_version = '6.5';
 		set_current_screen( 'index.php' );
 		$this->assertTrue( AmpPlugins::is_needed() );
 
