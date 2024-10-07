@@ -3268,6 +3268,29 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				null,
 				[ 'amp-wordpress-embed' ],
 			],
+
+			'subscriptions-section'                        => [
+				'
+				<section class="text" subscriptions-section="content" encrypted="" swg_amp_cache_nonce="">
+				    <script type="application/octet-stream" ciphertext="">
+				    </script>
+				  </section>
+				    <span swg_amp_cache_nonce="">
+				    </span>
+				  <section subscriptions-section="content">
+				    <p class="text">
+				      Lorem ipsum.
+				    </p>
+				  </section>
+				  <section subscriptions-section="content-not-granted">
+				    <p class="text">
+				      <strong>Subscribe for more.</strong>
+				    </p>
+				  </section>
+				',
+				null,
+				[ 'amp-subscriptions' ],
+			],
 		];
 	}
 
