@@ -991,11 +991,30 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function validate_tag_spec_for_node( DOMElement $node, $tag_spec ) {
 
-		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) && ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
-			return [
-				'code'                 => self::WRONG_PARENT_TAG,
-				'required_parent_name' => $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ],
-			];
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
+			$missing_required_parent = false;
+			if ( 'subscriptions-section content swg_amp_cache_nonce' === $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) {
+				// Special case for mandatory parent name which doesn't follow the pattern where mandatory_parent is just a tag name.
+				if ( ! (
+					$this->has_parent( $node, 'section' )
+					&&
+					$node->parentNode instanceof DOMElement
+					&&
+					$node->parentNode->getAttribute( 'subscriptions-section' ) === 'content'
+					&&
+					$node->parentNode->hasAttribute( 'swg_amp_cache_nonce' )
+				) ) {
+					$missing_required_parent = true;
+				}
+			} elseif ( ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
+				$missing_required_parent = true;
+			}
+			if ( $missing_required_parent ) {
+				return [
+					'code'                 => self::WRONG_PARENT_TAG,
+					'required_parent_name' => $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ],
+				];
+			}
 		}
 
 		// Extension scripts must be in the head. Note this currently never fails because all AMP scripts are moved to the head before sanitization.
