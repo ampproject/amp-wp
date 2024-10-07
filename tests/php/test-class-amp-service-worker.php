@@ -27,23 +27,40 @@ class Test_AMP_Service_Worker extends TestCase {
 		}
 	}
 
+	public function data_to_test_default_init_hooks() {
+		return [
+			'standard' => [
+				'template_mode' => 'standard',
+			],
+			'legacy'   => [
+				'template_mode' => 'reader',
+			],
+		];
+	}
+
 	/**
 	 * Test default hooks in init.
 	 *
 	 * @covers \AMP_Service_Worker::init()
+	 * @dataProvider data_to_test_default_init_hooks
 	 */
-	public function test_default_init_hooks() {
+	public function test_default_init_hooks( $template_mode ) {
 		remove_all_filters( 'query_vars' );
 		remove_all_actions( 'parse_request' );
 		remove_all_actions( 'wp' );
 		remove_all_actions( 'wp_front_service_worker' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, $template_mode );
 
 		AMP_Service_Worker::init();
 		$this->assertSame( 10, has_filter( 'query_vars', [ 'AMP_Service_Worker', 'add_query_var' ] ) );
 		$this->assertSame( 10, has_action( 'parse_request', [ 'AMP_Service_Worker', 'handle_service_worker_iframe_install' ] ) );
 		$this->assertSame( 10, has_action( 'wp', [ 'AMP_Service_Worker', 'add_install_hooks' ] ) );
 
-		$this->assertSame( 10, has_action( 'wp_front_service_worker', [ 'AMP_Service_Worker', 'add_cdn_script_caching' ] ) );
+		if ( amp_is_canonical() ) {
+			$this->assertEquals( 10, has_action( 'wp_front_service_worker', [ 'AMP_Service_Worker', 'add_cdn_script_caching' ] ) );
+		} else {
+			$this->assertFalse( has_action( 'wp_front_service_worker', [ 'AMP_Service_Worker', 'add_cdn_script_caching' ] ) );
+		}
 		$this->assertFalse( has_action( 'wp_front_service_worker', [ 'AMP_Service_Worker', 'add_image_caching' ] ) );
 		$this->assertFalse( has_action( 'wp_front_service_worker', [ 'AMP_Service_Worker', 'add_google_fonts_caching' ] ) );
 	}

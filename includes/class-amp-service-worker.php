@@ -54,7 +54,7 @@ class AMP_Service_Worker {
 			);
 		}
 
-		if ( $enabled_options['cdn_script_caching'] ) {
+		if ( $enabled_options['cdn_script_caching'] && amp_is_canonical() ) {
 			add_action( 'wp_front_service_worker', [ __CLASS__, 'add_cdn_script_caching' ] );
 		}
 		if ( $enabled_options['image_caching'] ) {
