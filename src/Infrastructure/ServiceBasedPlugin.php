@@ -67,8 +67,8 @@ abstract class ServiceBasedPlugin implements Plugin {
 	 */
 	public function __construct(
 		$enable_filters = null,
-		Injector $injector = null,
-		ServiceContainer $service_container = null
+		?Injector $injector = null,
+		?ServiceContainer $service_container = null
 	) {
 		/*
 		 * We use what is commonly referred to as a "poka-yoke" here.
