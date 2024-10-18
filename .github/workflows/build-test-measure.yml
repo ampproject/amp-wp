@@ -289,6 +289,11 @@ jobs:
         install-pwa-plugin: [true]
         coverage: [false]
         include:
+          - php: '8.4'
+            wp: 'trunk'
+            phpunit: '9.6'
+            experimental: true
+
           - php: '8.3'
             wp: 'trunk'
             phpunit: '9.6'
@@ -492,6 +497,10 @@ jobs:
         php: ['7.4']
         wp: ['latest']
         include:
+          - php: '8.4'
+            wp: 'trunk'
+            experimental: true
+
           - php: '8.3'
             wp: 'trunk'
             experimental: true
