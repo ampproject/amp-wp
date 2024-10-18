@@ -14,7 +14,7 @@
     "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
-    "ampproject/amp-toolbox": "0.11.5",
+    "ampproject/amp-toolbox": "0.11.6",
     "cweagans/composer-patches": "^1.0",
     "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "8.5.1"
@@ -23,7 +23,7 @@
     "automattic/vipwpcs": "^3.0",
     "civicrm/composer-downloads-plugin": "^4.0",
     "google/cloud-storage": "^1.0",
-    "mikey179/vfsstream": "1.6.11",
+    "mikey179/vfsstream": "1.6.12",
     "mustache/mustache": "^2",
     "php-stubs/wordpress-stubs": "^6.0",
     "phpcompatibility/phpcompatibility-wp": "2.1.5",

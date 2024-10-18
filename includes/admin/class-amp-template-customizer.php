@@ -76,7 +76,7 @@ class AMP_Template_Customizer {
 	 * @param ReaderThemeLoader|null $reader_theme_loader Reader theme loader.
 	 * @return AMP_Template_Customizer Instance.
 	 */
-	public static function init( WP_Customize_Manager $wp_customize, ReaderThemeLoader $reader_theme_loader = null ) {
+	public static function init( WP_Customize_Manager $wp_customize, ?ReaderThemeLoader $reader_theme_loader = null ) {
 		if ( null === $reader_theme_loader ) {
 			$reader_theme_loader = Services::get( 'reader_theme_loader' );
 		}
