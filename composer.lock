@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c672b16c6c4a23f305014e966245c095",
+    "content-hash": "d1bc9359ff0023f06fd3e4dfbc5c1eb6",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "0.11.5",
+            "version": "0.11.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "78531851c59fa5f306315372719f0064b5542cf4"
+                "reference": "72674f17e012ec880efc2e255997dce8fd44ca4e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/78531851c59fa5f306315372719f0064b5542cf4",
-                "reference": "78531851c59fa5f306315372719f0064b5542cf4",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/72674f17e012ec880efc2e255997dce8fd44ca4e",
+                "reference": "72674f17e012ec880efc2e255997dce8fd44ca4e",
                 "shasum": ""
             },
             "require": {
@@ -26,7 +26,7 @@
                 "ext-iconv": "*",
                 "ext-json": "*",
                 "ext-libxml": "*",
-                "php": "^5.6 || ^7.0 || ^8.0"
+                "php": "^7.4 || ^8.0"
             },
             "require-dev": {
                 "civicrm/composer-downloads-plugin": "^2.1 || ^3.0",
@@ -76,9 +76,9 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.11.5"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.11.6"
             },
-            "time": "2024-02-05T19:10:57+00:00"
+            "time": "2024-10-17T15:07:03+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -8525,7 +8525,7 @@
         "ext-libxml": "*",
         "ext-spl": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "platform-overrides": {
         "php": "7.4"
     },
