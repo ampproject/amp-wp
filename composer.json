@@ -89,9 +89,9 @@
     },
     "patches": {
       "sabberworm/php-css-parser": {
-        "1. Validate name-start code points for identifier <https://github.com/westonruter/PHP-CSS-Parser/pull/2>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/v8.x...westonruter:PHP-CSS-Parser:fix/malformed-identifier-without-tests.diff",
-        "2. Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/v8.x...westonruter:PHP-CSS-Parser:fix/selector-comma-parsing-without-tests.diff",
-        "3. Parse simple expressions <https://github.com/sabberworm/PHP-CSS-Parser/pull/389>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/v8.x...westonruter:PHP-CSS-Parser:fix/expression-parsing-without-tests.diff"
+        "1. Validate name-start code points for identifier <https://github.com/westonruter/PHP-CSS-Parser/pull/2>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/v8.7.0...westonruter:PHP-CSS-Parser:fix/malformed-identifier-without-tests.diff",
+        "2. Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/v8.7.0...westonruter:PHP-CSS-Parser:fix/selector-comma-parsing-without-tests.diff",
+        "3. Parse simple expressions <https://github.com/sabberworm/PHP-CSS-Parser/pull/389>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/v8.7.0...westonruter:PHP-CSS-Parser:fix/expression-parsing-without-tests.diff"
       }
     }
   },
