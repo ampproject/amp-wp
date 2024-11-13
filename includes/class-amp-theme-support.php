@@ -1379,7 +1379,7 @@ class AMP_Theme_Support {
 	 */
 	public static function filter_admin_bar_style_loader_tag( $tag, $handle ) {
 		if (
-			is_array( wp_styles()->registered['admin-bar']->deps ) && in_array( $handle, wp_styles()->registered['admin-bar']->deps, true ) ?
+			! empty( wp_styles()->registered['admin-bar']->deps ) && is_array( wp_styles()->registered['admin-bar']->deps ) && in_array( $handle, wp_styles()->registered['admin-bar']->deps, true ) ?
 				self::is_exclusively_dependent( wp_styles(), $handle, 'admin-bar' ) :
 				self::has_dependency( wp_styles(), $handle, 'admin-bar' )
 		) {
