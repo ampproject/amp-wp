@@ -1378,8 +1378,12 @@ class AMP_Theme_Support {
 	 * @return string Tag.
 	 */
 	public static function filter_admin_bar_style_loader_tag( $tag, $handle ) {
+		// Get Admin bar styles.
+		$admin_bar_dep = wp_styles()->query( 'admin-bar' );
+
+		// Check if the handle is a dependency of the admin-bar. If so, add the data-ampdevmode attribute.
 		if (
-			! empty( wp_styles()->registered['admin-bar']->deps ) && is_array( wp_styles()->registered['admin-bar']->deps ) && in_array( $handle, wp_styles()->registered['admin-bar']->deps, true ) ?
+			$admin_bar_dep && in_array( $handle, $admin_bar_dep->deps, true ) ?
 				self::is_exclusively_dependent( wp_styles(), $handle, 'admin-bar' ) :
 				self::has_dependency( wp_styles(), $handle, 'admin-bar' )
 		) {
