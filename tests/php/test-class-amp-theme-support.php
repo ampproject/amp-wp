@@ -1285,13 +1285,13 @@ class Test_AMP_Theme_Support extends TestCase {
 	}
 
 	/**
-	 * Test filter_admin_bar_script_loader_tag when ->deps is not an array.
+	 * Test filter_admin_bar_script_loader_tag when ->deps is an empty array.
 	 *
 	 * @covers \AMP_Theme_Support::filter_admin_bar_script_loader_tag()
 	 */
-	public function test_filter_admin_bar_script_loader_tag_non_array() {
+	public function test_filter_admin_bar_script_loader_tag_empty_array() {
 		wp_enqueue_script( 'admin-bar' );
-		$GLOBALS['wp_scripts']->registered['admin-bar']->deps = null;
+		$GLOBALS['wp_scripts']->registered['admin-bar']->deps = [];
 		$tag = '<script src="https://example.com/wp-includes/js/admin-bar.js?ver=5.3.2"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertEquals( $tag, AMP_Theme_Support::filter_admin_bar_script_loader_tag( $tag, 'example' ) );
 	}

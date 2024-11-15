@@ -1402,9 +1402,15 @@ class AMP_Theme_Support {
 	 * @return string Tag.
 	 */
 	public static function filter_customize_preview_style_loader_tag( $tag, $handle ) {
+		// Handle for customize-preview.
 		$customize_preview = 'customize-preview';
+
+		// Registered styles for customize-preview.
+		$customize_preview_dep = wp_styles()->query( $customize_preview );
+
+		// Check if the handle is a dependency of the customize-preview. If so, add the data-ampdevmode attribute.
 		if (
-			is_array( wp_styles()->registered[ $customize_preview ]->deps ) && in_array( $handle, wp_styles()->registered[ $customize_preview ]->deps, true )
+			in_array( $handle, $customize_preview_dep->deps, true )
 				? self::is_exclusively_dependent( wp_styles(), $handle, $customize_preview )
 				: self::has_dependency( wp_styles(), $handle, $customize_preview )
 		) {
@@ -1424,8 +1430,12 @@ class AMP_Theme_Support {
 	 * @return string Tag.
 	 */
 	public static function filter_admin_bar_script_loader_tag( $tag, $handle ) {
+		// Get Admin bar scripts.
+		$admin_bar_dep = wp_scripts()->query( 'admin-bar' );
+
+		// Check if the handle is a dependency of the admin-bar. If so, add the data-ampdevmode attribute.
 		if (
-			is_array( wp_scripts()->registered['admin-bar']->deps ) && in_array( $handle, wp_scripts()->registered['admin-bar']->deps, true ) ?
+			in_array( $handle, $admin_bar_dep->deps, true ) ?
 				self::is_exclusively_dependent( wp_scripts(), $handle, 'admin-bar' ) :
 				self::has_dependency( wp_scripts(), $handle, 'admin-bar' )
 		) {
