@@ -27,7 +27,7 @@
     "php-stubs/wordpress-stubs": "^6.0",
     "phpcompatibility/phpcompatibility-wp": "2.1.5",
     "phpdocumentor/reflection": "^3.0",
-    "phpstan/phpstan": "^1.0",
+    "phpstan/phpstan": "^2.0",
     "roave/security-advisories": "dev-latest",
     "sirbrillig/phpcs-variable-analysis": "2.11.19",
     "wp-cli/export-command": "^2.0",
