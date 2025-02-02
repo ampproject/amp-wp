@@ -95,7 +95,7 @@
     "postcss-preset-env": "9.5.15",
     "prettier": "3.4.2",
     "puppeteer": "22.12.1",
-    "react-test-renderer": "18.3.1",
+    "react-test-renderer": "19.0.0",
     "semver": "7.6.3",
     "webpack-remove-empty-scripts": "1.0.4",
     "webpackbar": "6.0.1",
