@@ -72,10 +72,16 @@ const sharedConfig = {
 	plugins: [
 		...defaultConfig.plugins
 			.map((plugin) => {
-				if (plugin.constructor.name === 'MiniCssExtractPlugin') {
+				if (
+					plugin.constructor.name === 'MiniCssExtractPlugin' &&
+					plugin.options
+				) {
 					plugin.options.filename = '../css/[name].css';
 				}
-				if (plugin.constructor.name === 'RtlCssPlugin') {
+				if (
+					plugin.constructor.name === 'RtlCssPlugin' &&
+					plugin.options
+				) {
 					plugin.options.filename = '../css/[name]-rtl.css';
 				}
 				return plugin;
