@@ -173,7 +173,7 @@ jobs:
         uses: ./.github/actions/setup-node-npm
 
       - name: Setup Jest cache
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 #v4.2.0
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf #v4.2.2
         with:
           path: ~/.jest-cache
           key: ${{ runner.os }}-jest
@@ -221,7 +221,7 @@ jobs:
         uses: ./.github/actions/plugin-build
 
       - name: Setup Jest cache
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 #v4.2.0
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf #v4.2.2
         with:
           path: ~/.jest-cache
           key: ${{ runner.os }}-jest-e2e-${{ matrix.part }}
@@ -251,7 +251,7 @@ jobs:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
       - name: Archive debug artifacts (screenshots, HTML snapshots)
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 #v4.6.0
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 #v4.6.1
         if: always()
         with:
           name: e2e-failure-artifacts
