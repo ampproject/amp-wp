@@ -3,10 +3,8 @@
   "rules": {
     "font-weight-notation": null,
     "function-url-quotes": null,
-    "max-line-length": null,
     "no-descending-specificity": null,
     "no-duplicate-selectors": null,
-    "number-leading-zero": null,
     "selector-type-no-unknown": [ true, { "ignore": ["custom-elements"] } ],
     "selector-class-pattern": [
       "^[a-z]+(-[a-z]+)*",
@@ -20,6 +18,16 @@
         "message": "Selector should use lowercase and separate words with hyphens (selector-id-pattern)"
       }
     ],
-    "value-keyword-case": null
+    "value-keyword-case": null,
+    "font-family-name-quotes": null,
+    "rule-empty-line-before" : null,
+    "selector-pseudo-element-colon-notation": null,
+    "at-rule-empty-line-before" : null,
+    "selector-attribute-quotes" : null,
+    "scss/operator-no-unspaced" : null,
+    "font-family-no-missing-generic-family-keyword" : null,
+    "color-named" : null,
+    "no-irregular-whitespace" : null,
+    "custom-property-no-missing-var-function" : null
   }
 }
