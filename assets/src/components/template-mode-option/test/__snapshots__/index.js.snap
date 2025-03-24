@@ -115,7 +115,7 @@ exports[`TemplateModeOption matches snapshot 1`] = `
     >
       <button
         aria-expanded={false}
-        className="components-button components-panel__body-toggle"
+        className="components-button components-panel__body-toggle is-next-40px-default-size"
         onBlur={[Function]}
         onClick={[Function]}
         onClickCapture={[Function]}
@@ -387,7 +387,7 @@ exports[`TemplateModeOption matches snapshot 2`] = `
     >
       <button
         aria-expanded={true}
-        className="components-button components-panel__body-toggle"
+        className="components-button components-panel__body-toggle is-next-40px-default-size"
         onBlur={[Function]}
         onClick={[Function]}
         onClickCapture={[Function]}
@@ -687,7 +687,7 @@ exports[`TemplateModeOption matches snapshot 3`] = `
     >
       <button
         aria-expanded={true}
-        className="components-button components-panel__body-toggle"
+        className="components-button components-panel__body-toggle is-next-40px-default-size"
         onBlur={[Function]}
         onClick={[Function]}
         onClickCapture={[Function]}
