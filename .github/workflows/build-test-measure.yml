@@ -173,7 +173,7 @@ jobs:
         uses: ./.github/actions/setup-node-npm
 
       - name: Setup Jest cache
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf #v4.2.2
+        uses: actions/cache@v4
         with:
           path: ~/.jest-cache
           key: ${{ runner.os }}-jest
@@ -221,7 +221,7 @@ jobs:
         uses: ./.github/actions/plugin-build
 
       - name: Setup Jest cache
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf #v4.2.2
+        uses: actions/cache@v4
         with:
           path: ~/.jest-cache
           key: ${{ runner.os }}-jest-e2e-${{ matrix.part }}
