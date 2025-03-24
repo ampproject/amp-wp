@@ -1429,6 +1429,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		// Remove unique layout ID.
 		$rendered_block = preg_replace( '/\s*(?<= class=")?has-\d+-columns-columns-layout-\d+\s*/', ' has-2-columns', $rendered_block );
+		$rendered_block = preg_replace( '/\s*(?<= class=")?has-\d+-columns-columns-is-layout-[0-9a-f]+\s*/', ' has-2-columns', $rendered_block );
 
 		// Remove layout class name and ID.
 		$rendered_block = str_replace(
