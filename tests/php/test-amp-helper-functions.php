@@ -931,6 +931,13 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			add_filter( 'amp_validation_error_sanitized', '__return_true' );
 			$this->assertTrue( amp_is_available() );
 			$assert_amphtml_link_present();
+			remove_filter( 'amp_validation_error_sanitized', '__return_true' );
+			$this->assertFalse( amp_is_available() );
+
+			// Also allow the URL when in a loose sandboxing.
+			AMP_Options_Manager::update_option( Option::SANDBOXING_ENABLED, true );
+			AMP_Options_Manager::update_option( Option::SANDBOXING_LEVEL, 1 );
+			$this->assertTrue( amp_is_available() );
 		}
 	}
 
