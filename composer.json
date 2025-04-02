@@ -29,7 +29,7 @@
     "phpdocumentor/reflection": "^3.0",
     "phpstan/phpstan": "^1.0",
     "roave/security-advisories": "dev-latest",
-    "sirbrillig/phpcs-variable-analysis": "2.11.22",
+    "sirbrillig/phpcs-variable-analysis": "2.12.0",
     "wp-cli/export-command": "^2.0",
     "wp-cli/extension-command": "^2.0",
     "wp-cli/wp-cli": "^2.0",
