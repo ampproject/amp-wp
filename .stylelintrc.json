@@ -3,8 +3,10 @@
   "rules": {
     "font-weight-notation": null,
     "function-url-quotes": null,
+    "max-line-length": null,
     "no-descending-specificity": null,
     "no-duplicate-selectors": null,
+    "number-leading-zero": null,
     "selector-type-no-unknown": [ true, { "ignore": ["custom-elements"] } ],
     "selector-class-pattern": [
       "^[a-z]+(-[a-z]+)*",
