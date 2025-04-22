@@ -20,6 +20,7 @@ describe('RedirectToggle', () => {
 				<RedirectToggle />
 			</OptionsContextProvider>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 

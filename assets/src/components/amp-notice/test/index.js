@@ -25,6 +25,7 @@ describe('AMPNotice', () => {
 				{'Component children'}
 			</AMPNotice>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
@@ -32,6 +33,7 @@ describe('AMPNotice', () => {
 				{'Component children'}
 			</AMPNotice>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 

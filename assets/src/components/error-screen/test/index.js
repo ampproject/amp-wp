@@ -21,6 +21,7 @@ describe('ErrorScreen', () => {
 				}}
 			/>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 });

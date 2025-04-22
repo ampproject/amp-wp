@@ -21,6 +21,7 @@ describe('getNoticeTemplate', () => {
 	it('should have the proper type', () => {
 		expect(type).toBe('function');
 	});
+
 	it('should return the correct message', () => {
 		expect(template()).toBe(sprintf('<p>%s</p>', message));
 	});

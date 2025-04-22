@@ -17,6 +17,7 @@ describe('Selectable', () => {
 				<div>{'Component children'}</div>
 			</Selectable>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
@@ -29,6 +30,7 @@ describe('Selectable', () => {
 				<div>{'Component children'}</div>
 			</Selectable>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 

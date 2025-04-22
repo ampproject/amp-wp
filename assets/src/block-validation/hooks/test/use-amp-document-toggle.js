@@ -44,6 +44,7 @@ describe('useAMPDocumentToggle', () => {
 
 	it('returns AMP document enable state', () => {
 		let { container } = setupAndRender(false);
+
 		expect(container.querySelector('button').textContent).toBe('disabled');
 
 		({ container } = setupAndRender(true));

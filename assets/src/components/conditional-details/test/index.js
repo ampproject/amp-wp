@@ -17,6 +17,7 @@ describe('ConditionalDetails', () => {
 				<div>{'children'}</div>
 			</ConditionalDetails>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
@@ -24,6 +25,7 @@ describe('ConditionalDetails', () => {
 				{[null, null]}
 			</ConditionalDetails>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 

@@ -33,6 +33,7 @@ async function testCommonDoneStepElements() {
 		'iframe[name="amp-wizard-completion-preview"]'
 	);
 	const previewFrame = await iframeElement.contentFrame();
+
 	await expect(previewFrame).not.toMatchElement('#wpadminbar');
 
 	await expect('.done__links-container a').not.countToBe(0);

@@ -86,6 +86,7 @@ describe('NavMenu', () => {
 		expect(handler).toHaveBeenCalledTimes(1);
 
 		const [event, link] = handler.mock.calls[0];
+
 		expect(event.type).toBe('click');
 		expect(link).toStrictEqual({
 			url: '',
