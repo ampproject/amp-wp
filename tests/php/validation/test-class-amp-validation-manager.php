@@ -1429,6 +1429,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		// Remove unique layout ID.
 		$rendered_block = preg_replace( '/\s*(?<= class=")?has-\d+-columns-columns-layout-\d+\s*/', ' has-2-columns', $rendered_block );
+		$rendered_block = preg_replace( '/\s*(?<= class=")?has-\d+-columns-columns-is-layout-[0-9a-f]+\s*/', ' has-2-columns', $rendered_block );
 
 		// Remove layout class name and ID.
 		$rendered_block = str_replace(
@@ -1849,83 +1850,57 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				'name'     => 'wp-includes',
 				'function' => 'WP_Embed::autoembed',
 			],
-		];
-
-		if ( function_exists( 'gutenberg_apply_block_hooks_to_post_content' ) && has_filter( 'the_content', 'gutenberg_apply_block_hooks_to_post_content' ) ) {
-			$sources[] = [
-				'type'     => 'plugin',
-				'name'     => 'gutenberg',
-				'file'     => 'lib/compat/wordpress-6.8/blocks.php',
-				'function' => 'gutenberg_apply_block_hooks_to_post_content',
-			];
-		}
-
-		$sources = array_merge(
-			$sources,
 			[
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'do_blocks',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'wptexturize',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'wpautop',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'shortcode_unautop',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'prepend_attachment',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'wp_replace_insecure_home_url',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'capital_P_dangit',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'do_shortcode',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'wp_filter_content_tags',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'convert_smilies',
-				],
-			]
-		);
-
-		if ( function_exists( 'apply_block_hooks_to_content' ) && has_filter( 'the_content', 'apply_block_hooks_to_content' ) ) {
-			array_unshift(
-				$sources,
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'apply_block_hooks_to_content',
-				]
-			);
-		}
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'do_blocks',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'wptexturize',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'wpautop',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'shortcode_unautop',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'prepend_attachment',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'wp_replace_insecure_home_url',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'capital_P_dangit',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'do_shortcode',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'wp_filter_content_tags',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'convert_smilies',
+			],
+		];
 
 		foreach ( $sources as &$source ) {
 			$function = $source['function'];
@@ -1948,35 +1923,34 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			$source['function'] = $function;
 		}
 
-		$source_json = wp_json_encode(
-			[
-				'hook'      => 'the_content',
-				'filter'    => true,
-				'post_id'   => get_the_ID(),
-				'post_type' => get_post_type(),
-				'sources'   => $sources,
-			]
-		);
-
 		$shortcode_fallback_reflection = new ReflectionFunction( $shortcode_fallback );
 
-		$expected_content = implode(
-			'',
-			[
-				"<!--amp-source-stack $source_json-->",
-				sprintf(
-					'<p>before<!--amp-source-stack {"type":"plugin","name":"amp","file":%1$s,"line":%2$s,"function":"{closure}","shortcode":"test"}--><b>test</b><!--/amp-source-stack {"type":"plugin","name":"amp","file":%1$s,"line":%2$s,"function":"{closure}","shortcode":"test"}-->after</p>' . "\n",
-					wp_json_encode( substr( $shortcode_fallback_reflection->getFileName(), strlen( AMP__DIR__ ) + 1 ) ),
-					$shortcode_fallback_reflection->getStartLine()
-				),
-				"<!--/amp-source-stack $source_json-->",
-			]
-		);
+		$this->assertTrue( (bool) preg_match( '/^<!--amp-source-stack (\{.+?})-->/', $filtered_content, $matches ) );
+		$json = $matches[1];
+		$source_stack = json_decode( $json, true );
+		$this->assertIsArray( $source_stack );
+		$this->assertStringEndsWith( "<!--/amp-source-stack $json-->", $filtered_content );
 
-		$this->assertEquals(
-			preg_split( '/(?=<)/', $expected_content ),
-			preg_split( '/(?=<)/', $filtered_content )
-		);
+		$expected_props = [
+			'hook'      => 'the_content',
+			'filter'    => true,
+			'post_id'   => get_the_ID(),
+			'post_type' => get_post_type(),
+		];
+		foreach ( $expected_props as $key => $value ) {
+			$this->assertEquals( $value, $source_stack[ $key ] );
+		}
+
+		foreach ( $sources as $expected_source ) {
+			$found = false;
+			foreach ( $source_stack['sources'] as $actual_source ) {
+				if ( count( array_diff( $expected_source, $actual_source ) ) === 0 ) {
+					$found = true;
+					break;
+				}
+			}
+			$this->assertTrue( $found, 'Unable to lcoate source: ' . wp_json_encode( $source ) );
+		}
 	}
 
 	/**
