@@ -40,6 +40,7 @@ describe('Featured Image Notice', () => {
 
 		// The warning notice for the small image should appear.
 		const warningNotice = await page.$(noticeSelector);
+
 		await expect(warningNotice).toMatch(featuredImageNoticeText);
 		await expect(page).toClick(selectButton);
 

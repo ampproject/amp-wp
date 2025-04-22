@@ -20,6 +20,7 @@ describe('DevToolsToggle', () => {
 				<DevToolsToggle />
 			</UserContextProvider>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 
@@ -41,6 +42,7 @@ describe('DevToolsToggle', () => {
 				<DevToolsToggle />
 			</UserContextProvider>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 

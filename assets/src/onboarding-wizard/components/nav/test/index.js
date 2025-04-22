@@ -74,6 +74,7 @@ describe('Nav', () => {
 				/>
 			</Providers>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 
@@ -130,6 +131,7 @@ describe('Nav', () => {
 		fireEvent.click(nextButton, new MouseEvent('click', { bubbles: true }));
 
 		closeButton = container.querySelector('.amp-settings-nav__close a');
+
 		expect(closeButton).toBeNull();
 	});
 
@@ -151,6 +153,7 @@ describe('Nav', () => {
 		fireEvent.click(nextButton, new MouseEvent('click', { bubbles: true }));
 
 		closeButton = container.querySelector('.amp-settings-nav__close a');
+
 		expect(closeButton).not.toBeNull();
 	});
 });

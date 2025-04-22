@@ -179,6 +179,7 @@ describe('maybeAddClientIdToValidationError', () => {
 			blockOrder: ['client-id-1', 'client-id-2'],
 			getBlock: () => ({ name: 'my-block' }),
 		});
+
 		expect(testValidationError).toMatchObject({});
 	});
 

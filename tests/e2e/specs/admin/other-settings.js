@@ -32,12 +32,15 @@ describe('Other settings', () => {
 
 		// Disable the setting, save and reload.
 		await scrollToElement({ selector: fullSelector, click: true });
+
 		await expect(page).toMatchElement(`${fullSelector}:not(:checked)`);
+
 		await saveSettings();
 		await page.reload();
 
 		// Confirm the setting value has been persisted.
 		await scrollToElement({ selector: panelSelector, click: true });
+
 		await expect(page).toMatchElement(`${fullSelector}:not(:checked)`);
 	});
 });

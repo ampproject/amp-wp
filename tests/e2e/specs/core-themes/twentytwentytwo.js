@@ -46,6 +46,7 @@ describe('Twenty Twenty-Two theme on AMP', () => {
 
 		it('should be initially hidden', async () => {
 			const pageHeaderElement = await page.$(pageHeaderSelector);
+
 			expect(pageHeaderElement).not.toBeNull();
 
 			await expect(pageHeaderElement).toMatchElement(
@@ -65,6 +66,7 @@ describe('Twenty Twenty-Two theme on AMP', () => {
 			await page.waitForSelector(pageHeaderSelector);
 
 			const pageHeaderElement = await page.$(pageHeaderSelector);
+
 			expect(pageHeaderElement).not.toBeNull();
 
 			await expect(pageHeaderElement).toClick(

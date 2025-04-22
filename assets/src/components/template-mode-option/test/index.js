@@ -27,6 +27,7 @@ describe('TemplateModeOption', () => {
 				</TemplateModeOption>
 			</OptionsContextProvider>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
@@ -39,6 +40,7 @@ describe('TemplateModeOption', () => {
 				/>
 			</OptionsContextProvider>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
@@ -53,6 +55,7 @@ describe('TemplateModeOption', () => {
 				/>
 			</OptionsContextProvider>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 
