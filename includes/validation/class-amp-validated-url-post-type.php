@@ -1941,10 +1941,6 @@ class AMP_Validated_URL_Post_Type {
 				if ( ! $url ) {
 					throw new Exception( 'illegal_url' );
 				}
-				// Don't let non-admins create new amp_validated_url posts.
-				if ( ! AMP_Validation_Manager::has_cap() ) {
-					throw new Exception( 'unauthorized' );
-				}
 			}
 
 			if ( ! $url ) {
