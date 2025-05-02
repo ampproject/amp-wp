@@ -30,13 +30,13 @@ class Test_AMP_Nav_Menu_Toggle_Sanitizer extends TestCase {
 		$head      = '<head><meta charset="utf-8"></head>';
 
 		$amp_state               = '<amp-state id="navMenuToggledOn"><script type="application/json">false</script></amp-state>';
-		$amp_get_container_attrs = function( $class = '', $toggle_class = 'toggled-on' ) {
+		$amp_get_container_attrs = function ( $class = '', $toggle_class = 'toggled-on' ) {
 			if ( empty( $toggle_class ) ) {
 				return '';
 			}
 			return ' data-amp-bind-class="&quot;' . $class . '&quot; + ( navMenuToggledOn ? &quot; ' . $toggle_class . '&quot; : \'\' )"';
 		};
-		$amp_get_toggle_attrs    = function( $class = '', $toggle_class = 'toggled-on' ) { // phpcs:ignore Generic.Formatting.MultipleStatementAlignment.NotSameWarning -- Sniff has a bug.
+		$amp_get_toggle_attrs    = function ( $class = '', $toggle_class = 'toggled-on' ) { // phpcs:ignore Generic.Formatting.MultipleStatementAlignment.NotSameWarning -- Sniff has a bug.
 			return ' on="tap:AMP.setState({ navMenuToggledOn: ! navMenuToggledOn })" aria-expanded="false" data-amp-bind-aria-expanded="navMenuToggledOn ? \'true\' : \'false\'"' . ( ! empty( $toggle_class ) ? ' data-amp-bind-class="&quot;' . $class . '&quot; + ( navMenuToggledOn ? &quot; ' . $toggle_class . '&quot; : \'\' )"' : '' );
 		};
 

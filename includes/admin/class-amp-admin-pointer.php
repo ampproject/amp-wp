@@ -150,7 +150,7 @@ class AMP_Admin_Pointer {
 
 		add_action(
 			'admin_print_footer_scripts',
-			function() {
+			function () {
 				$this->print_js();
 			}
 		);

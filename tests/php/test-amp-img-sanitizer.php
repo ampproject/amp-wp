@@ -29,7 +29,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		parent::set_up();
 		add_filter(
 			'amp_extract_image_dimensions_batch',
-			static function( $urls ) {
+			static function ( $urls ) {
 				$dimensions = [];
 				foreach ( array_keys( $urls ) as $url ) {
 					if ( preg_match( '#/(?P<width>\d+)x(?P<height>\d+)$#', $url, $matches ) ) {
@@ -654,7 +654,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$args = array_merge(
 			[
 				'use_document_element'      => true,
-				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
+				'validation_error_callback' => static function ( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
 			],

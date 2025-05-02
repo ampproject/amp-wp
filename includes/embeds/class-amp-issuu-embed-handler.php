@@ -64,4 +64,3 @@ class AMP_Issuu_Embed_Handler extends AMP_Base_Embed_Handler {
 		return $return;
 	}
 }
-

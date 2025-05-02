@@ -26,7 +26,7 @@ class AMP_Imgur_Embed_Handler_Test extends TestCase {
 		// Mock the HTTP request.
 		add_filter(
 			'pre_http_request',
-			static function( $pre, $r, $url ) {
+			static function ( $pre, $r, $url ) {
 				if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
 					return $pre;
 				}

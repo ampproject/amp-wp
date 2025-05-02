@@ -336,8 +336,8 @@ class AMP_Service_Worker {
 		// Die in a way that can be unit tested.
 		add_filter(
 			'wp_die_handler',
-			static function() {
-				return static function() {
+			static function () {
+				return static function () {
 					die();
 				};
 			},

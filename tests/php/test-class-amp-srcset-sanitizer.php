@@ -140,7 +140,7 @@ class AMP_Srcset_Sanitizer_Test extends TestCase {
 
 		$args = [
 			'use_document_element'      => true,
-			'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
+			'validation_error_callback' => static function ( $error ) use ( &$error_codes ) {
 				$error_codes[] = $error['code'];
 			},
 		];
