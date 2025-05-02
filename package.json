@@ -64,7 +64,7 @@
     "@wordpress/plugins": "7.19.0",
     "@wordpress/prettier-config": "4.19.0",
     "@wordpress/scripts": "28.6.0",
-    "axios": "1.8.4",
+    "axios": "1.9.0",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "copy-webpack-plugin": "13.0.0",
     "cross-env": "7.0.3",
