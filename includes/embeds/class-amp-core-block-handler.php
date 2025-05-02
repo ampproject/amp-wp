@@ -66,14 +66,6 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		/*
-		 * Disable interactivity API on core/navigation block.
-		 * Currently this support is added by Gutenberg plugin, but it will be a part of WP 6.3 as well.
-		 *
-		 * @TODO: Need to revisit once Interactivity API is landed in WP Core.
-		*/
-		add_filter( 'gutenberg_should_block_use_interactivity_api', '__return_false' );
-
 		add_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0, 2 );
 		add_filter( 'widget_text_content', [ $this, 'preserve_widget_text_element_dimensions' ], PHP_INT_MAX );
 	}
@@ -82,7 +74,6 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'gutenberg_should_block_use_interactivity_api', '__return_false' );
 		remove_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0 );
 		remove_filter( 'widget_text_content', [ $this, 'preserve_widget_text_element_dimensions' ], PHP_INT_MAX );
 	}
@@ -339,6 +330,11 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			add_action( 'wp_print_footer_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
 		}
 
+		$is_interactive_block = str_contains(
+			preg_match( '/(?<=<nav)\s[^>]+/', $block_content, $matches ) ? $matches[0] : '',
+			'data-wp-interactive'
+		);
+
 		$this->navigation_block_count++;
 		$modal_state_property = "modal_{$this->navigation_block_count}_expanded";
 
@@ -379,16 +375,9 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			return $block_content;
 		}
 
-		// Replace micromodal toggle logic with AMP state and set modal state property name based on its ID.
-		$block_content = preg_replace(
-			'/\sdata-micromodal-trigger="modal-\w+"/',
-			sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
-			$block_content
-		);
-
 		$block_content = preg_replace_callback(
 			'/(?<=<button)\s[^>]+/',
-			static function ( $matches ) use ( $modal_state_property ) {
+			static function ( $matches ) use ( $modal_state_property, $is_interactive_block ) {
 				$new_block_content = $matches[0];
 
 				// Skip submenu toggles.
@@ -396,8 +385,33 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 					return $new_block_content;
 				}
 
-				// Replace micromodal toggle logic bound with buttons with AMP state.
-				if ( false !== strpos( $new_block_content, ' data-micromodal-close' ) ) {
+				if ( $is_interactive_block ) {
+					// Replace `data-wp-on--click` or `data-wp-on-async--click` with AMP state on submenu open button.
+					if ( false !== strpos( $new_block_content, 'wp-block-navigation__responsive-container-open' ) ) {
+						$new_block_content = preg_replace(
+							'/\sdata-wp-on(?:-async)?--click="[^"]+"/',
+							sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
+							$new_block_content
+						);
+					}
+
+					// Replace `data-wp-on--click` or `data-wp-on-async--click` with AMP state on submenu close button.
+					if ( false !== strpos( $new_block_content, 'wp-block-navigation__responsive-container-close' ) ) {
+						$new_block_content = preg_replace(
+							'/\sdata-wp-on(?:-async)?--click="[^"]+"/',
+							sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
+							$new_block_content
+						);
+					}
+				} else {
+					// Replace micromodal toggle logic bound with buttons with AMP state to open the modal.
+					$new_block_content = preg_replace(
+						'/\sdata-micromodal-trigger="modal-\w+"/',
+						sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
+						$new_block_content
+					);
+
+					// Replace micromodal toggle logic bound with buttons with AMP state to close the modal.
 					$new_block_content = str_replace(
 						' data-micromodal-close',
 						sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
@@ -417,9 +431,6 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			},
 			$block_content
 		);
-
-		// Delete other micromodal-related data attributes.
-		$block_content = preg_replace( '/\sdata-micromodal-close/', '', $block_content );
 
 		// Change a responsive container class name and aria-hidden value based on the AMP state.
 		$block_content = preg_replace_callback(

@@ -14,7 +14,7 @@ When enabled, the data-ampdevmode attribute will be added to the document elemen
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1440](/includes/amp-helper-functions.php#L1440-L1450)
+:link: [includes/amp-helper-functions.php:1396](/includes/amp-helper-functions.php#L1396-L1416)
 
 <details>
 <summary>Show Code</summary>
@@ -29,6 +29,16 @@ return apply_filters(
 		( is_admin_bar_showing() && is_user_logged_in() )
 		||
 		is_customize_preview()
+		||
+		(
+			! is_ssl()
+			&&
+			function_exists( 'wp_get_environment_type' )
+			&&
+			'local' === wp_get_environment_type()
+			&&
+			'localhost' === wp_parse_url( home_url(), PHP_URL_HOST )
+		)
 	)
 );
 ```

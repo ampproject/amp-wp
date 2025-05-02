@@ -9,6 +9,7 @@ import {
 	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 	VALIDATION_ERROR_NEW_REJECTED_STATUS,
 } from 'amp-block-validation';
+import { beforeAll, describe, expect, it } from '@jest/globals';
 
 /**
  * WordPress dependencies
@@ -436,16 +437,19 @@ describe('ErrorContent', () => {
 				act(() => {
 					dispatch('core/block-editor').removeBlock(clientId, false);
 				});
+
 				// eslint-disable-next-line jest/no-conditional-expect
 				expect(container.innerHTML).toContain(
 					'error is no longer detected'
 				);
+
 				return;
 			}
 
 			if (null === clientId) {
 				// eslint-disable-next-line jest/no-conditional-expect
 				expect(container.innerHTML).toContain('outside the content');
+
 				return;
 			}
 
@@ -457,6 +461,7 @@ describe('ErrorContent', () => {
 				case 'plugin':
 					expect(container.innerHTML).toContain('test plugin block');
 					expect(container.innerHTML).toContain('My plugin (plugin)');
+
 					break;
 
 				case 'mu-plugin':
@@ -466,16 +471,19 @@ describe('ErrorContent', () => {
 					expect(container.innerHTML).toContain(
 						'My MU plugin (must-use plugin)'
 					);
+
 					break;
 
 				case 'theme':
 					expect(container.innerHTML).toContain('test theme block');
 					expect(container.innerHTML).toContain('My theme (theme)');
+
 					break;
 
 				case 'core':
 					expect(container.innerHTML).toContain('test core block');
 					expect(container.innerHTML).toContain('<dd>WordPress core');
+
 					break;
 
 				default:

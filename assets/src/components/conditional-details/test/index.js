@@ -3,6 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { create } from 'react-test-renderer';
+import { describe, expect, it } from '@jest/globals';
 
 /**
  * Internal dependencies
@@ -16,6 +17,7 @@ describe('ConditionalDetails', () => {
 				<div>{'children'}</div>
 			</ConditionalDetails>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
@@ -23,6 +25,7 @@ describe('ConditionalDetails', () => {
 				{[null, null]}
 			</ConditionalDetails>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 

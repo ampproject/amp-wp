@@ -11,6 +11,7 @@ describe('Template Mode selector on AMP Settings screen', () => {
 
 		// Scan results are stale right after completing the Wizard for any other template mode than Standard.
 		await page.waitForSelector('#template-modes');
+
 		await expect(page).toMatchElement(
 			'#template-mode-transitional:checked'
 		);

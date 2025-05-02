@@ -167,7 +167,7 @@ class AMP_Validated_URL_Post_Type {
 					'not_found'          => __( 'No validated URLs found', 'amp' ),
 					'not_found_in_trash' => __( 'No forgotten validated URLs', 'amp' ),
 					'search_items'       => __( 'Search validated URLs', 'amp' ),
-					'edit_item'          => '', // Overwritten in JS, so this prevents the page header from appearing and changing.
+					'edit_item'          => ' ', // Overwritten in JS, so this prevents the page header from appearing and changing.
 				],
 				'supports'     => false,
 				'public'       => false,
@@ -994,7 +994,7 @@ class AMP_Validated_URL_Post_Type {
 				'posts_per_page' => $count,
 			]
 		);
-		foreach ( $query->get_posts() as $post_id ) {
+		foreach ( $query->posts as $post_id ) {
 			if ( delete_post_meta( $post_id, self::STYLESHEETS_POST_META_KEY ) ) {
 				$deleted++;
 			}
@@ -1037,7 +1037,7 @@ class AMP_Validated_URL_Post_Type {
 				],
 			]
 		);
-		foreach ( $query->get_posts() as $post ) {
+		foreach ( $query->posts as $post ) {
 			if ( ! self::is_post_safe_to_garbage_collect( $post ) ) {
 				continue;
 			}
@@ -1940,10 +1940,6 @@ class AMP_Validated_URL_Post_Type {
 				$url = wp_validate_redirect( esc_url_raw( wp_unslash( $_GET['url'] ) ), null );
 				if ( ! $url ) {
 					throw new Exception( 'illegal_url' );
-				}
-				// Don't let non-admins create new amp_validated_url posts.
-				if ( ! AMP_Validation_Manager::has_cap() ) {
-					throw new Exception( 'unauthorized' );
 				}
 			}
 

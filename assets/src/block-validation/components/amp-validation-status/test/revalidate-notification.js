@@ -2,6 +2,14 @@
  * External dependencies
  */
 import { render, fireEvent } from '@testing-library/react';
+import {
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	jest,
+} from '@jest/globals';
 
 /**
  * WordPress dependencies

@@ -8,8 +8,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import AMPValidationErrorsKeptIcon from '../../../../images/amp-validation-errors-kept.svg';
-import BellIcon from '../../../../images/bell-icon.svg';
+import { BellIcon, AMPValidationErrorsKeptIcon } from '../../../icons';
 import { store as blockValidationStore } from '../../store';
 import { StatusIcon } from '../icon';
 import { SidebarNotification } from '../sidebar-notification';
@@ -94,11 +93,11 @@ export default function AMPDocumentStatusNotification() {
 							? __(
 									'Content may have changed. Trigger validation in the AMP Validation sidebar.',
 									'amp'
-							  )
+								)
 							: __(
 									'Content has changed. Trigger validation in the AMP Validation sidebar.',
 									'amp'
-							  )
+								)
 					}
 					isSmall={true}
 				/>
@@ -213,7 +212,7 @@ export default function AMPDocumentStatusNotification() {
 									'amp'
 								),
 								reviewedValidationErrorCount
-						  )
+							)
 						: __('No AMP validation issues detected.', 'amp')
 				}
 				isSmall={true}

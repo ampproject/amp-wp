@@ -89,16 +89,6 @@ class Test_AMP_Service_Worker extends TestCase {
 	}
 
 	/**
-	 * Test add_cdn_script_caching().
-	 *
-	 * @covers \AMP_Service_Worker::add_cdn_script_caching()
-	 */
-	public function test_add_cdn_script_caching() {
-		AMP_Service_Worker::add_cdn_script_caching( wp_service_workers()->get_registry() );
-		$this->assertArrayHasKey( 'amp-cdn-runtime-caching', wp_service_workers()->get_registry()->registered );
-	}
-
-	/**
 	 * Test add_image_caching().
 	 *
 	 * @covers \AMP_Service_Worker::add_image_caching()

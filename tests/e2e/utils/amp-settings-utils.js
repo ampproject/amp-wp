@@ -82,6 +82,7 @@ export async function installLocalPlugin(slug) {
 	await page.waitForSelector('#pluginzip');
 
 	const pluginPath = path.join(__dirname, '..', 'plugins', `${slug}.zip`);
+
 	await expect(page).toUploadFile('#pluginzip', pluginPath);
 
 	await page.waitForSelector('#install-plugin-submit:not([disabled])');
@@ -131,7 +132,7 @@ export async function cleanUpValidatedUrls() {
 
 	await page.click('#doaction');
 	await page.waitForXPath(
-		'//*[contains(@class, "updated notice")]/p[contains(text(), "forgotten")]'
+		'//*[contains(@class, "notice") and contains(@class, "updated")]/p[contains(text(), "forgotten")]'
 	);
 	await switchUserToTest();
 }

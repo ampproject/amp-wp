@@ -3,6 +3,7 @@
  */
 import { render, fireEvent } from '@testing-library/react';
 import { create } from 'react-test-renderer';
+import { describe, expect, it, jest } from '@jest/globals';
 
 /**
  * Internal dependencies
@@ -85,6 +86,7 @@ describe('NavMenu', () => {
 		expect(handler).toHaveBeenCalledTimes(1);
 
 		const [event, link] = handler.mock.calls[0];
+
 		expect(event.type).toBe('click');
 		expect(link).toStrictEqual({
 			url: '',

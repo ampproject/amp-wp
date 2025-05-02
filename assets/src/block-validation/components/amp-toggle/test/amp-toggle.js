@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, fireEvent } from '@testing-library/react';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 /**
  * Internal dependencies

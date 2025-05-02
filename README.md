@@ -5,12 +5,10 @@
 An easier path to great Page Experience for everyone. Powered by AMP.
 
 **Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [rtcamp](https://profiles.wordpress.org/rtcamp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [albertomedina](https://profiles.wordpress.org/albertomedina), [schlessera](https://profiles.wordpress.org/schlessera), [delawski](https://profiles.wordpress.org/delawski/), [swissspidy](https://profiles.wordpress.org/swissspidy), [pierlo](https://profiles.wordpress.org/pierlo), [joshuawold](https://profiles.wordpress.org/joshuawold), [thelovekesh](https://profiles.wordpress.org/thelovekesh/)  
-**Tags:** [page experience](https://wordpress.org/plugins/tags/page-experience), [performance](https://wordpress.org/plugins/tags/performance), [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization), [accelerated mobile pages](https://wordpress.org/plugins/tags/accelerated-mobile-pages)  
-**Requires at least:** 5.3  
-**Tested up to:** 6.3  
-**Stable tag:** 2.4.2  
+**Tags:** [page experience](https://wordpress.org/plugins/tags/page-experience), [performance](https://wordpress.org/plugins/tags/performance), [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization)  
+**Tested up to:** 6.7  
+**Stable tag:** 2.5.5  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
-**Requires PHP:** 7.4
 
 [![Build Status](https://github.com/ampproject/amp-wp/workflows/Build,%20test%20&%20measure/badge.svg)](https://github.com/ampproject/amp-wp/actions?query=branch%3Adevelop+workflow%3A%22Build%2C+test+%26+measure%22)
 [![Coverage Status](https://img.shields.io/codecov/c/github/ampproject/amp-wp/develop.svg)](https://codecov.io/gh/ampproject/amp-wp)
@@ -112,6 +110,8 @@ Please see the [FAQs on amp-wp.org](https://amp-wp.org/documentation/frequently-
 ![Reopen the onboarding wizard, change individual options, or manage advanced settings.](.wordpress-org/screenshot-6.png)
 
 ## Changelog
+
+**Version 2.5.1 is a maintenance and security release which fixes a reflected XSS vulnerability when mobile redirection is enabled.** For prior affected versions, the fix is backported to new patch releases: v2.0.12, v2.1.5, v2.2.5, v2.3.1, and v2.4.3. These are available in the WordPress.org Plugin Directory but not on GitHub.
 
 For the plugin’s changelog, please see [the Releases page on GitHub](https://github.com/ampproject/amp-wp/releases).
 

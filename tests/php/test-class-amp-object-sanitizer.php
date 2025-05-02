@@ -69,6 +69,14 @@ class AMP_Object_Sanitizer_Test extends TestCase {
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
+
+		// Ensure the ID was successfully copied. See <https://weston.ruter.net/2021/11/19/unexpected-handling-of-element-ids-in-php-dom/>/
+		foreach ( $dom->xpath->query( '//*/@id' ) as $id_attribute ) {
+			$this->assertSame(
+				$id_attribute->parentNode,
+				$dom->getElementById( $id_attribute->nodeValue )
+			);
+		}
 	}
 
 	public function get_scripts_data() {

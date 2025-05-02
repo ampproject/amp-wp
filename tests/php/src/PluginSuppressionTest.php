@@ -60,9 +60,6 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			'plugin_file_pattern',
 			null
 		);
-
-		// Work around issue with WP 5.5 compatibility where a failure occurs for undefined property: WP_Block_Type::$supports.
-		remove_filter( 'render_block', 'gutenberg_experimental_apply_classnames_and_styles' );
 	}
 
 	/**
@@ -582,6 +579,10 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			} else {
 				$this->assertStringContainsString( 'Bad filter!', $content );
 			}
+
+			// Avoid running deprecated `the_block_template_skip_link()` while printing styles.
+			// @see <https://core.trac.wordpress.org/ticket/59505>.
+			remove_action( 'wp_footer', 'the_block_template_skip_link' );
 
 			// Check action.
 			ob_start();

@@ -7,6 +7,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
   cancel-in-progress: true
 
+# Disable permissions for all available scopes.
+# Enable permissions for specific scopes as needed on job level.
+permissions: {}
+
 on:
   push:
     # Only run if JS or Python files changed.
@@ -31,14 +35,16 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@28deaeda66b76a05916b6923827895f2b14ab387 #v3.28.16
         with:
           languages: javascript, python
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@28deaeda66b76a05916b6923827895f2b14ab387 #v3.28.16

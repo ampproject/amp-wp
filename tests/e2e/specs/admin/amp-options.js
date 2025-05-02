@@ -47,6 +47,7 @@ describe('AMP settings screen newly activated', () => {
 
 	it('shows expected elements for standard mode', async () => {
 		await clickMode('standard');
+
 		await expect(page).toMatchElement('#template-mode-standard:checked');
 
 		await expect(page).not.toMatchElement('.mobile-redirection');
@@ -55,6 +56,7 @@ describe('AMP settings screen newly activated', () => {
 
 	it('shows expected elements for transitional mode', async () => {
 		await clickMode('transitional');
+
 		await expect(page).toMatchElement(
 			'#template-mode-transitional:checked'
 		);
@@ -81,6 +83,7 @@ describe('Settings screen when reader theme is active theme', () => {
 			selector: '#reader-themes .components-panel__body-toggle',
 			click: true,
 		});
+
 		await expect(page).toMatchElement('.amp-notice__body', {
 			text: /^Your active theme/,
 		});
@@ -164,6 +167,7 @@ describe('Saving', () => {
 
 		// Success notice should disappear on additional change.
 		await clickMode('standard');
+
 		await expect(page).not.toMatchElement('.amp-save-success-notice', {
 			text: 'Saved',
 		});

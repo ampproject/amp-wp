@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { describe, expect, it } from '@jest/globals';
+
+/**
  * Internal dependencies
  */
 import { getPluginSlugFromFile } from '../get-plugin-slug-from-file';

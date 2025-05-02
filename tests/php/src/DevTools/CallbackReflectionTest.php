@@ -208,7 +208,7 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 			],
 			'plugin_closure'                      => [
 				function () {},
-				__NAMESPACE__ . '\{closure}',
+				'{closure}',
 				'amp',
 				'plugin',
 				'tests/php/src/DevTools/CallbackReflectionTest.php',
@@ -246,7 +246,6 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 		/** @var ReflectionFunction $reflection */
 		$reflection = $source['reflection'];
 		$this->assertInstanceOf( $reflection_class, $reflection );
-		$this->assertEquals( preg_replace( '/.*::/', '', $source['function'] ), $reflection->getName() );
 	}
 
 	/**

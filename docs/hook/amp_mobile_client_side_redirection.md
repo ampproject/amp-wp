@@ -16,7 +16,7 @@ If false, a server-side solution will be used instead (via PHP). It&#039;s impor
 
 ### Source
 
-:link: [src/MobileRedirection.php:293](/src/MobileRedirection.php#L293)
+:link: [src/MobileRedirection.php:335](/src/MobileRedirection.php#L335)
 
 <details>
 <summary>Show Code</summary>

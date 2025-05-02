@@ -9,7 +9,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { store as blockValidationStore } from '../../store';
-import BellIcon from '../../../../images/bell-icon.svg';
+import { BellIcon } from '../../../icons';
 import { SidebarNotification } from '../sidebar-notification';
 import { useErrorsFetchingStateChanges } from '../../hooks/use-errors-fetching-state-changes';
 

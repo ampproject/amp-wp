@@ -19,8 +19,7 @@ import { BlockIcon } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import AMPAlert from '../../../../images/amp-alert.svg';
-import AMPDelete from '../../../../images/amp-delete.svg';
+import { AMPAlert, AMPDelete } from '../../../icons';
 import { getErrorSourceTitle } from './get-error-source-title';
 
 /**

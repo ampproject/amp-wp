@@ -12,7 +12,7 @@ Determine whether AMP is available for the current URL.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:380](/includes/amp-helper-functions.php#L380-L563)
+:link: [includes/amp-helper-functions.php:380](/includes/amp-helper-functions.php#L380-L562)
 
 <details>
 <summary>Show Code</summary>
@@ -45,7 +45,7 @@ function amp_is_available() {
 		}
 
 		$message = sprintf(
-			/* translators: 1: amp_is_available() function, 2: amp_is_request() function, 3: is_amp_endpoint() function */
+			/* translators: 1: amp_is_available function, 2: amp_is_request function, 3: is_amp_endpoint function */
 			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly.', 'amp' ),
 			'`amp_is_available()`',
 			'`amp_is_request()`',
@@ -192,7 +192,6 @@ function amp_is_available() {
 		}
 	} elseif ( ! (
 		$queried_object instanceof WP_Post &&
-		$wp_query instanceof WP_Query &&
 		( $wp_query->is_singular() || $wp_query->is_posts_page ) &&
 		amp_is_post_supported( $queried_object ) )
 	) {

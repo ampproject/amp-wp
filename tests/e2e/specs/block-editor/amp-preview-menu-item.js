@@ -12,24 +12,35 @@ import {
 	deactivatePlugin,
 } from '../../utils/amp-settings-utils';
 
-const postPreviewBtnSelector = '.components-button.editor-post-preview';
-const ampPreviewBtnSelector = `${postPreviewBtnSelector} + .amp-wrapper-post-preview > .amp-editor-post-preview`;
+const ampPreviewMenuItemSelector = `.amp-editor-post-preview`;
 
-describe('AMP Preview button', () => {
+describe('AMP Preview Menu Item', () => {
 	it('is rendered on a new post', async () => {
 		await createNewPost();
-		await page.waitForSelector(postPreviewBtnSelector);
 
-		await expect(page).toMatchElement(ampPreviewBtnSelector);
+		// Open the Preview dropdown.
+		const [previewMenuDropdownButton] = await page.$x(
+			'//button[contains(@class, "editor-preview-dropdown__toggle")]'
+		);
+
+		await previewMenuDropdownButton.click();
+
+		await expect(page).toMatchElement(ampPreviewMenuItemSelector);
 	});
 
 	it('is rendered when Gutenberg is disabled', async () => {
 		await deactivatePlugin('gutenberg');
 
 		await createNewPost();
-		await page.waitForSelector(postPreviewBtnSelector);
 
-		await expect(page).toMatchElement(ampPreviewBtnSelector);
+		// Open the Preview dropdown.
+		const [previewMenuDropdownButton] = await page.$x(
+			'//button[contains(@class, "editor-preview-dropdown__toggle")]'
+		);
+
+		await previewMenuDropdownButton.click();
+
+		await expect(page).toMatchElement(ampPreviewMenuItemSelector);
 
 		await activatePlugin('gutenberg');
 	});
@@ -40,9 +51,15 @@ describe('AMP Preview button', () => {
 			content:
 				'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur fugiat, impedit.',
 		});
-		await page.waitForSelector(postPreviewBtnSelector);
 
-		await expect(page).toMatchElement(ampPreviewBtnSelector);
+		// Open the Preview dropdown.
+		const [previewMenuDropdownButton] = await page.$x(
+			'//button[contains(@class, "editor-preview-dropdown__toggle")]'
+		);
+
+		await previewMenuDropdownButton.click();
+
+		await expect(page).toMatchElement(ampPreviewMenuItemSelector);
 	});
 
 	it('does not render the button when in Standard mode', async () => {
@@ -58,9 +75,15 @@ describe('AMP Preview button', () => {
 		});
 
 		await createNewPost();
-		await page.waitForSelector(postPreviewBtnSelector);
 
-		await expect(page).not.toMatchElement(ampPreviewBtnSelector);
+		// Open the Preview dropdown.
+		const [previewMenuDropdownButton] = await page.$x(
+			'//button[contains(@class, "editor-preview-dropdown__toggle")]'
+		);
+
+		await previewMenuDropdownButton.click();
+
+		await expect(page).not.toMatchElement(ampPreviewMenuItemSelector);
 
 		await cleanUpSettings();
 	});

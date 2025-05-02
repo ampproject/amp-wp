@@ -87,12 +87,18 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 
 		$attributes_to_copy = [ Attribute::ID, Attribute::CLASS_ ];
 		foreach ( $attributes_to_copy as $attribute_name ) {
-			$attribute = $element->getAttributeNode( $attribute_name );
-			if ( $attribute instanceof DOMAttr ) {
-				// Remove the attribute from the original node so that PHP DOM doesn't fail to set it on the replacement element (as happens with ID).
-				$element->removeAttributeNode( $attribute );
+			/*
+			 * Note: Previously this used $element->getAttributeNode() and $element->removeAttributeNode( $attribute_node )
+			 * but these would prevent the ID specifically from applying so that the element can be obtained via
+			 * $dom->getElementById(). As noted in <https://weston.ruter.net/2021/11/19/unexpected-handling-of-element-ids-in-php-dom/>:
+			 * > if you want to work with an attribute node instead, make sure you pass that same attribute node to setAttributeNode on the replacement element
+			 * But this was not being done. So this was changed to eliminate the use of attribute nodes altogether.
+			 */
+			if ( $element->hasAttribute( $attribute_name ) ) {
+				$attributes[ $attribute_name ] = $element->getAttribute( $attribute_name );
 
-				$attributes[ $attribute_name ] = $attribute->value;
+				// Remove the attribute from the original node so that PHP DOM doesn't fail to set it on the replacement element (as happens with ID).
+				$element->removeAttribute( $attribute_name );
 			}
 		}
 

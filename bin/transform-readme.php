@@ -67,12 +67,10 @@ $readme_txt = preg_replace_callback(
 		$expected_metadata = [
 			'Contributors',
 			'Tags',
-			'Requires at least',
 			'Tested up to',
 			'Stable tag',
 			'License',
 			'License URI',
-			'Requires PHP',
 		];
 		foreach ( $expected_metadata as $key ) {
 			if ( empty( $metadata[ $key ] ) ) {

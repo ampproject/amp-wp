@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { create } from 'react-test-renderer';
+import { describe, expect, it } from '@jest/globals';
 
 /**
  * Internal dependencies
@@ -20,6 +21,7 @@ describe('ErrorScreen', () => {
 				}}
 			/>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 });

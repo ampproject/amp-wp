@@ -10,21 +10,7 @@ if [[ -z $WP_VERSION ]]; then
 	exit 1
 fi
 
-case "$WP_VERSION" in
-	"4.9")
-		gb_version="4.9.0"
-		;;
-	"5.0" | "5.1")
-		gb_version="6.9.0"
-		;;
-	"5.2")
-		gb_version="7.6.1"
-		;;
-	*)
-		# WP 5.3 onwards can use the latest version of Gutenberg.
-		gb_version="trunk"
-		;;
-esac
+gb_version="trunk"
 
 if [[ "$gb_version" != "" ]]; then
 	echo -n "Installing Gutenberg ${gb_version}..."

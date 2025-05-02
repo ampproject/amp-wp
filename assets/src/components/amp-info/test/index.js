@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { create } from 'react-test-renderer';
+import { describe, expect, it } from '@jest/globals';
 
 /**
  * Internal dependencies
@@ -12,6 +13,7 @@ import { IconMobile } from '../../svg/icon-mobile';
 describe('AMPInfo', () => {
 	it('matches snapshots', () => {
 		let wrapper = create(<AMPInfo />);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
@@ -22,6 +24,7 @@ describe('AMPInfo', () => {
 				{'Component children'}
 			</AMPInfo>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 });

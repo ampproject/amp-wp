@@ -33,6 +33,7 @@ describe('Current active theme is reader theme and user is nontechnical', () => 
 			'.amp-stepper__item',
 			(els) => els.length
 		);
+
 		expect(stepperItemCount).toBe(5);
 
 		await expect(page).toMatchElement('p', { text: /transitional mode/i });

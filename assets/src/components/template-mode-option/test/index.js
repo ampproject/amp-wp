@@ -3,6 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { create } from 'react-test-renderer';
+import { describe, expect, it, jest } from '@jest/globals';
 
 /**
  * Internal dependencies
@@ -26,6 +27,7 @@ describe('TemplateModeOption', () => {
 				</TemplateModeOption>
 			</OptionsContextProvider>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
@@ -38,6 +40,7 @@ describe('TemplateModeOption', () => {
 				/>
 			</OptionsContextProvider>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
@@ -52,6 +55,7 @@ describe('TemplateModeOption', () => {
 				/>
 			</OptionsContextProvider>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 

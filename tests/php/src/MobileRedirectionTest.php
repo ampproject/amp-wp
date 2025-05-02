@@ -746,7 +746,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 			foreach ( [ true, false ] as $is_amp ) {
 				foreach ( [ true, false ] as $is_customizer ) {
 					foreach ( [ true, false ] as $is_paired_browsing ) {
-						// Skip ths condition for Reader mode since Paired Browsing not relevant.
+						// Skip this condition for Reader mode since Paired Browsing not relevant.
 						if ( AMP_Theme_Support::READER_MODE_SLUG === $template_mode ) {
 							continue;
 						}

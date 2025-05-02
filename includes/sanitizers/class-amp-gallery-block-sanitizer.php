@@ -77,6 +77,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			sprintf( './/ul[ %1$s ] | .//figure[ %1$s ]', $class_query ),
 			$this->dom->body
 		);
+
 		foreach ( $gallery_elements as $gallery_element ) {
 			/** @var Element $gallery_element */
 

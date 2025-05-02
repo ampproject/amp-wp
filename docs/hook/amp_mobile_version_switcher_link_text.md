@@ -14,7 +14,7 @@ Use the `amp_is_request()` function to determine whether you are filtering the t
 
 ### Source
 
-:link: [src/MobileRedirection.php:575](/src/MobileRedirection.php#L575)
+:link: [src/MobileRedirection.php:603](/src/MobileRedirection.php#L603)
 
 <details>
 <summary>Show Code</summary>

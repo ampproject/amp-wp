@@ -152,6 +152,13 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	const KEY_CUSTOM_SPACING_SIZE = 'customSpacingSize';
 
 	/**
+	 * Key for `defaultSpacingSizes` boolean in theme.json (v3).
+	 *
+	 * @var string
+	 */
+	const KEY_DEFAULT_SPACING_SIZES = 'defaultSpacingSizes';
+
+	/**
 	 * Action fired when the cached primary_theme_support should be updated.
 	 *
 	 * @var string
@@ -294,7 +301,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		$features = [];
 
 		foreach ( array_keys( self::SUPPORTED_FEATURES ) as $feature_key ) {
-			if ( $this->theme_has_theme_json() && function_exists( 'wp_get_global_settings' ) ) {
+			if ( wp_theme_has_theme_json() ) {
 				$feature_value   = [];
 				$global_settings = wp_get_global_settings( self::SUPPORTED_THEME_JSON_FEATURES[ $feature_key ], self::KEY_THEME );
 
@@ -314,7 +321,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			}
 
 			// Avoid reducing font sizes if theme.json is used for the sake of fluid typography.
-			if ( $this->theme_has_theme_json() && self::FEATURE_EDITOR_FONT_SIZES === $feature_key ) {
+			if ( wp_theme_has_theme_json() && self::FEATURE_EDITOR_FONT_SIZES === $feature_key ) {
 				$reduced = false;
 			}
 
@@ -385,7 +392,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		}
 
 		// Print the custom properties for the spacing sizes.
-		if ( $this->theme_has_theme_json() && function_exists( 'wp_get_global_settings' ) ) {
+		if ( wp_theme_has_theme_json() ) {
 			$this->print_spacing_sizes_custom_properties();
 		}
 	}
@@ -446,7 +453,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			}
 
 			// Just in case the font size is not in the expected format.
-			$font_size[ self::KEY_SIZE ] = $this->get_typography_value_and_unit( $font_size[ self::KEY_SIZE ] );
+			$font_size[ self::KEY_SIZE ] = wp_get_typography_value_and_unit( $font_size[ self::KEY_SIZE ] );
 
 			if ( ! is_array( $font_size[ self::KEY_SIZE ] ) || empty( $font_size[ self::KEY_SIZE ] ) ) {
 				continue;
@@ -462,11 +469,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			printf(
 				':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$s; }',
 				sanitize_key( $font_size[ self::KEY_SLUG ] ),
-				function_exists( 'wp_get_typography_font_size_value' )
-					// phpcs:disable WordPressVIPMinimum.Functions.StripTags.StripTagsOneParameter
-					? strip_tags( wp_get_typography_font_size_value( $font_size ) ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					: strip_tags( $font_size[ self::KEY_SIZE ] ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					// phpcs:enable WordPressVIPMinimum.Functions.StripTags.StripTagsOneParameter
+				esc_html( wp_strip_all_tags( wp_get_typography_font_size_value( $font_size ) ) )
 			);
 		}
 		echo '</style>';
@@ -496,10 +499,23 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 * Print spacing sizes custom properties.
 	 */
 	private function print_spacing_sizes_custom_properties() {
-		$custom_properties              = [];
-		$spacing_sizes                  = wp_get_global_settings( [ self::KEY_SPACING, self::KEY_SPACING_SIZES ], self::KEY_THEME );
-		$is_wp_generating_spacing_sizes = 0 !== wp_get_global_settings( [ self::KEY_SPACING, self::KEY_SPACING_SCALE ], self::KEY_THEME )[ self::KEY_STEPS ];
-		$custom_spacing_size            = wp_get_global_settings( [ self::KEY_SPACING, self::KEY_CUSTOM_SPACING_SIZE ], self::KEY_THEME );
+		$custom_properties   = [];
+		$spacing             = wp_get_global_settings( [ self::KEY_SPACING ], self::KEY_THEME );
+		$spacing_sizes       = $spacing[ self::KEY_SPACING_SIZES ] ?? [];
+		$custom_spacing_size = $spacing[ self::KEY_CUSTOM_SPACING_SIZE ] ?? false;
+		$spacing_scale       = $spacing[ self::KEY_SPACING_SCALE ] ?? [];
+
+		/**
+		 * By default check for `defaultSpacingSizes` boolean introduced in theme.json (v3)
+		 * and if it's false, then check for `steps` in `spacingScale` which is v2 default.
+		 *
+		 * @see <https://github.com/WordPress/gutenberg/pull/58409#issuecomment-2078077477>.
+		 */
+		$is_wp_generating_spacing_sizes = $spacing[ self::KEY_DEFAULT_SPACING_SIZES ] ?? false;
+
+		if ( array_key_exists( self::KEY_STEPS, $spacing_scale ) ) {
+			$is_wp_generating_spacing_sizes = 0 !== $spacing_scale[ self::KEY_STEPS ];
+		}
 
 		if ( ! $is_wp_generating_spacing_sizes && $custom_spacing_size ) {
 			if ( isset( $spacing_sizes[ self::KEY_THEME ] ) ) {
@@ -562,153 +578,5 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		// Calculate the luminance.
 		$lum = ( 0.2126 * $red ) + ( 0.7152 * $green ) + ( 0.0722 * $blue );
 		return (int) round( $lum );
-	}
-
-	/**
-	 * Checks whether a theme or its parent has a theme.json file.
-	 * Checks if `wp_get_global_settings()` exists and bail for WP < 5.9.
-	 *
-	 * Copied from `wp_theme_has_theme_json()`
-	 *
-	 * @codeCoverageIgnore
-	 *
-	 * @see https://github.com/WordPress/wordpress-develop/blob/200868214a1ae0a108dac491677ba82e7541fc8d/src/wp-includes/global-styles-and-settings.php#L384
-	 *
-	 * @since 2.4.1
-	 *
-	 * @return bool False if `wp_get_global_settings()` not exists or theme.json not found, true otherwise.
-	 */
-	private function theme_has_theme_json() {
-		if ( function_exists( 'wp_theme_has_theme_json' ) ) {
-			return wp_theme_has_theme_json();
-		}
-
-		static $theme_has_support = [];
-
-		$stylesheet = get_stylesheet();
-
-		if (
-			isset( $theme_has_support[ $stylesheet ] ) &&
-
-			/*
-			* Ignore static cache when `WP_DEBUG` is enabled. Why? To avoid interfering with
-			* the theme developer's workflow. Note that core uses a newer wp_get_development_mode() check.
-			*/
-			! ( defined( 'WP_DEBUG' ) && WP_DEBUG )
-		) {
-			return $theme_has_support[ $stylesheet ];
-		}
-
-		$stylesheet_directory = get_stylesheet_directory();
-		$template_directory   = get_template_directory();
-
-		// This is the same as get_theme_file_path(), which isn't available in load-styles.php context.
-		if ( $stylesheet_directory !== $template_directory && file_exists( $stylesheet_directory . '/theme.json' ) ) {
-			$path = $stylesheet_directory . '/theme.json';
-		} else {
-			$path = $template_directory . '/theme.json';
-		}
-
-		/** This filter is documented in wp-includes/link-template.php */
-		$path = apply_filters( 'theme_file_path', $path, 'theme.json' );
-
-		$theme_has_support[ $stylesheet ] = file_exists( $path );
-
-		return $theme_has_support[ $stylesheet ];
-	}
-
-	/**
-	 * Checks a string for a unit and value and returns an array
-	 * consisting of `'value'` and `'unit'`, e.g. array( '42', 'rem' ).
-	 *
-	 * Copied from `wp_get_typography_value_and_unit()`
-	 *
-	 * @codeCoverageIgnore
-	 *
-	 * @see https://github.com/WordPress/WordPress/blob/9caf1c4adeddff2577c24d622ebbbf278a671271/wp-includes/block-supports/typography.php#L297
-	 *
-	 * @since 2.4.1
-	 *
-	 * @param string|int|float $raw_value Raw size value from theme.json.
-	 * @param array            $options   {
-	 *     Optional. An associative array of options. Default is empty array.
-	 *
-	 *     @type string   $coerce_to        Coerce the value to rem or px. Default `'rem'`.
-	 *     @type int      $root_size_value  Value of root font size for rem|em <-> px conversion. Default `16`.
-	 *     @type string[] $acceptable_units An array of font size units. Default `array( 'rem', 'px', 'em' )`;
-	 * }
-	 * @return array|null The value and unit, or null if the value is empty.
-	 */
-	private function get_typography_value_and_unit( $raw_value, $options = [] ) {
-		if ( function_exists( 'wp_get_typography_value_and_unit' ) ) {
-			return wp_get_typography_value_and_unit( $raw_value, $options );
-		}
-
-		if ( ! is_string( $raw_value ) && ! is_int( $raw_value ) && ! is_float( $raw_value ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				esc_html__( 'Raw size value must be a string, integer, or float.', 'default' ),
-				'2.4.1'
-			);
-			return null;
-		}
-
-		if ( empty( $raw_value ) ) {
-			return null;
-		}
-
-		// Converts numbers to pixel values by default.
-		if ( is_numeric( $raw_value ) ) {
-			$raw_value = $raw_value . 'px';
-		}
-
-		$defaults = [
-			'coerce_to'        => '',
-			'root_size_value'  => 16,
-			'acceptable_units' => [ 'rem', 'px', 'em' ],
-		];
-
-		$options = wp_parse_args( $options, $defaults );
-
-		$acceptable_units_group = implode( '|', $options['acceptable_units'] );
-		$pattern                = '/^(\d*\.?\d+)(' . $acceptable_units_group . '){1,1}$/';
-
-		preg_match( $pattern, $raw_value, $matches );
-
-		// Bails out if not a number value and a px or rem unit.
-		if ( ! isset( $matches[1] ) || ! isset( $matches[2] ) ) {
-			return null;
-		}
-
-		$value = $matches[1];
-		$unit  = $matches[2];
-
-		/*
-		 * Default browser font size. Later, possibly could inject some JS to
-		 * compute this `getComputedStyle( document.querySelector( "html" ) ).fontSize`.
-		 */
-		if ( 'px' === $options['coerce_to'] && ( 'em' === $unit || 'rem' === $unit ) ) {
-			$value = $value * $options['root_size_value'];
-			$unit  = $options['coerce_to'];
-		}
-
-		if ( 'px' === $unit && ( 'em' === $options['coerce_to'] || 'rem' === $options['coerce_to'] ) ) {
-			$value = $value / $options['root_size_value'];
-			$unit  = $options['coerce_to'];
-		}
-
-		/*
-		 * No calculation is required if swapping between em and rem yet,
-		 * since we assume a root size value. Later we might like to differentiate between
-		 * :root font size (rem) and parent element font size (em) relativity.
-		 */
-		if ( ( 'em' === $options['coerce_to'] || 'rem' === $options['coerce_to'] ) && ( 'em' === $unit || 'rem' === $unit ) ) {
-			$unit = $options['coerce_to'];
-		}
-
-		return [
-			'value' => round( $value, 3 ),
-			'unit'  => $unit,
-		];
 	}
 }

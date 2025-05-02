@@ -93,6 +93,8 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$blockquote->parentNode->replaceChild( $amp_tiktok, $blockquote );
 		$amp_tiktok->appendChild( $blockquote );
+
+		/** @var DOMDocument $dom */
 		$blockquote->setAttributeNode( $dom->createAttribute( Attribute::PLACEHOLDER ) );
 		$blockquote->removeAttribute( Attribute::STYLE );
 	}

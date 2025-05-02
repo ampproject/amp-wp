@@ -384,14 +384,6 @@ class Test_AMP_Theme_Support extends TestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_validate_non_amp_theme() {
-		// Remove ID attributes which were added in WP 5.5.
-		add_filter(
-			'script_loader_tag',
-			static function ( $script ) {
-				return preg_replace( "/ id='amp-[^']+?'/", '', $script );
-			}
-		);
-
 		wp_scripts();
 		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
@@ -1754,14 +1746,14 @@ class Test_AMP_Theme_Support extends TestCase {
 			'<meta name="generator" content="AMP Plugin',
 			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 
-			'<script type="module" src="https://cdn.ampproject.org/v0.mjs" async crossorigin="anonymous"></script>',
+			'<script type="module" src="https://cdn.ampproject.org/v0.mjs" id="amp-runtime-js" async crossorigin="anonymous"></script>',
 			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.mjs" type="module" crossorigin="anonymous"></script>',
 			'<script src="https://cdn.ampproject.org/v0/amp-experiment-0.1.mjs" async="" custom-element="amp-experiment" type="module" crossorigin="anonymous"></script>',
 
 			'<script src="https://cdn.ampproject.org/v0/amp-ad-0.1.mjs" async="" custom-element="amp-ad" type="module" crossorigin="anonymous"></script>',
 			'<script src="https://cdn.ampproject.org/v0/amp-audio-0.1.mjs" async="" custom-element="amp-audio" type="module" crossorigin="anonymous"></script>',
-			'<script type="module" src="https://cdn.ampproject.org/v0/amp-list-0.1.mjs" async custom-element="amp-list" crossorigin="anonymous"></script>',
-			'<script type="module" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.mjs" async custom-element="amp-mathml" crossorigin="anonymous"></script>',
+			'<script type="module" src="https://cdn.ampproject.org/v0/amp-list-0.1.mjs" id="amp-list-js" async custom-element="amp-list" crossorigin="anonymous"></script>',
+			'<script type="module" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.mjs" id="amp-mathml-js" async custom-element="amp-mathml" crossorigin="anonymous"></script>',
 
 			'<link rel="icon" href="' . home_url( '/favicon.png', 'https' ) . '" sizes="32x32">',
 			'<link rel="icon" href="' . home_url( '/favicon.png', 'https' ) . '" sizes="192x192">',
@@ -1812,7 +1804,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		}
 
 		$this->assertStringContainsString( '<button>no-onclick</button>', $sanitized_html );
-		$this->assertCount( 5, AMP_Validation_Manager::$validation_results );
+		$this->assertCount( 5, AMP_Validation_Manager::$validation_results, 'Actual validation results: ' . wp_json_encode( AMP_Validation_Manager::$validation_results, JSON_PRETTY_PRINT ) );
 		$this->assertEquals(
 			[
 				'onclick' => 1,
@@ -1843,54 +1835,6 @@ class Test_AMP_Theme_Support extends TestCase {
 		wp_set_current_user( 0 );
 		$html = AMP_Theme_Support::prepare_response( $this->get_original_html() );
 		$this->assertStringNotContainsString( '<html amp', $html );
-	}
-
-	/**
-	 * Test prepare_response when Bento is enabled.
-	 *
-	 * @covers AMP_Theme_Support::prepare_response()
-	 */
-	public function test_prepare_response_in_bento() {
-		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
-
-		add_filter( 'amp_bento_enabled', '__return_true' );
-		wp();
-
-		$html = AMP_Theme_Support::prepare_response( $this->get_original_html() );
-		$this->assertStringContainsString( '<script ' . ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE . '>(self.AMP = self.AMP || []).push(function (AMP) { AMP.toggleExperiment("bento", true); });</script>', $html );
-		$this->assertStringContainsString( 'amp-facebook-1.0', $html ); // As opposed to amp-facebook-page-0.1, since Bento is enabled.
-	}
-
-	/**
-	 * Test prepare_response when Bento is enabled and in dev mode.
-	 *
-	 * @covers AMP_Theme_Support::prepare_response()
-	 */
-	public function test_prepare_response_in_bento_with_dev_mode() {
-		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
-
-		add_filter( 'amp_dev_mode_enabled', '__return_true' );
-		add_filter( 'amp_bento_enabled', '__return_true' );
-		wp();
-
-		$html = AMP_Theme_Support::prepare_response( $this->get_original_html() );
-		$this->assertStringContainsString( '<script ' . ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE . ' data-ampdevmode>(self.AMP = self.AMP || []).push(function (AMP) { AMP.toggleExperiment("bento", true); });</script>', $html );
-		$this->assertStringContainsString( 'amp-facebook-1.0', $html ); // As opposed to amp-facebook-page-0.1, since Bento is enabled.
-	}
-
-	/**
-	 * Test prepare_response when Bento is not enabled.
-	 *
-	 * @covers AMP_Theme_Support::prepare_response()
-	 */
-	public function test_prepare_response_without_bento() {
-		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
-
-		wp();
-
-		$html = AMP_Theme_Support::prepare_response( $this->get_original_html() );
-		$this->assertStringNotContainsString( 'AMP.toggleExperiment("bento", true);', $html );
-		$this->assertStringContainsString( 'amp-facebook-page-0.1', $html ); // As opposed to amp-facebook-page-1.0, since Bento is not enabled.
 	}
 
 	/** @return array */
@@ -2108,14 +2052,6 @@ class Test_AMP_Theme_Support extends TestCase {
 	 * Initializes and returns the original HTML.
 	 */
 	private function get_original_html() {
-		// Remove ID attributes which were added in WP 5.5.
-		add_filter(
-			'script_loader_tag',
-			static function ( $script ) {
-				return preg_replace( '/ id=(["\'])amp-.*?\1/', '', $script );
-			}
-		);
-
 		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		global $wp_widget_factory, $wp_scripts, $wp_styles;
 		$wp_scripts = null;

@@ -21,7 +21,7 @@ use WP_Post;
  * @since 2.2
  * @internal
  */
-class SupportLink implements Service, Delayed, Conditional, Registerable {
+class SupportLink implements Service, Delayed, Registerable {
 
 	/**
 	 * Get the action to use for registering the service.
@@ -30,19 +30,6 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 	 */
 	public static function get_registration_action() {
 		return 'wp_loaded';
-	}
-
-	/**
-	 * Check whether the conditional object is currently needed.
-	 *
-	 * @return bool Whether the conditional object is needed.
-	 */
-	public static function is_needed() {
-		return (
-			SupportScreen::check_core_version()
-			&&
-			SupportScreen::has_cap()
-		);
 	}
 
 	/**
@@ -85,15 +72,7 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 				'parent' => 'amp',
 				'title'  => esc_html__( 'Get support', 'amp' ),
 				'id'     => 'amp-support',
-				'href'   => esc_url(
-					add_query_arg(
-						[
-							'page' => 'amp-support',
-							'url'  => rawurlencode( amp_get_current_url() ),
-						],
-						admin_url( 'admin.php' )
-					)
-				),
+				'href'   => esc_url( 'https://wordpress.org/support/plugin/amp/' ),
 			]
 		);
 	}
@@ -112,14 +91,9 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 			return $actions;
 		}
 
-		$query_args = [
-			'page' => 'amp-support',
-			'url'  => rawurlencode( AMP_Validated_URL_Post_Type::get_url_from_post( $post ) ),
-		];
-
 		$actions['amp-support'] = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( add_query_arg( $query_args, admin_url( 'admin.php' ) ) ),
+			esc_url( 'https://wordpress.org/support/plugin/amp/' ),
 			esc_html__( 'Get Support', 'amp' )
 		);
 
@@ -140,14 +114,9 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 			return $actions;
 		}
 
-		$query_args = [
-			'page' => 'amp-support',
-			'url'  => rawurlencode( AMP_Validated_URL_Post_Type::get_url_from_post( $post ) ),
-		];
-
 		$actions['amp-support'] = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( add_query_arg( $query_args, admin_url( 'admin.php' ) ) ),
+			esc_url( 'https://wordpress.org/support/plugin/amp/' ),
 			esc_html__( 'Get Support', 'amp' )
 		);
 
@@ -168,12 +137,7 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 		if ( 'amp/amp.php' === $plugin_file ) {
 			$plugin_meta[] = sprintf(
 				'<a href="%s">%s</a>',
-				esc_url(
-					add_query_arg(
-						[ 'page' => 'amp-support' ],
-						admin_url( 'admin.php' )
-					)
-				),
+				esc_url( 'https://wordpress.org/support/plugin/amp/' ),
 				esc_html__( 'Get support', 'amp' )
 			);
 		}

@@ -6,7 +6,6 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const RemoveEmptyScriptsPlugin = require('webpack-remove-empty-scripts');
-const RtlCssPlugin = require('rtlcss-webpack-plugin');
 const WebpackBar = require('webpackbar');
 
 /**
@@ -44,7 +43,7 @@ const preparePackagesSchema = (packages = []) => {
 					? 'i18n'
 					: camelCaseDash(
 							packageName.replace(WORDPRESS_NAMESPACE, '')
-					  );
+						);
 
 			const handle = packageName.replace(WORDPRESS_NAMESPACE, 'wp-');
 
@@ -54,7 +53,7 @@ const preparePackagesSchema = (packages = []) => {
 					'polyfill' === camelCaseName
 						? require.resolve(
 								'@wordpress/babel-preset-default/build/polyfill'
-						  )
+							)
 						: packageName,
 				handle,
 				packageName,
@@ -73,17 +72,23 @@ const sharedConfig = {
 	plugins: [
 		...defaultConfig.plugins
 			.map((plugin) => {
-				if (plugin.constructor.name === 'MiniCssExtractPlugin') {
+				if (
+					plugin.constructor.name === 'MiniCssExtractPlugin' &&
+					plugin.options
+				) {
 					plugin.options.filename = '../css/[name].css';
+				}
+				if (
+					plugin.constructor.name === 'RtlCssPlugin' &&
+					plugin.options
+				) {
+					plugin.options.filename = '../css/[name]-rtl.css';
 				}
 				return plugin;
 			})
 			.filter(
 				(plugin) => plugin.constructor.name !== 'CleanWebpackPlugin'
 			),
-		new RtlCssPlugin({
-			filename: '../css/[name]-rtl.css',
-		}),
 		new RemoveEmptyScriptsPlugin(),
 	],
 	optimization: {
@@ -274,6 +279,32 @@ const wpPolyfills = {
 	],
 };
 
+const reactJSXRuntimePolyfill = {
+	...sharedConfig,
+	entry: {
+		'react-jsx-runtime': {
+			import: 'react/jsx-runtime',
+		},
+	},
+	output: {
+		path: path.resolve(__dirname, 'assets/js'),
+		filename: 'react-jsx-runtime.js',
+		library: {
+			name: 'ReactJSXRuntime',
+			type: 'window',
+		},
+	},
+	plugins: [
+		new WebpackBar({
+			name: 'React JSX Runtime Polyfill',
+			color: '#61dafb',
+		}),
+	],
+	externals: {
+		react: 'React',
+	},
+};
+
 const wpDomReady = preparePackagesSchema(['@wordpress/dom-ready']);
 
 const wpDomReadyPackage = {
@@ -441,58 +472,6 @@ const settingsPage = {
 	],
 };
 
-const supportPage = {
-	...sharedConfig,
-	entry: {
-		'wp-api-fetch': './assets/src/polyfills/api-fetch.js',
-		'amp-support': './assets/src/support-page',
-	},
-	externals: {
-		'amp-support': 'ampSupport',
-	},
-	resolve: {
-		alias: {
-			'@wordpress/api-fetch__non-shim': require.resolve(
-				'@wordpress/api-fetch'
-			),
-		},
-	},
-	plugins: [
-		...sharedConfig.plugins.filter(
-			(plugin) =>
-				plugin.constructor.name !== 'DependencyExtractionWebpackPlugin'
-		),
-		new DependencyExtractionWebpackPlugin({
-			useDefaults: false,
-			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
-			requestToHandle: (handle) => {
-				switch (handle) {
-					case 'lodash':
-					case '@wordpress/api-fetch':
-						return defaultRequestToHandle(handle);
-
-					default:
-						return undefined;
-				}
-			},
-			requestToExternal: (external) => {
-				switch (external) {
-					case 'lodash':
-					case '@wordpress/api-fetch':
-						return defaultRequestToExternal(external);
-
-					default:
-						return undefined;
-				}
-			},
-		}),
-		new WebpackBar({
-			name: 'Support Page',
-			color: '#67b255',
-		}),
-	],
-};
-
 const styles = {
 	...sharedConfig,
 	entry: () => {
@@ -570,10 +549,10 @@ module.exports = [
 	admin,
 	customizer,
 	wpPolyfills,
+	reactJSXRuntimePolyfill,
 	wpDomReadyPackage,
 	onboardingWizard,
 	settingsPage,
-	supportPage,
 	styles,
 	mobileRedirection,
 ];

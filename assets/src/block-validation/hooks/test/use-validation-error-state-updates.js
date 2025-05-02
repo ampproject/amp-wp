@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, waitFor } from '@testing-library/react';
+import { describe, expect, it, jest } from '@jest/globals';
 
 /**
  * WordPress dependencies
@@ -178,6 +179,7 @@ describe('maybeAddClientIdToValidationError', () => {
 			blockOrder: ['client-id-1', 'client-id-2'],
 			getBlock: () => ({ name: 'my-block' }),
 		});
+
 		expect(testValidationError).toMatchObject({});
 	});
 

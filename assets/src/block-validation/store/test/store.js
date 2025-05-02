@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { describe, expect, it } from '@jest/globals';
+
+/**
  * WordPress dependencies
  */
 import { dispatch, select } from '@wordpress/data';
@@ -12,27 +17,37 @@ import { rawValidationErrors } from './__data__/raw-validation-errors';
 describe('Block validation data store', () => {
 	it('sets and selects state correctly', () => {
 		dispatch(blockValidationStore).setIsShowingReviewed(true);
+
 		expect(select(blockValidationStore).getIsShowingReviewed()).toBe(true);
+
 		dispatch(blockValidationStore).setIsShowingReviewed(false);
+
 		expect(select(blockValidationStore).getIsShowingReviewed()).toBe(false);
 
 		expect(select(blockValidationStore).getMaybeIsPostDirty()).toBe(false);
+
 		dispatch(blockValidationStore).setMaybeIsPostDirty(true);
+
 		expect(select(blockValidationStore).getMaybeIsPostDirty()).toBe(true);
+
 		dispatch(blockValidationStore).setMaybeIsPostDirty(false);
+
 		expect(select(blockValidationStore).getMaybeIsPostDirty()).toBe(false);
 
 		expect(
 			select(blockValidationStore).getFetchingErrorsRequestErrorMessage()
 		).toBe('');
+
 		dispatch(blockValidationStore).setFetchingErrorsRequestErrorMessage(
 			'Error message'
 		);
+
 		expect(
 			select(blockValidationStore).getFetchingErrorsRequestErrorMessage()
 		).toBe('Error message');
 
 		dispatch(blockValidationStore).setReviewLink('http://example.com');
+
 		expect(select(blockValidationStore).getReviewLink()).toBe(
 			'http://example.com'
 		);
@@ -60,9 +75,13 @@ describe('Block validation data store', () => {
 		).toHaveLength(1);
 
 		expect(select(blockValidationStore).getIsFetchingErrors()).toBe(false);
+
 		dispatch(blockValidationStore).setIsFetchingErrors(true);
+
 		expect(select(blockValidationStore).getIsFetchingErrors()).toBe(true);
+
 		dispatch(blockValidationStore).setIsFetchingErrors(false);
+
 		expect(select(blockValidationStore).getIsFetchingErrors()).toBe(false);
 	});
 });

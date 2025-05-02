@@ -11,11 +11,7 @@
  * @internal
  */
 function amp_post_template_init_hooks() {
-	if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.7', '>=' ) ) {
-		add_action( 'amp_post_template_head', 'wp_robots' );
-	} else {
-		add_action( 'amp_post_template_head', 'noindex' );
-	}
+	add_action( 'amp_post_template_head', 'wp_robots' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_title' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_canonical' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_fonts' );

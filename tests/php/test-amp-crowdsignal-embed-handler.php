@@ -52,19 +52,12 @@ class AMP_Crowdsignal_Embed_Handler_Test extends TestCase {
 				'<p><iframe title="Which design do you prefer?" src="https://poll.fm/7012505/embed" frameborder="0" class="cs-iframe-embed"></iframe></p>',
 				$poll_response,
 			],
-		];
-
-		/*
-		 * There is a bug with WordPress's oEmbed handling for Crowdsignal surveys.
-		 * See <https://core.trac.wordpress.org/ticket/46467>.
-		 */
-		if ( version_compare( get_bloginfo( 'version' ), '5.2.0', '>=' ) ) {
-			$data['survey.fm'] = [
+			'survey.fm'      => [
 				'https://rydk.survey.fm/test-survey',
 				'<p><a href="https://rydk.survey.fm/test-survey" target="_blank">View Survey</a></p>',
 				$survey_response,
-			];
-		}
+			],
+		];
 
 		return $data;
 	}

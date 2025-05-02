@@ -3,6 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { render, fireEvent } from '@testing-library/react';
+import { describe, expect, it, jest } from '@jest/globals';
 
 /**
  * Internal dependencies
@@ -119,6 +120,7 @@ describe('SiteScanSourcesList', () => {
 		const sourceUrlList = container.querySelector(
 			'.site-scan-results__urls-list'
 		);
+
 		expect(sourceUrlList).not.toBeNull();
 		expect(sourceUrlList.innerHTML).toMatch(
 			/href="https:\/\/example.org\/"/

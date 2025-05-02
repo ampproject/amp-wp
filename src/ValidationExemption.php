@@ -35,7 +35,7 @@ final class ValidationExemption {
 	 * HTML attribute to indicate an tag/element has been verified for PX.
 	 *
 	 * The difference here with `data-amp-unvalidated-tag` is that the PX-verified means that the tag will work
-	 * properly Bento components and CSS tree shaking.
+	 * properly with CSS tree shaking.
 	 *
 	 * @var string
 	 */

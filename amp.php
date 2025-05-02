@@ -5,17 +5,19 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 2.4.3-alpha
+ * Version: 2.5.6-alpha
  * License: GPLv2 or later
- * Requires at least: 5.3
+ * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Requires at least: 6.6
  * Requires PHP: 7.4
+ * Text Domain: amp
  *
  * @package AMP
  */
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '2.4.3-alpha' );
+define( 'AMP__VERSION', '2.5.6-alpha' );
 
 /**
  * Errors encountered while loading the plugin.

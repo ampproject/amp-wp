@@ -14,7 +14,7 @@ This filter is a feature flag to opt-in to discontinue using `amp-img` (and `amp
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1474](/includes/amp-helper-functions.php#L1474)
+:link: [includes/amp-helper-functions.php:1440](/includes/amp-helper-functions.php#L1440)
 
 <details>
 <summary>Show Code</summary>

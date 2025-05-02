@@ -53,7 +53,6 @@ module.exports = function (grunt) {
 				src: [
 					'assets/js/**/*.js',
 					'assets/js/**/*.js.map',
-					'!assets/js/amp-service-worker-runtime-precaching.js',
 					'assets/js/**/*.asset.php',
 					'assets/css/*.css',
 					'assets/css/*.css.map',

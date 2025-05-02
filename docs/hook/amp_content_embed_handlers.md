@@ -13,7 +13,7 @@ Filters the content embed handlers.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1387](/includes/amp-helper-functions.php#L1387-L1414)
+:link: [includes/amp-helper-functions.php:1344](/includes/amp-helper-functions.php#L1344-L1370)
 
 <details>
 <summary>Show Code</summary>
@@ -39,7 +39,6 @@ return apply_filters(
 		AMP_TikTok_Embed_Handler::class       => [],
 		AMP_Tumblr_Embed_Handler::class       => [],
 		AMP_Gallery_Embed_Handler::class      => [],
-		AMP_Gfycat_Embed_Handler::class       => [],
 		AMP_Imgur_Embed_Handler::class        => [],
 		AMP_Scribd_Embed_Handler::class       => [],
 		AMP_WordPress_Embed_Handler::class    => [],

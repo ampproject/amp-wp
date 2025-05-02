@@ -2,7 +2,6 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { HAS_PAGE_CACHING } from 'amp-settings';
 
 /**
  * WordPress dependencies
@@ -53,13 +52,8 @@ ErrorNotice.propTypes = {
  * The bottom section of the settings page.
  */
 export function SettingsFooter() {
-	const {
-		didSaveOptions,
-		editedOptions,
-		hasOptionsChanges,
-		savingOptions,
-		modifiedOptions,
-	} = useContext(Options);
+	const { didSaveOptions, editedOptions, hasOptionsChanges, savingOptions } =
+		useContext(Options);
 	const { downloadingTheme } = useContext(ReaderThemes);
 	const { error } = useContext(ErrorContext);
 	const {
@@ -79,9 +73,6 @@ export function SettingsFooter() {
 		isBusy ||
 		!themeSupport ||
 		(READER === themeSupport && !readerTheme);
-
-	const shouldShowPageCacheFlushNotice =
-		modifiedOptions?.theme_support || modifiedOptions?.reader_theme;
 
 	return (
 		<section className="amp-settings-nav">
@@ -116,26 +107,7 @@ export function SettingsFooter() {
 							className="amp-save-success-notice"
 							type={NOTICE_TYPE_SUCCESS}
 						>
-							<p>
-								{HAS_PAGE_CACHING &&
-								shouldShowPageCacheFlushNotice ? (
-									<>
-										{__(
-											'Saved. Consider flushing page cache.',
-											'amp'
-										) + ' '}
-										<a
-											href="https://amp-wp.org/documentation/getting-started/amp-site-setup/page-caching-with-amp-and-wordpress/"
-											target="_blank"
-											rel="noreferrer noopener"
-										>
-											{__('Learn More', 'amp')}
-										</a>
-									</>
-								) : (
-									__('Saved', 'amp')
-								)}
-							</p>
+							<p>{__('Saved', 'amp')}</p>
 						</AMPNotice>
 					)}
 			</div>

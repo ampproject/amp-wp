@@ -242,7 +242,7 @@ function amp_get_media_items_ids( $type, $image_count = 3 ) {
 			)
 		);
 	}
-	return implode( ',', $query->get_posts() );
+	return implode( ',', $query->posts );
 }
 
 /**

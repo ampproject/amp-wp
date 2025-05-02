@@ -86,7 +86,7 @@ export function PluginsWithAmpIncompatibility({
 										<a href={AMP_COMPATIBLE_PLUGINS_URL} />
 									),
 								}
-						  )
+							)
 						: ''}
 				</p>
 			)}

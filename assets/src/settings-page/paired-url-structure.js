@@ -220,7 +220,7 @@ function SlugConflictsNotice({ slug, conflicts }) {
 
 				{conflicts.rewrite && (
 					<li>
-						{__('Rewrite rules: ', 'amp')}
+						{__('Rewrite rules:', 'amp')}
 						{conflicts.rewrite
 							.map((entity) => <code key={entity}>{entity}</code>)
 							.reduce((prev, curr) => [prev, ', ', curr])}

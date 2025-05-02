@@ -8,7 +8,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import AMPValidationErrorsKeptIcon from '../../../../images/amp-validation-errors-kept.svg';
+import { AMPValidationErrorsKeptIcon } from '../../../icons';
 import { store as blockValidationStore } from '../../store';
 import { StatusIcon } from '../icon';
 import { SidebarNotification } from '../sidebar-notification';

@@ -22,6 +22,7 @@ import {
  */
 import { cleanUpSettings } from '../utils/onboarding-wizard-utils';
 import {
+	activatePlugin,
 	deactivatePlugin,
 	installLocalPlugin,
 } from '../utils/amp-settings-utils';
@@ -202,6 +203,8 @@ async function runAxeTestsForBlockEditor() {
 		disabledRules: [
 			'aria-allowed-role',
 			'aria-valid-attr-value',
+			'aria-required-children',
+			'aria-required-parent',
 			'button-name',
 			'color-contrast',
 			'dlitem',
@@ -210,10 +213,6 @@ async function runAxeTestsForBlockEditor() {
 			'link-name',
 			'listitem',
 			'region',
-			// Disabled due to this rule being erroneously recorded as a violation after
-			// downgrading package-lock.json to v1 (see https://github.com/ampproject/amp-wp/pull/6618).
-			// This can be reverted once node v16 becomes LTS.
-			'nested-interactive',
 		],
 		exclude: [
 			// Ignores elements created by metaboxes.
@@ -267,6 +266,7 @@ async function setupThemesAndPlugins() {
 	await installTheme('hestia');
 	await installTheme('twentytwenty'); // Ensure that twentytwenty theme is installed.
 	await activateTheme('twentytwenty');
+	await activatePlugin('gutenberg');
 }
 
 /**

@@ -66,6 +66,7 @@ const BlockEdit = (props) => {
 								dataDelayAdRequest: !dataDelayAdRequest,
 							})
 						}
+						__nextHasNoMarginBottom={true}
 					/>
 					<LayoutControls
 						{...props}

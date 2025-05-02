@@ -86,10 +86,9 @@ final class PluginRegistryTest extends TestCase {
 			'RequiresPHP',
 			'Title',
 			'AuthorName',
+			'UpdateURI',
+			'RequiresPlugins',
 		];
-		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.8', '>=' ) ) {
-			$expected_keys[] = 'UpdateURI';
-		}
 
 		$plugins = $this->call_private_method( $plugin_registry, 'get_mu_plugins_data' );
 		$this->assertIsArray( $plugins );

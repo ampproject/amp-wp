@@ -35,7 +35,7 @@ final class ElementList implements IteratorAggregate, Countable {
 	 * @param DOMElement|null $caption The caption for the element.
 	 * @return ElementList A clone of this list, with the new element added.
 	 */
-	public function add( DOMElement $element, DOMElement $caption = null ): ElementList {
+	public function add( DOMElement $element, ?DOMElement $caption = null ): ElementList {
 		$cloned_list             = clone $this;
 		$cloned_list->elements[] = null === $caption ? $element : new CaptionedSlide( $element, $caption );
 		return $cloned_list;

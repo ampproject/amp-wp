@@ -5,13 +5,13 @@ exports[`AMPSettingToggle matches snapshots 1`] = `
   className="amp-setting-toggle"
 >
   <div
-    className="components-base-control components-toggle-control css-1wgfkcs-Wrapper-boxSizingReset-classes ej5x27r4"
+    className="components-base-control components-toggle-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
   >
     <div
-      className="components-base-control__field css-yj91it-StyledField ej5x27r3"
+      className="components-base-control__field css-2txpkp-StyledField ej5x27r3"
     >
       <div
-        className="components-flex components-h-stack css-79etx6-View-Flex-base-ItemsRow e19lxcc00"
+        className="components-flex components-h-stack css-1ub13jk-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
         data-wp-c16t={true}
         data-wp-component="HStack"
       >
@@ -33,7 +33,7 @@ exports[`AMPSettingToggle matches snapshots 1`] = `
           />
         </span>
         <label
-          className="components-flex-item components-flex-block components-toggle-control__label css-14wzr73-View-Item-sx-Base-block e19lxcc00"
+          className="components-flex-item components-flex-block components-toggle-control__label css-1mqm1jz-PolymorphicDiv-Item-sx-Base-block e19lxcc00"
           data-wp-c16t={true}
           data-wp-component="FlexBlock"
           htmlFor="inspector-toggle-control-0"
@@ -60,13 +60,13 @@ exports[`AMPSettingToggle matches snapshots 2`] = `
   className="amp-setting-toggle"
 >
   <div
-    className="components-base-control components-toggle-control css-1wgfkcs-Wrapper-boxSizingReset-classes ej5x27r4"
+    className="components-base-control components-toggle-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
   >
     <div
-      className="components-base-control__field css-yj91it-StyledField ej5x27r3"
+      className="components-base-control__field css-2txpkp-StyledField ej5x27r3"
     >
       <div
-        className="components-flex components-h-stack css-79etx6-View-Flex-base-ItemsRow e19lxcc00"
+        className="components-flex components-h-stack css-1ub13jk-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
         data-wp-c16t={true}
         data-wp-component="HStack"
       >
@@ -88,7 +88,7 @@ exports[`AMPSettingToggle matches snapshots 2`] = `
           />
         </span>
         <label
-          className="components-flex-item components-flex-block components-toggle-control__label css-14wzr73-View-Item-sx-Base-block e19lxcc00"
+          className="components-flex-item components-flex-block components-toggle-control__label css-1mqm1jz-PolymorphicDiv-Item-sx-Base-block e19lxcc00"
           data-wp-c16t={true}
           data-wp-component="FlexBlock"
           htmlFor="inspector-toggle-control-1"

@@ -51,6 +51,7 @@ export function AMPSettingToggle({
 					</div>
 				}
 				onChange={onChange}
+				__nextHasNoMarginBottom={true}
 			/>
 		</div>
 	);

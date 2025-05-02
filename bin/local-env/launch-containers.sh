@@ -22,6 +22,10 @@ fi
 echo -e $(status_message "Stopping Docker containers...")
 dc down --remove-orphans >/dev/null 2>&1
 
+# Build the Docker containers.
+echo -e $(status_message "Building Docker containers...")
+dc build wordpress >/dev/null
+
 # Download image updates.
 echo -e $(status_message "Downloading Docker image updates...")
 dc pull

@@ -254,6 +254,7 @@ const AmpLightboxToggle = (props) => {
 					setAttributes({ linkTo: 'none' });
 				}
 			}}
+			__nextHasNoMarginBottom={true}
 		/>
 	);
 };
@@ -286,6 +287,7 @@ const AmpCarouselToggle = (props) => {
 			label={__('Display as carousel', 'amp')}
 			checked={ampCarousel}
 			onChange={() => setAttributes({ ampCarousel: !ampCarousel })}
+			__nextHasNoMarginBottom={true}
 		/>
 	);
 };

@@ -14,22 +14,22 @@
     "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
-    "ampproject/amp-toolbox": "0.11.3",
+    "ampproject/amp-toolbox": "0.11.6",
     "cweagans/composer-patches": "^1.0",
     "fasterimage/fasterimage": "1.5.0",
-    "sabberworm/php-css-parser": "dev-master#cc791ad"
+    "sabberworm/php-css-parser": "8.5.1"
   },
   "require-dev": {
     "automattic/vipwpcs": "^3.0",
-    "civicrm/composer-downloads-plugin": "^3.0",
     "google/cloud-storage": "^1.0",
-    "mikey179/vfsstream": "1.6.11",
+    "mikey179/vfsstream": "1.6.12",
     "mustache/mustache": "^2",
     "php-stubs/wordpress-stubs": "^6.0",
-    "phpcompatibility/phpcompatibility-wp": "2.1.4",
+    "phpcompatibility/phpcompatibility-wp": "2.1.6",
     "phpdocumentor/reflection": "^3.0",
+    "phpstan/phpstan": "^1.0",
     "roave/security-advisories": "dev-latest",
-    "sirbrillig/phpcs-variable-analysis": "2.11.17",
+    "sirbrillig/phpcs-variable-analysis": "2.11.22",
     "wp-cli/export-command": "^2.0",
     "wp-cli/extension-command": "^2.0",
     "wp-cli/wp-cli": "^2.0",
@@ -69,7 +69,6 @@
   },
   "config": {
     "allow-plugins": {
-      "civicrm/composer-downloads-plugin": true,
       "cweagans/composer-patches": true,
       "dealerdirect/phpcodesniffer-composer-installer": true
     },
@@ -80,13 +79,6 @@
   },
   "extra": {
     "composer-exit-on-patch-failure": true,
-    "downloads": {
-      "phpstan": {
-        "path": "vendor/bin/phpstan",
-        "type": "phar",
-        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar"
-      }
-    },
     "patches": {
       "sabberworm/php-css-parser": {
         "1. Validate name-start code points for identifier <https://github.com/westonruter/PHP-CSS-Parser/pull/2>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/cc791ad...westonruter:PHP-CSS-Parser:fix/malformed-identifier-without-tests.diff",

@@ -12,7 +12,7 @@ Filters the list of user agents used to determine if the user agent from the cur
 
 ### Source
 
-:link: [src/MobileRedirection.php:324](/src/MobileRedirection.php#L324)
+:link: [src/MobileRedirection.php:366](/src/MobileRedirection.php#L366)
 
 <details>
 <summary>Show Code</summary>

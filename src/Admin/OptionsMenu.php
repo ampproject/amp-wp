@@ -66,9 +66,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	/** @var LoadingError */
 	private $loading_error;
 
-	/** @var SiteHealth */
-	private $site_health;
-
 	/** @var DependencySupport */
 	private $dependency_support;
 
@@ -99,15 +96,13 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * @param RESTPreloader     $rest_preloader An instance of the RESTPreloader class.
 	 * @param DependencySupport $dependency_support An instance of the DependencySupport class.
 	 * @param LoadingError      $loading_error An instance of the LoadingError class.
-	 * @param SiteHealth        $site_health An instance of the SiteHealth class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, DependencySupport $dependency_support, LoadingError $loading_error, SiteHealth $site_health ) {
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, DependencySupport $dependency_support, LoadingError $loading_error ) {
 		$this->google_fonts       = $google_fonts;
 		$this->reader_themes      = $reader_themes;
 		$this->rest_preloader     = $rest_preloader;
 		$this->dependency_support = $dependency_support;
 		$this->loading_error      = $loading_error;
-		$this->site_health        = $site_health;
 	}
 
 	/**
@@ -245,9 +240,8 @@ class OptionsMenu implements Conditional, Service, Registerable {
 
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
-		$theme             = wp_get_theme();
-		$is_reader_theme   = $this->reader_themes->theme_data_exists( get_stylesheet() );
-		$page_cache_detail = $this->site_health->get_page_cache_detail( true );
+		$theme           = wp_get_theme();
+		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
 		$amp_validated_urls_link = admin_url(
 			add_query_arg(
@@ -291,7 +285,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'VALIDATE_NONCE'                     => AMP_Validation_Manager::has_cap() ? AMP_Validation_Manager::get_amp_validate_nonce() : '',
 			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
 			'ERROR_INDEX_LINK'                   => $amp_error_index_link,
-			'HAS_PAGE_CACHING'                   => ( is_array( $page_cache_detail ) && 'good' === $page_cache_detail['status'] ),
 			'ANALYTICS_VENDORS_LIST'             => $this->get_analytics_vendors(),
 		];
 

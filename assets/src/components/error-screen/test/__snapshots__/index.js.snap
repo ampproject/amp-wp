@@ -37,7 +37,17 @@ exports[`ErrorScreen matches snapshot 1`] = `
       </pre>
       <button
         className="components-button components-clipboard-button is-secondary is-small"
+        onBlur={[Function]}
+        onClick={[Function]}
+        onClickCapture={[Function]}
         onCopy={[Function]}
+        onFocusCapture={[Function]}
+        onKeyDownCapture={[Function]}
+        onKeyPressCapture={[Function]}
+        onMouseDown={[Function]}
+        onMouseDownCapture={[Function]}
+        onMouseEnter={[Function]}
+        onMouseMove={[Function]}
         type="button"
       >
         Copy Error

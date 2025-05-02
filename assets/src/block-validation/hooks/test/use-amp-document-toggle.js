@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, fireEvent } from '@testing-library/react';
+import { beforeAll, describe, expect, it, jest } from '@jest/globals';
 
 /**
  * WordPress dependencies
@@ -43,6 +44,7 @@ describe('useAMPDocumentToggle', () => {
 
 	it('returns AMP document enable state', () => {
 		let { container } = setupAndRender(false);
+
 		expect(container.querySelector('button').textContent).toBe('disabled');
 
 		({ container } = setupAndRender(true));

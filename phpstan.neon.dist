@@ -35,3 +35,5 @@ parameters:
 			- WP_CLI::error
 	dynamicConstantNames:
 		- INTL_IDNA_VARIANT_2003
+	featureToggles:
+		requireFileExists: false

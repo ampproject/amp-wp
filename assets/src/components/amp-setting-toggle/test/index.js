@@ -3,6 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { create } from 'react-test-renderer';
+import { describe, expect, it } from '@jest/globals';
 
 /**
  * Internal dependencies
@@ -19,6 +20,7 @@ describe('AMPSettingToggle', () => {
 				title={'My title'}
 			/>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
@@ -28,6 +30,7 @@ describe('AMPSettingToggle', () => {
 				title={'My title'}
 			/>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 

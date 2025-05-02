@@ -8,7 +8,6 @@
 namespace AmpProject\AmpWP\BackgroundTask;
 
 use AMP_Options_Manager;
-use AmpProject\AmpWP\BlockUniqidTransformer;
 use AmpProject\AmpWP\Option;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -66,28 +65,11 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 	const GUTENBERG_VERSION = 'gutenberg_version';
 
 	/**
-	 * @var BlockUniqidTransformer
-	 */
-	private $block_uniqid_transformer;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param BackgroundTaskDeactivator $background_task_deactivator Deactivator.
-	 * @param BlockUniqidTransformer    $block_uniqid_transformer    Transformer.
-	 */
-	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, BlockUniqidTransformer $block_uniqid_transformer ) {
-		parent::__construct( $background_task_deactivator );
-		$this->block_uniqid_transformer = $block_uniqid_transformer;
-	}
-
-	/**
 	 * Register the service with the system.
 	 *
 	 * @return void
 	 */
 	public function register() {
-		add_action( 'amp_plugin_update', [ $this, 'handle_plugin_update' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_disabled_option' ], 10, 2 );
 		parent::register();
 	}
@@ -229,48 +211,6 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 		return (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_amp-parsed-stylesheet%'"
 		);
-	}
-
-	/**
-	 * Handle update to plugin.
-	 *
-	 * @param string $old_version Old version.
-	 */
-	public function handle_plugin_update( $old_version ) {
-		// Note: We cannot use the is_css_transient_caching_disabled method because we need to get the underlying stored value.
-		$disabled = AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
-		if ( empty( $disabled ) ) {
-			return;
-		}
-
-		// Obtain the version of WordPress and Gutenberg at which time the functionality was disabled, if available.
-		$wp_version        = isset( $disabled[ self::WP_VERSION ] ) ? $disabled[ self::WP_VERSION ] : null;
-		$gutenberg_version = isset( $disabled[ self::GUTENBERG_VERSION ] ) ? $disabled[ self::GUTENBERG_VERSION ] : null;
-
-		if (
-			// Reset the disabling of the CSS caching subsystem when updating from versions 1.5.0 or 1.5.1.
-			(
-				version_compare( $old_version, '1.5.0', '>=' )
-				&&
-				version_compare( $old_version, '1.5.2', '<' )
-			)
-			||
-			// Reset when it was disabled prior to the versions of WP/Gutenberg being captured,
-			// or if the captured versions were affected at the time of disabling.
-			(
-				version_compare( strtok( $old_version, '-' ), '2.2.2', '<' )
-				&&
-				(
-					! is_array( $disabled )
-					||
-					$this->block_uniqid_transformer->is_affected_gutenberg_version( $gutenberg_version )
-					||
-					$this->block_uniqid_transformer->is_affected_wordpress_version( $wp_version )
-				)
-			)
-		) {
-			$this->enable_css_transient_caching();
-		}
 	}
 
 	/**

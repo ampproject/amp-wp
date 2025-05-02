@@ -17,32 +17,13 @@ use AmpProject\Layout;
  * AMP versions. Remove Bento stylesheets and scripts if they aren't needed.
  *
  * @since 2.2
+ * @deprecated 2.5.0 Bento support have been removed from amphtml.
  * @internal
  */
 class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 
 	/** @var string */
 	const XPATH_BENTO_ELEMENTS_QUERY = './/*[ starts-with( name(), "bento-" ) ]';
-
-	/**
-	 * Tag and attribute sanitizer.
-	 *
-	 * @var AMP_Base_Sanitizer|null
-	 */
-	protected $tag_and_attribute_sanitizer;
-
-	/**
-	 * Init.
-	 *
-	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
-	 */
-	public function init( $sanitizers ) {
-		parent::init( $sanitizers );
-
-		if ( array_key_exists( AMP_Tag_And_Attribute_Sanitizer::class, $sanitizers ) ) {
-			$this->tag_and_attribute_sanitizer = $sanitizers[ AMP_Tag_And_Attribute_Sanitizer::class ];
-		}
-	}
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
@@ -192,16 +173,6 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $bento_runtime_scripts as $bento_runtime_script ) {
 				ValidationExemption::mark_node_as_px_verified( $bento_runtime_script );
 			}
-		}
-
-		// If bento-prefixed components were discovered, then ensure that the tag-and-attribute sanitizer will prefer
-		// Bento components when validating and that it will use the Bento versions of component scripts, and ultimately
-		// AMP_Theme_Support::ensure_required_markup() will add the Bento experiment opt-in which is still required at
-		// the moment.
-		if ( count( $bento_elements_discovered ) > 0 && $this->tag_and_attribute_sanitizer ) {
-			$this->tag_and_attribute_sanitizer->update_args(
-				[ 'prefer_bento' => true ]
-			);
 		}
 	}
 

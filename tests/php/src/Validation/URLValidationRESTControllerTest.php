@@ -143,10 +143,7 @@ class URLValidationRESTControllerTest extends DependencyInjectedTestCase {
 				],
 				'post',
 				'administrator',
-				( new DependencySupport() )->has_support()
-					// Before WP 5.5, the params were not validated as strictly, so the request get passes till the controller.
-					? ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ? 'amp_post_preview_denied' : 'rest_invalid_param' )
-					: 'amp_rest_no_dev_tools',
+				'rest_invalid_param',
 			],
 
 			'bad_preview2' => [

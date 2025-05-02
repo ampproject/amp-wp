@@ -275,7 +275,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		$query_vars  = [];
 		$query_param = wp_parse_url( $url, PHP_URL_QUERY );
 		wp_parse_str( $query_param, $query_vars );
-		$query_vars = ( is_array( $query_vars ) ) ? $query_vars : [];
 
 		$excluded_param = [ 'start', 'v', 'vi', 'w', 'h' ];
 
@@ -476,16 +475,14 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
 			preg_match( $regex, $parsed_url['fragment'], $matches );
 
-			if ( is_array( $matches ) ) {
-				$matches    = wp_parse_args(
-					$matches,
-					[
-						'minutes' => 0,
-						'seconds' => 0,
-					]
-				);
-				$start_time = ( (int) $matches['seconds'] + ( (int) $matches['minutes'] * 60 ) );
-			}
+			$matches    = wp_parse_args(
+				$matches,
+				[
+					'minutes' => 0,
+					'seconds' => 0,
+				]
+			);
+			$start_time = ( (int) $matches['seconds'] + ( (int) $matches['minutes'] * 60 ) );
 		}
 
 		return $start_time;

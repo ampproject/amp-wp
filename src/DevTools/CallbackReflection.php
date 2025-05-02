@@ -110,7 +110,32 @@ final class CallbackReflection implements Service {
 		if ( $reflection instanceof ReflectionMethod ) {
 			$source['function'] = $reflection->getDeclaringClass()->getName() . '::' . $reflection->getName();
 		} else {
-			$source['function'] = $reflection->getName();
+			$function_name = $reflection->getName();
+
+			/*
+			 * In PHP 8.4, a closure's string representation changes from {closure} to include the function that contained
+			 * the closure, like {closure:Test_AMP_Validation_Manager::test_decorate_shortcode_and_filter_source():1831}.
+			 * It can even indicate closure nesting like {closure:{closure:Test_AMP_Validation_Manager::get_locate_sources_data():883}:886}.
+			 * So these are normalized here.
+			 */
+			$function_name = preg_replace(
+				'/\{closure.*}/',
+				'{closure}',
+				$function_name
+			);
+
+			/*
+			 * Additionally, in PHP 8.4 the namespace no longer prefixes the closure. So this is now removed
+			 * for consistency across all PHP versions, replacing AmpProject\AmpWP\Tests\DevTools\{closure}
+			 * with just {closure}.
+			 */
+			$function_name = preg_replace(
+				'/(\w+\\\\)+(?=\{)/',
+				'',
+				$function_name
+			);
+
+			$source['function'] = $function_name;
 		}
 
 		return $source;

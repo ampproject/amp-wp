@@ -13,6 +13,16 @@ exports[`Nav matches snapshot 1`] = `
       <a
         className="components-button is-link"
         href="http://site.test/wp-admin"
+        onBlur={[Function]}
+        onClick={[Function]}
+        onClickCapture={[Function]}
+        onFocusCapture={[Function]}
+        onKeyDownCapture={[Function]}
+        onKeyPressCapture={[Function]}
+        onMouseDown={[Function]}
+        onMouseDownCapture={[Function]}
+        onMouseEnter={[Function]}
+        onMouseMove={[Function]}
       >
         <svg
           fill="none"
@@ -67,7 +77,16 @@ exports[`Nav matches snapshot 1`] = `
         className="components-button is-primary"
         disabled={false}
         id="next-button"
+        onBlur={[Function]}
         onClick={[Function]}
+        onClickCapture={[Function]}
+        onFocusCapture={[Function]}
+        onKeyDownCapture={[Function]}
+        onKeyPressCapture={[Function]}
+        onMouseDown={[Function]}
+        onMouseDownCapture={[Function]}
+        onMouseEnter={[Function]}
+        onMouseMove={[Function]}
         type="button"
       >
         Next

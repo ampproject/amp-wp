@@ -294,7 +294,7 @@ function amp_media( $type, $count = 3 ) {
 			)
 		);
 	}
-	return $query->get_posts();
+	return $query->posts;
 }
 
 /**

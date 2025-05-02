@@ -4,6 +4,7 @@
 import { render, fireEvent } from '@testing-library/react';
 import { create } from 'react-test-renderer';
 import PropTypes from 'prop-types';
+import { describe, expect, it, jest } from '@jest/globals';
 
 /**
  * Internal dependencies
@@ -73,6 +74,7 @@ describe('Nav', () => {
 				/>
 			</Providers>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 
@@ -129,6 +131,7 @@ describe('Nav', () => {
 		fireEvent.click(nextButton, new MouseEvent('click', { bubbles: true }));
 
 		closeButton = container.querySelector('.amp-settings-nav__close a');
+
 		expect(closeButton).toBeNull();
 	});
 
@@ -150,6 +153,7 @@ describe('Nav', () => {
 		fireEvent.click(nextButton, new MouseEvent('click', { bubbles: true }));
 
 		closeButton = container.querySelector('.amp-settings-nav__close a');
+
 		expect(closeButton).not.toBeNull();
 	});
 });

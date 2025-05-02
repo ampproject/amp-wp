@@ -12,7 +12,7 @@ Determine whether native `img` should be used instead of converting to `amp-img`
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1460](/includes/amp-helper-functions.php#L1460-L1475)
+:link: [includes/amp-helper-functions.php:1426](/includes/amp-helper-functions.php#L1426-L1441)
 
 <details>
 <summary>Show Code</summary>

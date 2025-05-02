@@ -111,26 +111,6 @@ class AMP_Service_Worker {
 			return;
 		}
 
-		// Add AMP scripts to runtime cache which will then get stale-while-revalidate strategy.
-		$service_workers->register(
-			'amp-cdn-runtime-caching',
-			static function () {
-				$urls = AMP_Service_Worker::get_precached_script_cdn_urls();
-				if ( empty( $urls ) ) {
-					return '';
-				}
-
-				$js = file_get_contents( AMP__DIR__ . '/assets/js/amp-service-worker-runtime-precaching.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
-				$js = preg_replace( '#/\*\s*global.+?\*/#', '', $js );
-				$js = str_replace(
-					'URLS',
-					wp_json_encode( $urls ),
-					$js
-				);
-				return $js;
-			}
-		);
-
 		// Serve the AMP Runtime from cache and check for an updated version in the background. See <https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js#L54-L58>.
 		self::register_caching_route(
 			$service_workers,

@@ -535,7 +535,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->assertTrue( current_user_can( 'manage_options' ) );
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
-		$this->assertObjectHasAttribute( 'href', $admin_bar->get_node( 'amp-settings' ) );
+		$this->assertObjectHasProperty( 'href', $admin_bar->get_node( 'amp-settings' ) );
 	}
 
 	/**
@@ -1212,11 +1212,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 			'wp_editor_has_scripts_attributed'           => [
 				function () {
-					if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
-						// @see <https://github.com/WordPress/wordpress-develop/commit/d241ab3b55b06fed59e7ea03318e9f872399b390>
-						$this->markTestSkipped( 'The script ID attribute with before, after and extra was only added to scripts in WP 5.5.' );
-					}
-
 					add_action(
 						'wp_enqueue_scripts',
 						static function () {
@@ -1254,12 +1249,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			],
 			'wp_editor_has_scripts_attributed_on_old_wp_versions' => [
 				function () {
-					if ( version_compare( get_bloginfo( 'version' ), '5.5', '>' ) ) {
-						// @see <https://github.com/WordPress/wordpress-develop/commit/d241ab3b55b06fed59e7ea03318e9f872399b390>
-						//@see <https://github.com/WordPress/wordpress-develop/commit/d241ab3b55b06fed59e7ea03318e9f872399b390>
-						$this->markTestSkipped( 'The script ID attribute with before, after and extra was only added to scripts in WP 5.5.' );
-					}
-
 					add_action(
 						'wp_enqueue_scripts',
 						static function () {
@@ -1437,6 +1426,24 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		// Remove class name injected by gutenberg_render_layout_support_flag().
 		$rendered_block = preg_replace( '/\s*(?<= class=")?wp-container-\w+\s*/', '', $rendered_block );
+
+		// Remove unique layout ID.
+		$rendered_block = preg_replace( '/\s*(?<= class=")?has-\d+-columns-columns-layout-\d+\s*/', ' has-2-columns', $rendered_block );
+		$rendered_block = preg_replace( '/\s*(?<= class=")?has-\d+-columns-columns-is-layout-[0-9a-f]+\s*/', ' has-2-columns', $rendered_block );
+
+		// Remove layout class name and ID.
+		$rendered_block = str_replace(
+			' is-layout-flow wp-block-quote-is-layout-flow',
+			'',
+			$rendered_block
+		);
+
+		// Remove suffix from class name in later Gutenberg versions.
+		$rendered_block = str_replace(
+			'-columns-is-layout-1',
+			'',
+			$rendered_block
+		);
 
 		$expected = str_replace(
 			[
@@ -1832,136 +1839,67 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$filtered_content = apply_filters( 'the_content', 'before[test]after' );
 
-		if ( has_filter( 'the_content', 'do_blocks' ) ) {
-			$sources = [
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'WP_Embed::run_shortcode',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'WP_Embed::autoembed',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'do_blocks',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'wptexturize',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'wpautop',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'shortcode_unautop',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'prepend_attachment',
-				],
-			];
-		} else {
-			$sources = [
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'WP_Embed::run_shortcode',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'WP_Embed::autoembed',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'wptexturize',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'wpautop',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'shortcode_unautop',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'prepend_attachment',
-				],
-			];
-		}
-
-		// This will be called after `do_shortcode` in WP 6.4 and later.
-		// @see <https://core.trac.wordpress.org/ticket/58853>.
-		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '6.4', '<' ) ) {
-			$sources[] = [
+		$sources = [
+			[
 				'type'     => 'core',
 				'name'     => 'wp-includes',
-				'function' => version_compare( get_bloginfo( 'version' ), '5.5-alpha', '>' ) ? 'wp_filter_content_tags' : 'wp_make_content_images_responsive',
-			];
-		}
-
-		if ( function_exists( 'wp_replace_insecure_home_url' ) ) {
-			$sources[] = [
+				'function' => 'WP_Embed::run_shortcode',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'WP_Embed::autoembed',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'do_blocks',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'wptexturize',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'wpautop',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'shortcode_unautop',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'prepend_attachment',
+			],
+			[
 				'type'     => 'core',
 				'name'     => 'wp-includes',
 				'function' => 'wp_replace_insecure_home_url',
-			];
-		}
-
-		if ( function_exists( 'gutenberg_trim_footnotes' ) ) {
-			$sources[] = [
-				'type'     => 'plugin',
-				'name'     => 'gutenberg',
-				'function' => 'gutenberg_trim_footnotes',
-			];
-		}
-
-		$sources = array_merge(
-			$sources,
+			],
 			[
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'capital_P_dangit',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'do_shortcode',
-				],
-			]
-		);
-
-		// `wp_filter_content_tags` is called after `do_shortcode` in WP 6.4 and later.
-		// @see <https://core.trac.wordpress.org/ticket/58853>.
-		if ( version_compare( get_bloginfo( 'version' ), '6.4-alpha', '>=' ) ) {
-			$sources[] = [
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'capital_P_dangit',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'do_shortcode',
+			],
+			[
 				'type'     => 'core',
 				'name'     => 'wp-includes',
 				'function' => 'wp_filter_content_tags',
-			];
-		}
-
-		// `wp_filter_content_tags` is called before `convert_smilies` in WP 6.4 and later.
-		$sources[] = [
-			'type'     => 'core',
-			'name'     => 'wp-includes',
-			'function' => 'convert_smilies',
+			],
+			[
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'convert_smilies',
+			],
 		];
 
 		foreach ( $sources as &$source ) {
@@ -1985,35 +1923,34 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			$source['function'] = $function;
 		}
 
-		$source_json = wp_json_encode(
-			[
-				'hook'      => 'the_content',
-				'filter'    => true,
-				'post_id'   => get_the_ID(),
-				'post_type' => get_post_type(),
-				'sources'   => $sources,
-			]
-		);
-
 		$shortcode_fallback_reflection = new ReflectionFunction( $shortcode_fallback );
 
-		$expected_content = implode(
-			'',
-			[
-				"<!--amp-source-stack $source_json-->",
-				sprintf(
-					'<p>before<!--amp-source-stack {"type":"plugin","name":"amp","file":%1$s,"line":%2$s,"function":"{closure}","shortcode":"test"}--><b>test</b><!--/amp-source-stack {"type":"plugin","name":"amp","file":%1$s,"line":%2$s,"function":"{closure}","shortcode":"test"}-->after</p>' . "\n",
-					wp_json_encode( substr( $shortcode_fallback_reflection->getFileName(), strlen( AMP__DIR__ ) + 1 ) ),
-					$shortcode_fallback_reflection->getStartLine()
-				),
-				"<!--/amp-source-stack $source_json-->",
-			]
-		);
+		$this->assertTrue( (bool) preg_match( '/^<!--amp-source-stack (\{.+?})-->/', $filtered_content, $matches ) );
+		$json = $matches[1];
+		$source_stack = json_decode( $json, true );
+		$this->assertIsArray( $source_stack );
+		$this->assertStringEndsWith( "<!--/amp-source-stack $json-->", $filtered_content );
 
-		$this->assertEquals(
-			preg_split( '/(?=<)/', $expected_content ),
-			preg_split( '/(?=<)/', $filtered_content )
-		);
+		$expected_props = [
+			'hook'      => 'the_content',
+			'filter'    => true,
+			'post_id'   => get_the_ID(),
+			'post_type' => get_post_type(),
+		];
+		foreach ( $expected_props as $key => $value ) {
+			$this->assertEquals( $value, $source_stack[ $key ] );
+		}
+
+		foreach ( $sources as $expected_source ) {
+			$found = false;
+			foreach ( $source_stack['sources'] as $actual_source ) {
+				if ( count( array_diff( $expected_source, $actual_source ) ) === 0 ) {
+					$found = true;
+					break;
+				}
+			}
+			$this->assertTrue( $found, 'Unable to lcoate source: ' . wp_json_encode( $source ) );
+		}
 	}
 
 	/**
@@ -2964,7 +2901,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$script                = wp_scripts()->registered[ $slug ];
 		$expected_dependencies = [
 			'lodash',
-			'react',
+			'react-jsx-runtime',
 			'wp-api-fetch',
 			'wp-block-editor',
 			'wp-components',
@@ -2975,6 +2912,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			'wp-hooks',
 			'wp-i18n',
 			'wp-plugins',
+			'wp-primitives',
 			'wp-url',
 		];
 

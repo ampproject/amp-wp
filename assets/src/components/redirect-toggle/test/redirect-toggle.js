@@ -3,6 +3,7 @@
  */
 import { render, fireEvent } from '@testing-library/react';
 import { create } from 'react-test-renderer';
+import { describe, expect, it, jest } from '@jest/globals';
 
 /**
  * Internal dependencies
@@ -19,6 +20,7 @@ describe('RedirectToggle', () => {
 				<RedirectToggle />
 			</OptionsContextProvider>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 

@@ -1637,20 +1637,6 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					'.stateful'   => false,
 				],
 			],
-			'bento_accordion_with_id' => [
-				'
-					<bento-accordion id="my-accordion">
-						<section>
-							<h2>Section 1</h2>
-							<div>Content in section 1.</div>
-						</section>
-					</bento-accordion>
-				',
-				[
-					'#my-accordion' => true,
-					'amp-accordion#my-accordion' => true,
-				],
-			],
 			'amp_replacement_elements_with_id' => [
 				'
 					<img id="my-img" src="https://example.com/foo.png" width="100" height="100">
@@ -1705,7 +1691,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 		add_filter( 'amp_native_img_used', '__return_false' );
 
-		// The toggling of the 'add_noscript_fallback' arg is to catch a bizzare PHP DOM issue whereby if you replace
+		// The toggling of the 'add_noscript_fallback' arg is to catch a bizarre PHP DOM issue whereby if you replace
 		// an element in a Document, and that replaced element had an ID, the element will still be returned by
 		// getElementById even though it is no longer inside of the document. When add_noscript_fallback is false,
 		// then the original img (for example) will not be inside of the document (?).
@@ -3531,9 +3517,14 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'admin-bar-css' ), 'Expected admin bar CSS to be present originally.' );
 					$this->assertStringContainsString( 'admin-bar', $original_dom->body->getAttribute( 'class' ) );
 					$this->assertStringContainsString( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
+					$this->assertStringContainsString( '.wp-block-audio :where(figcaption)', $amphtml_source, 'Expected block-library/style.css' );
 
-					$this->assertStringContainsString( '.wp-block-audio figcaption', $amphtml_source, 'Expected block-library/style.css' );
-					$this->assertStringContainsString( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
+					$this->assertStringContainsString(
+						'[class^="wp-block-"]:not(.wp-block-gallery) figcaption',
+						str_replace( '> figcaption', 'figcaption', $amphtml_source ),  // Account for recent CSS changes.
+						'Expected twentyten/blocks.css'
+					);
+
 					$amphtml_source = preg_replace( '/\s*>\s*/', '>', $amphtml_source ); // Account for variance in postcss.
 					$this->assertStringContainsString( '.amp-wp-default-form-message>p', $amphtml_source, 'Expected amp-default.css' );
 					$this->assertStringContainsString( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );

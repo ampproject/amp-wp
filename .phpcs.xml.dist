@@ -14,7 +14,6 @@
 		<exclude name="Universal.Operators.DisallowShortTernary" />
 
 		<!-- @TODO(P0): Fix these once WPCS is merged on develop and remove the exclusions. -->
-		<exclude name="WordPress.Security.EscapeOutput.OutputNotEscaped" />
 		<exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames.stringFound" />
 		<exclude name="PSR2.Classes.ClassDeclaration.CloseBraceAfterBody" />
 		<exclude name="Universal.ControlStructures.DisallowLonelyIf.Found" />
@@ -50,6 +49,7 @@
 		<exclude name="WordPress.PHP.IniSet.display_errors_Disallowed" />
 		<exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames.matchFound" />
 		<exclude name="WordPress.Security.NonceVerification.Missing" />
+		<exclude name="WordPress.Security.EscapeOutput.ExceptionNotEscaped" />
 	</rule>
 
 	<rule ref="WordPress-Docs">

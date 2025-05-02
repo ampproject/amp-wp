@@ -94,7 +94,7 @@ final class ValidationCountsRestController extends WP_REST_Controller implements
 	 * Retrieves total unreviewed count for validation URLs and errors.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 * @return WP_REST_Response Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$unreviewed_validated_url_count    = AMP_Validated_URL_Post_Type::get_validation_error_urls_count();

@@ -17,7 +17,7 @@ export const settings = {
 	icon: 'welcome-learn-more',
 	keywords: [
 		__('Mathematical formula', 'amp'),
-		__('Scientific content ', 'amp'),
+		__('Scientific content', 'amp'),
 	],
 
 	attributes: {

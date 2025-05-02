@@ -98,6 +98,7 @@ const BlockEdit = (props) => {
 						label={__('Autoplay', 'amp')}
 						checked={autoPlay}
 						onChange={() => setAttributes({ autoPlay: !autoPlay })}
+						__nextHasNoMarginBottom={true}
 					/>
 					<LayoutControls
 						{...props}

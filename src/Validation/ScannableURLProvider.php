@@ -336,7 +336,7 @@ final class ScannableURLProvider implements Service {
 					'posts_per_page' => 1,
 				]
 			);
-			if ( count( $authored_post_query->get_posts() ) > 0 ) {
+			if ( count( $authored_post_query->posts ) > 0 ) {
 				$author_page_urls[] = get_author_posts_url( $author->ID, $author->user_nicename );
 			}
 		}
@@ -376,7 +376,7 @@ final class ScannableURLProvider implements Service {
 				'order'          => 'DESC',
 			]
 		);
-		$posts = $query->get_posts();
+		$posts = $query->posts;
 
 		$latest_post = array_shift( $posts );
 		if ( ! $latest_post ) {

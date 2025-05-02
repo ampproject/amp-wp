@@ -1,5 +1,7 @@
 ## Filter `amp_bento_enabled`
 
+> :warning: This filter is deprecated: 2.5.0
+
 ```php
 apply_filters( 'amp_bento_enabled', $enabled );
 ```
@@ -14,13 +16,13 @@ When Bento is enabled, newer experimental versions of AMP components are used wh
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:935](/includes/amp-helper-functions.php#L935)
+:link: [includes/deprecated.php:384](/includes/deprecated.php#L384)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-return apply_filters( 'amp_bento_enabled', false );
+return apply_filters_deprecated( 'amp_bento_enabled', [ false ], 'AMP 2.5.0', 'Remove bento support', 'Bento support has been removed.' );
 ```
 
 </details>

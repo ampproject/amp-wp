@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { describe, expect, it } from '@jest/globals';
+
+/**
  * Internal dependencies
  */
 import { getTemplateModeRecommendation } from '../index';
@@ -16,6 +21,7 @@ describe('getTemplateModeRecommendation', () => {
 								hasSuppressedPlugins,
 								userIsTechnical,
 							});
+
 						expect(cb).not.toThrow();
 					});
 				});
@@ -29,6 +35,7 @@ describe('getTemplateModeRecommendation', () => {
 						userIsTechnical,
 						hasFreshSiteScanResults,
 					});
+
 				expect(cb).not.toThrow();
 			});
 		});

@@ -287,6 +287,11 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 		// Remove decoding attribute.
 		$content = preg_replace( '/\s+decoding="async"/', '', $content );
 
+		// Auto sizes was added in WordPress 6.7
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '6.7', '>=' ) ) {
+			$expected = str_replace( ' sizes="', ' sizes="auto, ', $expected );
+		}
+
 		$this->assertEquals(
 			$this->normalize( $expected ),
 			$this->normalize( $content )

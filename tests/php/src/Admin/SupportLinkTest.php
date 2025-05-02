@@ -60,20 +60,6 @@ class SupportLinkTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::is_needed()
-	 */
-	public function test_is_needed() {
-
-		// Test 1: Test for users that don't have permission.
-		$this->assertFalse( SupportLink::is_needed() );
-
-		// Test 2: Test with admin user.
-		$this->mock_admin_user();
-
-		$this->assertTrue( SupportLink::is_needed() );
-	}
-
-	/**
 	 * @covers ::register()
 	 */
 	public function test_register() {
@@ -134,7 +120,7 @@ class SupportLinkTest extends TestCase {
 		$node = $admin_bar->get_node( 'amp-support' );
 
 		$this->assertInstanceOf( 'stdClass', $node );
-		$this->assertStringContainsString( 'page=amp-support', $node->href );
+		$this->assertStringContainsString( 'https://wordpress.org/support/plugin/amp/', $node->href );
 	}
 
 	/**
@@ -151,12 +137,7 @@ class SupportLinkTest extends TestCase {
 		$actions = $this->instance->amp_validated_url_status_actions( [], $post );
 
 		$this->assertStringContainsString(
-			'page=amp-support',
-			$actions['amp-support']
-		);
-
-		$this->assertStringContainsString(
-			sprintf( 'url=%s', rawurlencode( $post->post_title ) ),
+			'https://wordpress.org/support/plugin/amp/',
 			$actions['amp-support']
 		);
 	}
@@ -184,12 +165,7 @@ class SupportLinkTest extends TestCase {
 		$actions = $this->instance->post_row_actions( [], $post );
 
 		$this->assertStringContainsString(
-			'page=amp-support',
-			$actions['amp-support']
-		);
-
-		$this->assertStringContainsString(
-			sprintf( 'url=%s', rawurlencode( $post->post_title ) ),
+			'https://wordpress.org/support/plugin/amp/',
 			$actions['amp-support']
 		);
 	}
@@ -208,12 +184,7 @@ class SupportLinkTest extends TestCase {
 
 		$should_have = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url(
-				add_query_arg(
-					[ 'page' => 'amp-support' ],
-					admin_url( 'admin.php' )
-				)
-			),
+			esc_url( 'https://wordpress.org/support/plugin/amp/' ),
 			esc_html__( 'Get support', 'amp' )
 		);
 

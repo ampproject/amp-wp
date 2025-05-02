@@ -48,7 +48,7 @@ final class GenerateCommand {
 	public function __invoke( $args, $assoc_args ) {
 		// Bail if current PHP version is not supported.
 		// Current combination of phpDocumentor and nikic/php-parser supports 7.4 or less.
-		if ( ! version_compare( phpversion(), '7.4', '<=' ) ) {
+		if ( version_compare( phpversion(), '8.0', '>=' ) ) {
 			WP_CLI::error( 'This command requires PHP 7.4 or less.' );
 		}
 
