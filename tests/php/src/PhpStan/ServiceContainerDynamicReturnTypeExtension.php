@@ -18,7 +18,6 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\MethodReflection;
 use PHPStan\Reflection\ParametersAcceptorSelector;
 use PHPStan\ShouldNotHappenException;
-use PHPStan\Type\Constant\ConstantBooleanType;
 use PHPStan\Type\DynamicMethodReturnTypeExtension;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
@@ -40,7 +39,7 @@ final class ServiceContainerDynamicReturnTypeExtension implements DynamicMethodR
 	public function isMethodSupported(
 		MethodReflection $methodReflection
 	): bool {
-		return in_array( $methodReflection->getName(), [ 'get' ], true );
+		return 'get' === $methodReflection->getName();
 	}
 
 	public function getTypeFromMethodCall(
@@ -52,7 +51,8 @@ final class ServiceContainerDynamicReturnTypeExtension implements DynamicMethodR
 			case 'get':
 				return $this->getGetTypeFromMethodCall(
 					$methodReflection,
-					$methodCall
+					$methodCall,
+					$scope,
 				);
 
 			case 'has':
@@ -67,9 +67,12 @@ final class ServiceContainerDynamicReturnTypeExtension implements DynamicMethodR
 
 	private function getGetTypeFromMethodCall(
 		MethodReflection $methodReflection,
-		MethodCall $methodCall
+		MethodCall $methodCall,
+		Scope $scope
 	): Type {
-		$return_type = ParametersAcceptorSelector::selectSingle(
+		$return_type = ParametersAcceptorSelector::selectFromArgs(
+			$scope,
+			$methodCall->getArgs(),
 			$methodReflection->getVariants()
 		)->getReturnType();
 

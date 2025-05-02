@@ -52,7 +52,8 @@ final class ServicesDynamicReturnTypeExtension implements DynamicStaticMethodRet
 			case 'get':
 				return $this->getGetTypeFromStaticMethodCall(
 					$methodReflection,
-					$methodCall
+					$methodCall,
+					$scope
 				);
 
 			case 'has':
@@ -67,9 +68,12 @@ final class ServicesDynamicReturnTypeExtension implements DynamicStaticMethodRet
 
 	private function getGetTypeFromStaticMethodCall(
 		MethodReflection $methodReflection,
-		StaticCall $methodCall
+		StaticCall $methodCall,
+		$scope
 	): Type {
-		$return_type = ParametersAcceptorSelector::selectSingle(
+		$return_type = ParametersAcceptorSelector::selectFromArgs(
+			$scope,
+			$methodCall->getArgs(),
 			$methodReflection->getVariants()
 		)->getReturnType();
 
