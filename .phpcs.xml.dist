@@ -149,6 +149,10 @@
 			<property name="spacingBeforeFirst" value="1"/>
 			<property name="spacingAfterLast" value="0"/>
 		</properties>
+
+		<exclude-pattern>back-compat/*</exclude-pattern>
+		<exclude-pattern>bin/*</exclude-pattern>
+		<exclude-pattern>includes/amp-post-template-functions.php</exclude-pattern>
 	</rule>
 
 	<!-- Include sniffs for PHP cross-version compatibility. -->
