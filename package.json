@@ -94,7 +94,7 @@
     "postcss-nested": "7.0.2",
     "postcss-preset-env": "10.1.6",
     "prettier": "3.5.3",
-    "puppeteer": "22.12.1",
+    "puppeteer": "24.8.0",
     "react-test-renderer": "18.3.1",
     "semver": "7.7.1",
     "webpack-remove-empty-scripts": "1.0.4",
