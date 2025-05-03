@@ -120,6 +120,7 @@ describe('SiteScanSourcesList', () => {
 		const sourceUrlList = container.querySelector(
 			'.site-scan-results__urls-list'
 		);
+
 		expect(sourceUrlList).not.toBeNull();
 		expect(sourceUrlList.innerHTML).toMatch(
 			/href="https:\/\/example.org\/"/

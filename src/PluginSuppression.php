@@ -266,7 +266,7 @@ final class PluginSuppression implements Service, Registerable {
 
 		// Because this data will be accessed via REST, add additional fields that are not easily rendered in JS.
 		$validation_errors = array_map(
-			static function( $validation_error ) {
+			static function ( $validation_error ) {
 				$term = $validation_error['term'];
 
 				$validation_error['edit_url'] = admin_url(

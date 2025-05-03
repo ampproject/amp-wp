@@ -75,6 +75,7 @@ describe('Onboarding Wizard Site Scan Step', () => {
 			'.site-scan-results__source',
 			(sources) => sources.length
 		);
+
 		expect(totalIssuesCount).toBe(2);
 
 		await expect(page).toMatchElement(

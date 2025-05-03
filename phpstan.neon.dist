@@ -35,5 +35,22 @@ parameters:
 			- WP_CLI::error
 	dynamicConstantNames:
 		- INTL_IDNA_VARIANT_2003
-	featureToggles:
-		requireFileExists: false
+	ignoreErrors:
+		- identifier: require.fileNotFound
+		- identifier: requireOnce.fileNotFound
+		- identifier: new.internalClass
+		- identifier: instanceof.internalClass
+		- identifier: property.internalClass
+		- identifier: staticProperty.internalClass
+		- identifier: method.internalClass
+		- identifier: method.internal
+		- identifier: staticMethod.internal
+		- identifier: staticMethod.internalClass
+		- identifier: classConstant.internalClass
+		- identifier: classConstant.internalInterface
+		- identifier: function.internal
+		- identifier: traitUse.internalTrait
+		- identifier: parameter.internalClass
+		- identifier: catch.internalClass
+		- identifier: return.internalClass
+		- identifier: method.internalInterface

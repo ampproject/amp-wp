@@ -21,6 +21,7 @@ describe('getTemplateModeRecommendation', () => {
 								hasSuppressedPlugins,
 								userIsTechnical,
 							});
+
 						expect(cb).not.toThrow();
 					});
 				});
@@ -34,6 +35,7 @@ describe('getTemplateModeRecommendation', () => {
 						userIsTechnical,
 						hasFreshSiteScanResults,
 					});
+
 				expect(cb).not.toThrow();
 			});
 		});

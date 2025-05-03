@@ -82,6 +82,7 @@ export async function installLocalPlugin(slug) {
 	await page.waitForSelector('#pluginzip');
 
 	const pluginPath = path.join(__dirname, '..', 'plugins', `${slug}.zip`);
+
 	await expect(page).toUploadFile('#pluginzip', pluginPath);
 
 	await page.waitForSelector('#install-plugin-submit:not([disabled])');

@@ -25,6 +25,7 @@ describe('AMP settings page anchor linking', () => {
 			'supported-templates'
 		);
 		await page.waitForSelector('#supported-templates');
+
 		await expect(page).toMatchElement(
 			'#supported-templates .amp-drawer__panel-body.is-opened'
 		);
@@ -36,6 +37,7 @@ describe('AMP settings page anchor linking', () => {
 		});
 
 		await page.waitForSelector('#analytics-options');
+
 		await expect(page).toMatchElement(
 			'#analytics-options .amp-drawer__panel-body.is-opened'
 		);
@@ -82,6 +84,7 @@ describe('AMP developer tools settings', () => {
 
 		// Disable it
 		await scrollToElement({ selector: fullSelector, click: true });
+
 		await expect(page).toMatchElement(`${fullSelector}:not(:checked)`);
 
 		const links = [

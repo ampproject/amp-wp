@@ -20,6 +20,7 @@ describe('AMPSettingToggle', () => {
 				title={'My title'}
 			/>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
@@ -29,6 +30,7 @@ describe('AMPSettingToggle', () => {
 				title={'My title'}
 			/>
 		);
+
 		expect(wrapper.toJSON()).toMatchSnapshot();
 	});
 

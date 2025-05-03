@@ -611,7 +611,7 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 		$sanitizer = new AMP_Video_Sanitizer(
 			$dom,
 			[
-				'validation_error_callback' => static function( $error, $context ) use ( $that ) {
+				'validation_error_callback' => static function ( $error, $context ) use ( $that ) {
 					$that->assertEquals(
 						[
 							'node_name'          => 'onload',
@@ -642,7 +642,7 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 		$sanitizer = new AMP_Video_Sanitizer(
 			$dom,
 			[
-				'validation_error_callback' => static function( $error, $context ) use ( $that ) {
+				'validation_error_callback' => static function ( $error, $context ) use ( $that ) {
 					$that->assertEquals(
 						[
 							'node_name'          => 'onload',

@@ -173,7 +173,7 @@ jobs:
         uses: ./.github/actions/setup-node-npm
 
       - name: Setup Jest cache
-        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a #v4.1.2
+        uses: actions/cache@v4
         with:
           path: ~/.jest-cache
           key: ${{ runner.os }}-jest
@@ -183,7 +183,7 @@ jobs:
 
       - name: Upload code coverage report
         if: github.actor != 'dependabot[bot]'
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 #v4.6.0
+        uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d #v5.4.2
         with:
           file: build/logs/lcov.info
           flags: javascript
@@ -221,7 +221,7 @@ jobs:
         uses: ./.github/actions/plugin-build
 
       - name: Setup Jest cache
-        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a #v4.1.2
+        uses: actions/cache@v4
         with:
           path: ~/.jest-cache
           key: ${{ runner.os }}-jest-e2e-${{ matrix.part }}
@@ -251,7 +251,7 @@ jobs:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
       - name: Archive debug artifacts (screenshots, HTML snapshots)
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 #v4.4.3
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
         if: always()
         with:
           name: e2e-failure-artifacts
@@ -335,11 +335,11 @@ jobs:
             external-http: true
 
           - php: '7.4'
-            wp: '6.5'
+            wp: '6.6'
             phpunit: '7'
 
           - php: '7.4'
-            wp: '6.5'
+            wp: '6.6'
             phpunit: '7'
             external-http: true
     steps:
@@ -408,6 +408,9 @@ jobs:
         # The JSON file is provided by the `shivammathur/setup-php` action. See https://github.com/shivammathur/setup-php#problem-matchers.
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
+      - name: Install SVN
+        run: sudo apt-get install subversion
+
       - name: Install WP tests
         if: needs.pre-run.outputs.changed-php-count > 0
         run: bash bin/ci/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
@@ -464,7 +467,7 @@ jobs:
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 && github.actor != 'dependabot[bot]' }}
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 #v4.6.0
+        uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d #v5.4.2
         with:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           flags: php,unit
@@ -518,7 +521,7 @@ jobs:
             wp: 'latest'
 
           - php: '7.4'
-            wp: '6.5'
+            wp: '6.6'
     steps:
       - name: Shutdown default MySQL service
         if: needs.pre-run.outputs.changed-php-count > 0

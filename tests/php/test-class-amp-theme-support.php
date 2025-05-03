@@ -184,14 +184,14 @@ class Test_AMP_Theme_Support extends TestCase {
 		// Add filters so that get_template_directory() the theme in the mock filesystem.
 		add_filter(
 			'theme_root',
-			function() use ( $mock_directory ) {
+			function () use ( $mock_directory ) {
 				return $mock_directory->url();
 			}
 		);
 
 		add_filter(
 			'template',
-			function() use ( $mock_theme ) {
+			function () use ( $mock_theme ) {
 				return $mock_theme;
 			}
 		);
@@ -491,7 +491,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_special', 'is_custom', 'is_page' ] );
 		add_filter(
 			'amp_supportable_templates',
-			static function( $templates ) {
+			static function ( $templates ) {
 				$templates['is_single']        = [
 					'label'  => 'Single post',
 					'parent' => 'is_singular',
@@ -499,7 +499,7 @@ class Test_AMP_Theme_Support extends TestCase {
 				$templates['is_special']       = [
 					'label'    => 'Special post',
 					'parent'   => 'is_single',
-					'callback' => static function( WP_Query $query ) {
+					'callback' => static function ( WP_Query $query ) {
 						return $query->is_singular() && 'special' === get_post( $query->get_queried_object_id() )->post_name;
 					},
 				];
@@ -509,14 +509,14 @@ class Test_AMP_Theme_Support extends TestCase {
 				];
 				$templates['is_custom']        = [
 					'label'    => 'Custom',
-					'callback' => static function( WP_Query $query ) {
+					'callback' => static function ( WP_Query $query ) {
 						return false !== $query->get( 'custom', false );
 					},
 				];
 				$templates['is_custom[thing]'] = [
 					'label'    => 'Custom Thing',
 					'parent'   => 'is_custom',
-					'callback' => static function( WP_Query $query ) {
+					'callback' => static function ( WP_Query $query ) {
 						return 'thing' === $query->get( 'custom', false );
 					},
 				];
@@ -525,7 +525,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		);
 		add_filter(
 			'query_vars',
-			static function( $vars ) {
+			static function ( $vars ) {
 				$vars[] = 'custom';
 				return $vars;
 			}
@@ -630,7 +630,7 @@ class Test_AMP_Theme_Support extends TestCase {
 				$templates['missing_parent'] = [
 					'label'    => 'Missing parent',
 					'parent'   => 'is_unknown',
-					'callback' => static function( WP_Query $query ) {
+					'callback' => static function ( WP_Query $query ) {
 						return false !== $query->get( 'missing_parent', false );
 					},
 				];
@@ -746,10 +746,10 @@ class Test_AMP_Theme_Support extends TestCase {
 		// Test inclusion of custom template.
 		add_filter(
 			'amp_supportable_templates',
-			static function( $templates ) {
+			static function ( $templates ) {
 				$templates['is_custom'] = [
 					'label'    => 'Custom',
-					'callback' => static function( WP_Query $query ) {
+					'callback' => static function ( WP_Query $query ) {
 						return false !== $query->get( 'custom', false );
 					},
 				];
@@ -1010,13 +1010,13 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		add_action(
 			'admin_bar_init',
-			function() {
+			function () {
 				wp_enqueue_style( 'example-admin-bar', 'https://example.com/example-admin-bar.css', [ 'admin-bar' ], '0.1' );
 				wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
 			}
 		);
 
-		$callback = function() {
+		$callback = function () {
 			?>
 			<style type="text/css" media="screen">
 				html { margin-top: 64px !important; }
@@ -1638,7 +1638,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		ob_start();
 		echo 'foo';
 		ob_start(
-			static function( $response ) {
+			static function ( $response ) {
 				return strtoupper( $response );
 			}
 		);
@@ -1657,7 +1657,6 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertStringContainsString( 'BAR', $output );
 		$this->assertStringContainsString( '<amp-video src="test.mp4"', $output );
 		$this->assertStringNotContainsString( '<script data-test', $output );
-
 	}
 
 	/**
@@ -1710,7 +1709,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		$this->set_private_property( AMP_Theme_Support::class, 'metadata', amp_get_schemaorg_metadata() );
 
-		$call_prepare_response = static function() use ( $original_html ) {
+		$call_prepare_response = static function () use ( $original_html ) {
 			AMP_HTTP::$headers_sent                     = [];
 			AMP_Validation_Manager::$validation_results = [];
 			return AMP_Theme_Support::prepare_response( $original_html );
@@ -2070,7 +2069,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		add_action(
 			'wp_enqueue_scripts',
-			static function() {
+			static function () {
 				wp_enqueue_script( 'amp-list' );
 				wp_enqueue_style( 'my-font', 'https://fonts.googleapis.com/css?family=Tangerine', [], null ); // phpcs:ignore
 			}
@@ -2078,7 +2077,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		add_filter(
 			'script_loader_tag',
-			static function( $tag, $handle ) {
+			static function ( $tag, $handle ) {
 				if ( ! wp_scripts()->get_data( $handle, 'conditional' ) ) {
 					$tag = preg_replace( '/(?<=<script)/', " handle='$handle' ", $tag );
 				}
@@ -2090,7 +2089,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		add_action(
 			'wp_footer',
-			static function() {
+			static function () {
 				wp_print_scripts( 'amp-mathml' );
 				?>
 				<amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
@@ -2101,7 +2100,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		add_filter(
 			'get_site_icon_url',
-			static function() {
+			static function () {
 				return home_url( '/favicon.png' );
 			}
 		);
@@ -2349,7 +2348,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->go_to( home_url( '/?amp=1' ) );
 		add_filter(
 			'amp_content_sanitizers',
-			static function( $sanitizers ) {
+			static function ( $sanitizers ) {
 				$sanitizers[ AMP_Theme_Support_Sanitizer_Counter::class ] = [];
 				return $sanitizers;
 			}
@@ -2374,7 +2373,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$redirects = [];
 		add_filter(
 			'wp_redirect',
-			static function( $url ) use ( &$redirects ) {
+			static function ( $url ) use ( &$redirects ) {
 				array_unshift( $redirects, $url );
 				return '';
 			}

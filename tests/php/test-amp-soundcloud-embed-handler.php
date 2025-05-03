@@ -31,7 +31,7 @@ class AMP_SoundCloud_Embed_Handler_Test extends TestCase {
 	 *
 	 * @var string
 	 */
-	protected $playlist_url = 'https://soundcloud.com/classical-music-playlist/sets/classical-music-essential-collection';
+	protected $playlist_url = 'https://soundcloud.com/hasnaa-tabra/sets/classical-music';
 
 	/**
 	 * Response for track oEmbed request.
@@ -47,7 +47,7 @@ class AMP_SoundCloud_Embed_Handler_Test extends TestCase {
 	 * @see AMP_SoundCloud_Embed_Test::$playlist_url
 	 * @var string
 	 */
-	protected $playlist_oembed_response = '{"version":1.0,"type":"rich","provider_name":"SoundCloud","provider_url":"http://soundcloud.com","height":450,"width":500,"title":"Classical Music - The Essential Collection by Classical Music","description":"Classical Music - The Essential Collection features 50 of the finest Classical Masterpieces ever written. Definitely not to working to! ","thumbnail_url":"http://i1.sndcdn.com/artworks-000083473866-mno23j-t500x500.jpg","html":"\u003Ciframe width=\"500\" height=\"450\" scrolling=\"no\" frameborder=\"no\" src=\"https://w.soundcloud.com/player/?visual=true\u0026url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F40936190\u0026show_artwork=true\u0026maxwidth=500\u0026maxheight=750\u0026dnt=1\"\u003E\u003C/iframe\u003E","author_name":"Classical Music","author_url":"https://soundcloud.com/classical-music-playlist"}';
+	protected $playlist_oembed_response = '{"version":1.0,"type":"rich","provider_name":"SoundCloud","provider_url":"https://soundcloud.com","height":450,"width":"500","title":"Classical Music by Hasnaa Tabra","description":"","thumbnail_url":"https://i1.sndcdn.com/artworks-000092720295-kjpq3h-t500x500.jpg","html":"<iframe width=\"500\" height=\"450\" scrolling=\"no\" frameborder=\"no\" src=\"https://w.soundcloud.com/player/?visual=true&url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F53337986&show_artwork=true\"></iframe>","author_name":"Hasnaa Tabra","author_url":"https://soundcloud.com/hasnaa-tabra"}';
 
 	/**
 	 * Set up.
@@ -121,7 +121,7 @@ class AMP_SoundCloud_Embed_Handler_Test extends TestCase {
 
 			'playlist_simple' => [
 				$this->playlist_url . PHP_EOL,
-				'<p><amp-soundcloud data-playlistid="40936190" data-visual="true" height="450" width="500" layout="responsive">' . ( function_exists( 'wp_filter_oembed_iframe_title_attribute' ) ? '<a fallback href="https://soundcloud.com/classical-music-playlist/sets/classical-music-essential-collection">Classical Music &#8211; The Essential Collection by Classical Music</a>' : '' ) . '</amp-soundcloud></p>' . PHP_EOL,
+				'<p><amp-soundcloud data-playlistid="53337986" data-visual="true" height="450" width="500" layout="responsive">' . ( function_exists( 'wp_filter_oembed_iframe_title_attribute' ) ? '<a fallback href="https://soundcloud.com/hasnaa-tabra/sets/classical-music">Classical Music by Hasnaa Tabra</a>' : '' ) . '</amp-soundcloud></p>' . PHP_EOL,
 			],
 		];
 	}

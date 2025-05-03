@@ -534,8 +534,9 @@ function amp_is_available() {
 
 		// If not in an AMP-first mode, check if there are any validation errors with kept invalid markup for this URL.
 		// And if so, and if the user cannot do validation (since they can always get fresh validation results), then
-		// AMP is not available.
-		if ( ! amp_is_canonical() && ! AMP_Validation_Manager::has_cap() ) {
+		// AMP is not available. This only applies if Sandboxing is disabled or the Strict sandboxing mode is on,
+		// since in Loose or Moderate sandboxing modes, invalid AMP markup can still be served.
+		if ( ! amp_is_canonical() && ! AMP_Validation_Manager::has_cap() && in_array( amp_get_sandboxing_level(), [ 0, 3 ], true ) ) {
 			$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors(
 				amp_get_current_url(),
 				[ 'ignore_accepted' => true ]

@@ -29,6 +29,7 @@ describe('AMP settings screen Review panel', () => {
 
 	it('is present on the page', async () => {
 		await page.waitForSelector('.settings-site-review');
+
 		await expect(page).toMatchElement('h2', { text: 'Review' });
 		await expect(page).toMatchElement('h3', { text: 'Need help?' });
 		await expect(page).toMatchElement('.settings-site-review__list li', {
@@ -57,6 +58,7 @@ describe('AMP settings screen Review panel', () => {
 		const htmlAttributes = await page.$eval('html', (el) =>
 			el.getAttributeNames()
 		);
+
 		await expect(htmlAttributes).toContain('amp');
 	});
 
@@ -73,6 +75,7 @@ describe('AMP settings screen Review panel', () => {
 		const htmlAttributes = await page.$eval('html', (el) =>
 			el.getAttributeNames()
 		);
+
 		await expect(htmlAttributes).toContain('amp');
 	});
 
@@ -91,6 +94,7 @@ describe('AMP settings screen Review panel', () => {
 		const htmlAttributes = await page.$eval('html', (el) =>
 			el.getAttributeNames()
 		);
+
 		await expect(htmlAttributes).toContain('amp');
 	});
 
@@ -113,11 +117,13 @@ describe('AMP settings screen Review panel', () => {
 		// There should be no Review panel after page reload.
 		await visitAdminPage('admin.php', 'page=amp-options');
 		await page.waitForSelector('#amp-settings-root');
+
 		await expect(page).not.toMatchElement('.settings-site-review');
 
 		await setTemplateMode('standard');
 
 		await page.waitForSelector('.settings-site-review');
+
 		await expect(page).toMatchElement('h2', { text: 'Review' });
 	});
 });

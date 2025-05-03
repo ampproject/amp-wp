@@ -9,13 +9,17 @@ export const PREV_BUTTON_SELECTOR =
 
 export async function goToOnboardingWizard() {
 	await visitAdminPage('index.php', '');
+
 	await expect(page).not.toMatchElement('#amp-onboarding-wizard');
+
 	await visitAdminPage('admin.php', 'page=amp-onboarding-wizard');
+
 	await expect(page).toMatchElement('#amp-onboarding-wizard');
 }
 
 export async function clickNextButton() {
 	await page.waitForSelector(`${NEXT_BUTTON_SELECTOR}:not([disabled])`);
+
 	await expect(page).toClick(`${NEXT_BUTTON_SELECTOR}:not([disabled])`);
 }
 
@@ -26,6 +30,7 @@ export async function clickPrevButton() {
 export async function moveToTechnicalScreen() {
 	await goToOnboardingWizard();
 	await clickNextButton();
+
 	await expect(page).toMatchElement('.technical-background-option');
 }
 
@@ -35,9 +40,11 @@ export async function moveToSiteScanScreen({ technical }) {
 	const radioSelector = technical
 		? '#technical-background-enable'
 		: '#technical-background-disable';
+
 	await expect(page).toClick(radioSelector);
 
 	await clickNextButton();
+
 	await expect(page).toMatchElement('.site-scan');
 }
 
@@ -45,6 +52,7 @@ export async function moveToTemplateModeScreen({ technical }) {
 	await moveToSiteScanScreen({ technical });
 
 	await clickNextButton();
+
 	await expect(page).toMatchElement('.template-mode-option');
 }
 
@@ -116,6 +124,7 @@ export async function completeWizard({
 		await expect(page).toClick('#next-button');
 	}
 	await page.waitForSelector('#amp-settings', { timeout: 30000 });
+
 	await expect(page).toMatchElement('#amp-settings');
 }
 

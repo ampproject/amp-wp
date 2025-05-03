@@ -92,7 +92,6 @@ class Test_AMP_Post_Type_Support extends TestCase {
 			],
 			AMP_Post_Type_Support::get_eligible_post_types()
 		);
-
 	}
 
 	/**

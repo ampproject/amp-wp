@@ -19,6 +19,7 @@ describe('Close button placement', () => {
 
 		const { height } = await page.viewport();
 		await page.setViewport({ width: DEFAULT_MOBILE_BREAKPOINT, height });
+
 		await expect(page).toMatchElement('.amp-settings-nav .is-link', {
 			text: /Close/,
 		});
@@ -31,6 +32,7 @@ describe('Close button placement', () => {
 			width: DEFAULT_MOBILE_BREAKPOINT - 1,
 			height,
 		});
+
 		await expect(page).not.toMatchElement('.amp-settings-nav .is-link', {
 			text: /Close/,
 		});

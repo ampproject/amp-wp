@@ -548,7 +548,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 		add_filter(
 			'amp_validation_error_sanitized',
-			static function( $sanitized, $error ) use ( $acceptable_errors ) {
+			static function ( $sanitized, $error ) use ( $acceptable_errors ) {
 				if ( true === $acceptable_errors ) {
 					return true;
 				}
@@ -627,7 +627,7 @@ class AMP_Validation_Error_Taxonomy {
 			$groups = self::sanitize_term_status( $args['group'], [ 'multiple' => true ] );
 		}
 
-		$filter = static function( $clauses ) use ( $groups ) {
+		$filter = static function ( $clauses ) use ( $groups ) {
 			$clauses['where'] .= ' AND t.term_group ' . AMP_Validation_Error_Taxonomy::prepare_term_group_in_sql( $groups );
 			return $clauses;
 		};
@@ -832,7 +832,7 @@ class AMP_Validation_Error_Taxonomy {
 		// Prevent query vars from persisting after redirect.
 		add_filter(
 			'removable_query_args',
-			static function( $query_vars ) {
+			static function ( $query_vars ) {
 				$query_vars[] = 'amp_actioned';
 				$query_vars[] = 'amp_actioned_count';
 				$query_vars[] = 'amp_validation_errors_not_deleted';
@@ -844,7 +844,7 @@ class AMP_Validation_Error_Taxonomy {
 		// Add recognition of amp_validation_error_status and type query vars (which will only apply in admin since post type is not publicly_queryable).
 		add_filter(
 			'query_vars',
-			static function( $query_vars ) {
+			static function ( $query_vars ) {
 				$query_vars[] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR;
 				$query_vars[] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR;
 				return $query_vars;
@@ -854,7 +854,7 @@ class AMP_Validation_Error_Taxonomy {
 		// Default ordering terms by ID descending so that new terms appear at the top.
 		add_filter(
 			'get_terms_defaults',
-			static function( $args, $taxonomies ) {
+			static function ( $args, $taxonomies ) {
 				if ( [ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] === $taxonomies ) {
 					$args['orderby'] = 'term_id';
 					$args['order']   = 'DESC';
@@ -871,7 +871,7 @@ class AMP_Validation_Error_Taxonomy {
 		// Override the columns displayed for the validation error terms.
 		add_filter(
 			'manage_edit-' . self::TAXONOMY_SLUG . '_columns',
-			static function() {
+			static function () {
 				return [
 					'error_code'       => esc_html__( 'Error', 'amp' ),
 					'status'           => sprintf(
@@ -906,7 +906,7 @@ class AMP_Validation_Error_Taxonomy {
 		// Let the created date column sort by term ID.
 		add_filter(
 			'manage_edit-' . self::TAXONOMY_SLUG . '_sortable_columns',
-			static function( $sortable_columns ) {
+			static function ( $sortable_columns ) {
 				$sortable_columns['created_date_gmt'] = 'term_id';
 				$sortable_columns['error_type']       = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR;
 				$sortable_columns['error_code']       = AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR;
@@ -917,7 +917,7 @@ class AMP_Validation_Error_Taxonomy {
 		// Hide empty term addition form.
 		add_action(
 			'admin_enqueue_scripts',
-			static function() {
+			static function () {
 				$current_screen = get_current_screen();
 				if ( ! $current_screen ) {
 					return;
@@ -1023,7 +1023,7 @@ class AMP_Validation_Error_Taxonomy {
 		// Replace the primary column to be error instead of the removed name column..
 		add_filter(
 			'list_table_primary_column',
-			static function( $primary_column ) {
+			static function ( $primary_column ) {
 				if ( get_current_screen() && AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
 					$primary_column = 'error_code';
 				}
@@ -1139,7 +1139,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 		add_filter(
 			'terms_clauses',
-			static function( $clauses, $taxonomies ) use ( $groups ) {
+			static function ( $clauses, $taxonomies ) use ( $groups ) {
 				if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $taxonomies[0] && AMP_Validation_Error_Taxonomy::$should_filter_terms_clauses_for_error_validation_status ) {
 					$clauses['where'] .= ' AND t.term_group ' . AMP_Validation_Error_Taxonomy::prepare_term_group_in_sql( $groups );
 				}
@@ -1170,7 +1170,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		add_filter(
 			'terms_clauses',
-			static function( $clauses, $taxonomies ) use ( $type ) {
+			static function ( $clauses, $taxonomies ) use ( $type ) {
 				global $wpdb;
 				if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $taxonomies[0] ) {
 					$clauses['where'] .= $wpdb->prepare( ' AND tt.description LIKE %s', '%"type":"' . $wpdb->esc_like( $type ) . '"%' );
@@ -1204,7 +1204,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		add_filter(
 			'terms_clauses',
-			static function( $clauses ) {
+			static function ( $clauses ) {
 				global $wpdb;
 
 				if ( isset( $_GET['order'] ) && 'desc' === $_GET['order'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -2038,7 +2038,7 @@ class AMP_Validation_Error_Taxonomy {
 				$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $url_post_id );
 				$validation_errors = array_filter(
 					$validation_errors,
-					static function( $error ) use ( $term ) {
+					static function ( $error ) use ( $term ) {
 						return $error['term']->term_id === $term->term_id;
 					}
 				);

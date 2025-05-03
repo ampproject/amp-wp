@@ -30,7 +30,7 @@ class DependencySupport implements Service {
 	 *
 	 * @var string
 	 */
-	const WP_MIN_VERSION = '6.5';
+	const WP_MIN_VERSION = '6.6';
 
 	/**
 	 * Determines whether core or Gutenberg provides minimal support.

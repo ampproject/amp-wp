@@ -41,6 +41,7 @@ describe('AMP settings screen Site Scan panel', () => {
 
 		it('has no impact if settings are changed', async () => {
 			await setTemplateMode('standard');
+
 			await expect(page).toMatchElement('#template-modes');
 		});
 	});
@@ -105,6 +106,7 @@ describe('AMP settings screen Site Scan panel', () => {
 
 			// Reload the page and confirm that the panel is collapsed.
 			await page.reload();
+
 			await expect(page).toMatchElement(
 				'#site-scan .components-panel__body-toggle[aria-expanded="false"]'
 			);
@@ -180,6 +182,7 @@ describe('AMP settings screen Site Scan panel', () => {
 				'.site-scan-results__source',
 				(sources) => sources.length
 			);
+
 			expect(totalIssuesCount).toBe(2);
 
 			await expect(page).toMatchElement(
@@ -254,10 +257,12 @@ describe('AMP settings screen Site Scan panel', () => {
 				selector: '#plugin-suppression .components-panel__body-toggle',
 				click: true,
 			});
+
 			await expect(page).toSelect(
 				'#suppressed-plugins-table tbody tr:first-child .column-status select',
 				'Suppressed'
 			);
+
 			await saveSettings();
 
 			await scrollToElement({ selector: '#site-scan' });

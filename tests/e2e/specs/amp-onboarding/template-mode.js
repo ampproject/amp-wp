@@ -31,16 +31,19 @@ describe('Template mode', () => {
 
 	it('should allow options to be selected', async () => {
 		await clickMode('standard');
+
 		await expect(page).toMatchElement('.selectable--selected h2', {
 			text: 'Standard',
 		});
 
 		await clickMode('transitional');
+
 		await expect(page).toMatchElement('.selectable--selected h2', {
 			text: 'Transitional',
 		});
 
 		await clickMode('reader');
+
 		await expect(page).toMatchElement('.selectable--selected h2', {
 			text: 'Reader',
 		});
@@ -62,19 +65,23 @@ describe('Template mode recommendations with reader theme active', () => {
 		await expect(page).toMatchElement(
 			'#template-mode-transitional-container .components-panel__body-title button[aria-expanded="true"]'
 		);
+
 		const transitionalCopy = await page.$eval(
 			'#template-mode-transitional-container .amp-drawer__panel-body',
 			(el) => el.innerText
 		);
+
 		expect(transitionalCopy).toContain('Recommended');
 
 		await expect(page).toMatchElement(
 			'#template-mode-standard-container .components-panel__body-title button[aria-expanded="true"]'
 		);
+
 		const standardCopy = await page.$eval(
 			'#template-mode-standard-container .amp-drawer__panel-body',
 			(el) => el.innerText
 		);
+
 		expect(standardCopy).toContain('Recommended');
 	});
 
@@ -166,6 +173,7 @@ describe('Stepper item modifications', () => {
 			'.amp-stepper__item',
 			(els) => els.length
 		);
+
 		expect(itemCount).toBe(6);
 
 		await expect(page).toMatchElement('.amp-stepper__item-title', {
@@ -180,6 +188,7 @@ describe('Stepper item modifications', () => {
 			'.amp-stepper__item',
 			(els) => els.length
 		);
+
 		expect(itemCount).toBe(5);
 
 		await expect(page).not.toMatchElement('.amp-stepper__item-title', {
