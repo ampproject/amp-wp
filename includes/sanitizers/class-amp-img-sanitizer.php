@@ -580,6 +580,9 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	private function is_gif_url( $url ) {
 		$ext  = self::$anim_extension;
 		$path = wp_parse_url( $url, PHP_URL_PATH );
+		if ( null === $path ) {
+			return false;
+		}
 		return substr( $path, -strlen( $ext ) ) === $ext;
 	}
 
