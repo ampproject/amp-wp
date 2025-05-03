@@ -580,7 +580,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	private function is_gif_url( $url ) {
 		$ext  = self::$anim_extension;
 		$path = wp_parse_url( $url, PHP_URL_PATH );
-		// 检查$path是否为null，若是则赋值为空字符串
 		if ( null === $path ) {
 			return false;
 		}
