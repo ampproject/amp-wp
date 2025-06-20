@@ -127,6 +127,7 @@ module.exports = {
 				// Disabling because we are not using typescript.
 				// @see <https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/unbound-method.md>
 				'jest/unbound-method': 'off',
+				'jest/prefer-ending-with-an-expect': 'off',
 			},
 		},
 		{
@@ -149,6 +150,7 @@ module.exports = {
 				'jest/unbound-method': 'off',
 				// Disabling because it's not the Jest environment.
 				'jest/prefer-importing-jest-globals': 'off',
+				'jest/prefer-ending-with-an-expect': 'off',
 			},
 		},
 		{
