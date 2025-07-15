@@ -36,6 +36,7 @@ parameters:
 	dynamicConstantNames:
 		- INTL_IDNA_VARIANT_2003
 	ignoreErrors:
+		- identifier: require.fileNotFound
 		- identifier: requireOnce.fileNotFound
 		- identifier: new.internalClass
 		- identifier: instanceof.internalClass
