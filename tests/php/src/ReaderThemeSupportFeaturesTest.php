@@ -339,9 +339,9 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		$this->assertArrayHasKey( 'editor-gradient-presets', $features );
 		$this->assertContains(
 			[
-				'name'     => 'Vivid cyan blue to vivid purple',
-				'gradient' => 'linear-gradient(135deg,rgb(6,147,227) 0%,rgb(155,81,224) 100%)',
-				'slug'     => 'vivid-cyan-blue-to-vivid-purple',
+				'name'     => 'Light green cyan to vivid green cyan',
+				'gradient' => 'linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%)',
+				'slug'     => 'light-green-cyan-to-vivid-green-cyan',
 			],
 			$features['editor-gradient-presets']
 		);
