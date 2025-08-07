@@ -124,7 +124,7 @@ export function TemplateModes({ focusReaderThemes }) {
 						<div className="reader-themes__heading">
 							<h3>
 								{sprintf(
-									/* translators: placeholder is a theme name. */
+									/* translators: %s placeholder is a theme name. */
 									__('Reader theme: %s', 'amp'),
 									selectedTheme.name || ''
 								)}

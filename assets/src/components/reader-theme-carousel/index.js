@@ -76,7 +76,7 @@ export function ReaderThemeCarousel() {
 
 		return pages.map((page, index) => ({
 			label: sprintf(
-				/* translators: Placeholder is a page number. */
+				/* translators: Placeholder %d is a page number. */
 				__('Page %d'),
 				index
 			),
@@ -131,7 +131,7 @@ export function ReaderThemeCarousel() {
 				<AMPNotice>
 					<p>
 						{sprintf(
-							/* translators: placeholder is the name of a WordPress theme. */
+							/* translators: placeholder %s is the name of a WordPress theme. */
 							__(
 								'Your active theme “%s” is not listed below because it is already AMP-compatible. If you wish to use your active theme for both AMP and non-AMP pages, then Transitional template mode is what you should choose.',
 								'amp'

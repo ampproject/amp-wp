@@ -93,7 +93,7 @@ export const validateFeaturedImage = (media, dimensions) => {
 	) {
 		errors.push(
 			sprintf(
-				/* translators: List of image formats */
+				/* translators: List of image formats 1: JPEG 2: PNG 3: GIF 4: WebP 5: SVG */
 				__(
 					'The featured image must be of either %1$s, %2$s, %3$s, %4$s, or %5$s format.',
 					'amp'
@@ -125,7 +125,7 @@ export const validateFeaturedImage = (media, dimensions) => {
 		} else if (dimensions.width) {
 			errors.push(
 				sprintf(
-					/* translators: placeholder is minimum width. */
+					/* translators: placeholder %s is minimum width. */
 					__(
 						'The featured image should have a width of at least %s pixels.',
 						'amp'
@@ -136,7 +136,7 @@ export const validateFeaturedImage = (media, dimensions) => {
 		} else if (dimensions.height) {
 			errors.push(
 				sprintf(
-					/* translators: placeholder is minimum height. */
+					/* translators: placeholder %s is minimum height. */
 					__(
 						'The featured image should have a height of at least %s pixels.',
 						'amp'
