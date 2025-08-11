@@ -120,7 +120,7 @@ function AnalyticsEntry({
 		<PanelRow className="amp-analytics-entry">
 			<h4>
 				{sprintf(
-					/* translators: placeholder is the entry index */
+					/* translators: placeholder %s is the entry index */
 					__('Analytics Configuration #%s', 'amp'),
 					entryIndex
 				)}

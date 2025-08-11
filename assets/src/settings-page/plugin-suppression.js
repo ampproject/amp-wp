@@ -42,7 +42,7 @@ function SuppressedPluginTime({ suppressedPlugin }) {
 	return (
 		<time dateTime={format('c', suppressedPlugin.timestamp)}>
 			{sprintf(
-				/* translators: placeholder is a formatted date. */
+				/* translators: placeholder %s is a formatted date. */
 				__('Since %s.', 'amp'),
 				dateI18n(dateFormat, suppressedPlugin.timestamp * 1000)
 			)}
@@ -65,7 +65,7 @@ function SuppressedPluginUsername({ suppressedPlugin }) {
 	return (
 		<span>
 			{sprintf(
-				/* translators: placeholder is the name of the user who suppressed the plugin */
+				/* translators: placeholder %s is the name of the user who suppressed the plugin */
 				__('Done by %s.', 'amp'),
 				suppressedPlugin.user.name || suppressedPlugin.user.slug
 			)}
@@ -98,7 +98,7 @@ function SuppressedPluginVersion({ pluginDetails, suppressedPlugin }) {
 		return (
 			<span>
 				{sprintf(
-					/* translators: both placeholders are plugin version numbers. */
+					/* translators: 1. placeholder is the current plugin version, 2. placeholder is the last suppressed plugin version. */
 					__(
 						'Now updated to version %1$s since suppressed at %2$s.',
 						'amp'
@@ -293,13 +293,13 @@ function PluginRow({ pluginKey, pluginDetails }) {
 										rel="noreferrer"
 									>
 										{sprintf(
-											/* translators: placeholder is an author name. */
+											/* translators: %s placeholder is an author name. */
 											__('By %s'),
 											pluginDetails.Author
 										)}
 									</a>
 								) : (
-									/* translators: placeholder is an author name. */
+									/* translators: %s placeholder is an author name. */
 									sprintf(__('By %s'), pluginDetails.Author)
 								)}
 							</p>

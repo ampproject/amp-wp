@@ -47,13 +47,13 @@ const FeaturedImageSelectionError = wp.media.View.extend({
 		);
 		message += '<# } else if ( minWidth ) { #>';
 		message += sprintf(
-			/* translators: placeholder is required minimum width in pixels. */
+			/* translators: placeholder %s is required minimum width in pixels. */
 			__('It should have a width of at least %s pixels.', 'amp'),
 			'{{minWidth}}'
 		);
 		message += '<# } else if ( minHeight ) { #>';
 		message += sprintf(
-			/* translators: placeholder is required minimum height in pixels. */
+			/* translators: placeholder %s is required minimum height in pixels. */
 			__('It should have a height of at least %s pixels.', 'amp'),
 			'{{minHeight}}'
 		);
