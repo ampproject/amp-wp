@@ -67,7 +67,7 @@
     "axios": "1.11.0",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "copy-webpack-plugin": "13.0.0",
-    "cross-env": "7.0.3",
+    "cross-env": "10.0.0",
     "css-minimizer-webpack-plugin": "7.0.2",
     "enzyme": "3.11.0",
     "eslint": "8.57.0",
