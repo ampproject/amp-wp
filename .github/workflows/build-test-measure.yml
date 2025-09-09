@@ -291,15 +291,18 @@ jobs:
         install-pwa-plugin: [true]
         coverage: [false]
         include:
-          - php: '8.4'
+          - php: '8.5'
             wp: 'trunk'
             phpunit: '9.6'
             experimental: true
 
+          - php: '8.4'
+            wp: 'trunk'
+            phpunit: '9.6'
+
           - php: '8.3'
             wp: 'trunk'
             phpunit: '9.6'
-            experimental: true
 
           - php: '8.2'
             wp: 'trunk'
@@ -314,7 +317,7 @@ jobs:
             phpunit: '9.3'
             multisite: true
 
-          - php: '8.0'
+          - php: '8.4'
             wp: 'latest'
             phpunit: '9.3'
             coverage: true
@@ -499,23 +502,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['7.4']
+        php: ['8.3', '8.2', '8.1', '8.0','7.4']
         wp: ['latest']
         include:
+          - php: '8.5'
+            wp: 'trunk'
+            experimental: true
+
           - php: '8.4'
             wp: 'trunk'
             experimental: true
-
-          - php: '8.3'
-            wp: 'trunk'
-            experimental: true
-
-          - php: '8.2'
-            wp: 'trunk'
-            experimental: true
-
-          - php: '8.1'
-            wp: 'trunk'
 
           - php: '8.0'
             wp: 'latest'
