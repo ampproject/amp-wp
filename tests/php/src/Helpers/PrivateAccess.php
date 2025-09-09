@@ -31,7 +31,9 @@ trait PrivateAccess {
 	 */
 	private function call_private_method( $object, $method_name, $args = [] ) {
 		$method = ( new ReflectionClass( $object ) )->getMethod( $method_name );
-		$method->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$method->setAccessible( true );
+		}
 		return $method->invokeArgs( $object, $args );
 	}
 
@@ -46,7 +48,9 @@ trait PrivateAccess {
 	 */
 	private function call_private_static_method( $class, $method_name, $args = [] ) {
 		$method = ( new ReflectionClass( $class ) )->getMethod( $method_name );
-		$method->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$method->setAccessible( true );
+		}
 		return $method->invokeArgs( null, $args );
 	}
 
@@ -61,7 +65,9 @@ trait PrivateAccess {
 	private function set_private_property( $object, $property_name, $value ) {
 		$reflection_class = new ReflectionClass( $object );
 		$property         = $reflection_class->getProperty( $property_name );
-		$property->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$property->setAccessible( true );
+		}
 
 		if ( $property->isStatic() ) {
 			$reflection_class->setStaticPropertyValue( $property_name, $value );
@@ -80,7 +86,9 @@ trait PrivateAccess {
 	 */
 	private function get_private_property( $object, $property_name ) {
 		$property = ( new ReflectionClass( $object ) )->getProperty( $property_name );
-		$property->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$property->setAccessible( true );
+		}
 
 		// Note: In PHP 8, `ReflectionProperty::getValue()` now requires that an object be supplied if it's a
 		// non-static property.
