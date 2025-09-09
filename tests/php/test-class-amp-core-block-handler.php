@@ -155,7 +155,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
 
-		$this->assertStringContainsString( 'style="aspect-ratio:560/320"', $content );
+		$this->assertMatchesRegularExpression( '#style="aspect-ratio:\s?560\s?/\s?320"#', $content );
 		$this->assertStringContainsString( 'width="560"', $content );
 		$this->assertStringContainsString( 'height="320"', $content );
 	}
