@@ -299,10 +299,12 @@ jobs:
           - php: '8.4'
             wp: 'trunk'
             phpunit: '9.6'
+            experimental: true
 
           - php: '8.3'
             wp: 'trunk'
             phpunit: '9.6'
+            experimental: true
 
           - php: '8.2'
             wp: 'trunk'
