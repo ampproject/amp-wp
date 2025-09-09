@@ -248,8 +248,6 @@ function _amp_incorrect_plugin_slug_admin_notice() {
 	<?php
 }
 
-// Temporary change to trigger CI.
-
 if ( 'amp' !== basename( AMP__DIR__ ) ) {
 	add_action( 'admin_notices', '_amp_incorrect_plugin_slug_admin_notice' );
 }
