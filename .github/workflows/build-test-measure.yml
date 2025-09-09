@@ -412,6 +412,7 @@ jobs:
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Install SVN
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: sudo apt-get install subversion
 
       - name: Install WP tests
