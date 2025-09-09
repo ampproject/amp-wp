@@ -317,7 +317,7 @@ jobs:
             phpunit: '9.3'
             multisite: true
 
-          - php: '8.4'
+          - php: '8.0'
             wp: 'latest'
             phpunit: '9.3'
             coverage: true
