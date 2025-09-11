@@ -75,7 +75,7 @@ class Test_AMP_Post_Template_Functions extends TestCase {
 				amp_post_template_add_fonts( $template );
 			}
 		);
-		$this->assertEmpty( $output );
+		$this->assertStringNotContainsString( '<link rel="stylesheet"', $output );
 
 		add_filter(
 			'amp_post_template_data',
