@@ -311,36 +311,36 @@ jobs:
 
           - php: '8.0'
             wp: 'trunk'
-            phpunit: '9.3'
+            phpunit: '9.6'
             multisite: true
 
           - php: '8.0'
             wp: 'latest'
-            phpunit: '9.3'
+            phpunit: '9.6'
             coverage: true
 
           - php: '8.0'
             wp: 'latest'
-            phpunit: '9.3'
+            phpunit: '9.6'
             external-http: true
 
           - php: '7.4'
             wp: 'latest'
-            phpunit: '9.3'
+            phpunit: '9.6'
             multisite: true
 
           - php: '7.4'
             wp: 'latest'
-            phpunit: '9.3'
+            phpunit: '9.6'
             external-http: true
 
           - php: '7.4'
             wp: '6.6'
-            phpunit: '7'
+            phpunit: '9.6'
 
           - php: '7.4'
             wp: '6.6'
-            phpunit: '7'
+            phpunit: '9.6'
             external-http: true
     steps:
       # Note: The repeated `needs.pre-run.outputs.changed-php-count > 0` checks would be avoided if a step could short-
