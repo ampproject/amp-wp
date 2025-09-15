@@ -22,7 +22,7 @@ class AMP_Srcset_Sanitizer_Test extends TestCase {
 	 *
 	 * @return array[] Test data.
 	 */
-	public function data_sanitize() {
+	public static function data_sanitize() {
 		return [
 			'img_with_valid_srcset'                     => [
 				'<img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg, https://example.com/image-1.jpg     512w, https://example.com/image-2.jpg 1024w   , https://example.com/image-3.jpg 300w, https://example.com/image-4.jpg 768w" width="350" height="150">',

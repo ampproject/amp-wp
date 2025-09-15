@@ -2383,7 +2383,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	}
 
 	/** @return array */
-	public function data_amp_has_paired_endpoint() {
+	public static function data_amp_has_paired_endpoint() {
 		return [
 			'nothing'                 => [
 				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,

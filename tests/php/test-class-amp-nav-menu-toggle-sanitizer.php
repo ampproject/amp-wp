@@ -21,7 +21,7 @@ class Test_AMP_Nav_Menu_Toggle_Sanitizer extends TestCase {
 	 *
 	 * @return array Data.
 	 */
-	public function data_converter() {
+	public static function data_converter() {
 		$container_id = 'nav-menu-container';
 		$toggle_id    = 'nav-menu-toggle';
 

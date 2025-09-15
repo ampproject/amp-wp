@@ -22,7 +22,7 @@ final class DetermineHeroImagesTest extends TestCase {
 	 *
 	 * @return array[] Associative array of data arrays.
 	 */
-	public function data_transform() {
+	public static function data_transform() {
 		$input = static function ( $body ) {
 			return '<!DOCTYPE html><html ⚡><head>'
 				. '<meta charset="utf-8">'

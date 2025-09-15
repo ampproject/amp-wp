@@ -1063,7 +1063,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	 *
 	 * @return array Data.
 	 */
-	public function data_get_details_summary_label() {
+	public static function data_get_details_summary_label() {
 		return [
 			'invalid_css_at_rule'                  => [
 				$this->get_mock_error(),

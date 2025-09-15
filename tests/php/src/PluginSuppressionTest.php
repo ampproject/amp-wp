@@ -653,7 +653,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	 *
 	 * @return array[]
 	 */
-	public function data_provider_for_filter_plugin_row_meta() {
+	public static function data_provider_for_filter_plugin_row_meta() {
 
 		return [
 			'plugin is not suppressed'                 => [

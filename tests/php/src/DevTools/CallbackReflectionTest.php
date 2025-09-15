@@ -153,7 +153,7 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 	}
 
 	/** @return array */
-	public function data_get_source() {
+	public static function data_get_source() {
 		require_once ABSPATH . '/wp-admin/includes/widgets.php';
 		require_once dirname( dirname( __DIR__ ) ) . '/data/themes/custom/functions.php';
 		require_once dirname( dirname( __DIR__ ) ) . '/data/themes/child-of-core/functions.php';

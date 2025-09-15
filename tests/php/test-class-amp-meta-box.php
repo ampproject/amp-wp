@@ -558,7 +558,7 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 	 *
 	 * @return array
 	 */
-	public function data_provider_for_sanitize_status() {
+	public static function data_provider_for_sanitize_status() {
 
 		return [
 			[

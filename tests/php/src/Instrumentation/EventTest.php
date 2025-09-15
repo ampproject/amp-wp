@@ -12,7 +12,7 @@ final class EventTest extends TestCase {
 
 	use PrivateAccess;
 
-	public function data_get_header_string() {
+	public static function data_get_header_string() {
 		return [
 			[ 'event-1', '', null, 'event-1' ],
 			[ 'event-2', 'Event N°2', null, 'event-2;desc="Event N°2"' ],
@@ -59,7 +59,7 @@ final class EventTest extends TestCase {
 		$this->assertEquals( $expected, $event->get_header_string() );
 	}
 
-	public function data_add_properties_typing() {
+	public static function data_add_properties_typing() {
 		return [
 			// Type of $properties collection.
 			'null type'                  => [ null, InvalidEventProperties::class, 'but is of type NULL' ],

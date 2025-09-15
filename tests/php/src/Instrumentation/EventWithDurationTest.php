@@ -7,7 +7,7 @@ use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 final class EventWithDurationTest extends TestCase {
 
-	public function data_get_header_string() {
+	public static function data_get_header_string() {
 		return [
 			[ 'event-1', '', null, 0.0, 'event-1;dur="0.0"' ],
 			[ 'event-2', 'Event N°2', null, 3.14, 'event-2;desc="Event N°2";dur="3.1"' ],
