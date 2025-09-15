@@ -207,7 +207,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term()
 	 */
 	public function test_prepare_validation_error_taxonomy_term() {
-		$error              = $this->get_mock_error();
+		$error              = self::get_mock_error();
 		$sources            = [
 			[
 				'type' => 'plugin',
@@ -241,7 +241,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		// New accepted.
 		$this->accept_sanitization_by_default( true );
 		$error_foo = array_merge(
-			$this->get_mock_error(),
+			self::get_mock_error(),
 			[ 'foo' => 1 ]
 		);
 		AMP_Validated_URL_Post_Type::store_validation_errors(
@@ -261,7 +261,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		// New rejected.
 		$this->accept_sanitization_by_default( false );
 		$error_bar = array_merge(
-			$this->get_mock_error(),
+			self::get_mock_error(),
 			[ 'bar' => 1 ]
 		);
 		AMP_Validated_URL_Post_Type::store_validation_errors(
@@ -289,7 +289,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$this->assertTrue( amp_is_canonical() );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 		$error_baz = array_merge(
-			$this->get_mock_error(),
+			self::get_mock_error(),
 			[ 'baz' => 1 ]
 		);
 		AMP_Validated_URL_Post_Type::store_validation_errors(
@@ -383,7 +383,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::accept_validation_errors()
 	 */
 	public function test_accept_validation_errors() {
-		$error = $this->get_mock_error();
+		$error = self::get_mock_error();
 		AMP_Validation_Error_Taxonomy::accept_validation_errors( [] );
 		$this->assertNull( apply_filters( 'amp_validation_error_sanitized', null, $error ) );
 		remove_all_filters( 'amp_validation_error_sanitized' );
@@ -403,7 +403,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::is_array_subset()
 	 */
 	public function test_is_array_subset() {
-		$error = $this->get_mock_error();
+		$error = self::get_mock_error();
 		$this->assertTrue( AMP_Validation_Error_Taxonomy::is_array_subset( $error, $error ) );
 
 		// The superset argument now has an extra key and value, but the superset still has all of the values of the subset.
@@ -730,7 +730,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		self::factory()->term->create(
 			[
 				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-				'description' => wp_json_encode( $this->get_mock_error() ),
+				'description' => wp_json_encode( self::get_mock_error() ),
 				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 			]
 		);
@@ -744,7 +744,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		self::factory()->term->create(
 			[
 				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-				'description' => wp_json_encode( $this->get_mock_error() ),
+				'description' => wp_json_encode( self::get_mock_error() ),
 				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 			]
 		);
@@ -798,7 +798,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 			$validation_error_term = self::factory()->term->create(
 				[
 					'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-					'description' => wp_json_encode( $this->get_mock_error() ),
+					'description' => wp_json_encode( self::get_mock_error() ),
 					'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 				]
 			);
@@ -846,7 +846,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 			self::factory()->term->create(
 				[
 					'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-					'description' => wp_json_encode( $this->get_mock_error() ),
+					'description' => wp_json_encode( self::get_mock_error() ),
 					'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 				]
 			);
@@ -888,7 +888,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$this->assertEmpty( $output );
 
 		ob_start();
-		$post_id = AMP_Validated_URL_Post_Type::store_validation_errors( [ $this->get_mock_error() ], home_url( '/' ) );
+		$post_id = AMP_Validated_URL_Post_Type::store_validation_errors( [ self::get_mock_error() ], home_url( '/' ) );
 		wp_delete_post( $post_id, true );
 		AMP_Validation_Error_Taxonomy::render_clear_empty_button();
 		$output = ob_get_clean();
@@ -974,7 +974,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$term_this_taxonomy = self::factory()->term->create_and_get(
 			[
 				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-				'description' => wp_json_encode( $this->get_mock_error() ),
+				'description' => wp_json_encode( self::get_mock_error() ),
 			]
 		);
 
@@ -1066,7 +1066,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	public static function data_get_details_summary_label() {
 		return [
 			'invalid_css_at_rule'                  => [
-				$this->get_mock_error(),
+				self::get_mock_error(),
 				'<code>&lt;link&gt;</code>',
 			],
 			'disallowed_attribute'                 => [
@@ -1212,7 +1212,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	public function test_filter_manage_custom_columns() {
 		$this->accept_sanitization_by_default( false );
 		AMP_Validation_Error_Taxonomy::register();
-		$validation_error = $this->get_mock_error();
+		$validation_error = self::get_mock_error();
 		$initial_content  = 'example initial content';
 		$term_id          = self::factory()->term->create(
 			[
@@ -1413,7 +1413,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$error_term              = self::factory()->term->create_and_get(
 			[
 				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-				'description' => wp_json_encode( $this->get_mock_error() ),
+				'description' => wp_json_encode( self::get_mock_error() ),
 			]
 		);
 		wp_update_term( $error_term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => $initial_accepted_status ] );
@@ -1505,7 +1505,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 				throw new Exception( 'redirected' );
 			}
 		);
-		$post_id = AMP_Validated_URL_Post_Type::store_validation_errors( [ $this->get_mock_error() ], home_url( '/' ) );
+		$post_id = AMP_Validated_URL_Post_Type::store_validation_errors( [ self::get_mock_error() ], home_url( '/' ) );
 		wp_delete_post( $post_id, true );
 		$_REQUEST = &$_POST; // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 
@@ -1575,7 +1575,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	 *
 	 * @return array $error Mock validation error.
 	 */
-	public function get_mock_error() {
+	public static function get_mock_error() {
 		return [
 			'at_rule'         => 'foo',
 			'code'            => AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
@@ -1599,7 +1599,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::get_error_details_json()
 	 */
 	public function test_get_error_details_json() {
-		$error            = $this->get_mock_error();
+		$error            = self::get_mock_error();
 		$error['sources'] = [
 			[
 				'type' => 'plugin',
