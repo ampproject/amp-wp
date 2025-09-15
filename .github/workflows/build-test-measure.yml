@@ -439,13 +439,13 @@ jobs:
         if: ${{ matrix.multisite == false && needs.pre-run.outputs.changed-php-count > 0 }}
         run: |
             if [[ ${{ matrix.external-http == false }} == true && ${{ matrix.coverage == false }} == true ]]; then
-              phpunit --verbose
+              phpunit
             elif [[ ${{ matrix.external-http == true }} == true && ${{ matrix.coverage == false }} == true ]]; then
-              phpunit --testsuite external-http --verbose
+              phpunit --testsuite external-http
             elif [[ ${{ matrix.external-http == false }} == true && ${{ matrix.coverage == true }} == true ]]; then
-              phpunit --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
+              phpunit --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
             elif [[ ${{ matrix.external-http == true }} == true && ${{ matrix.coverage == true }} == true ]]; then
-              phpunit --testsuite external-http --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
+              phpunit --testsuite external-http --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
             fi
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
@@ -453,13 +453,13 @@ jobs:
         if: ${{ matrix.multisite == true && needs.pre-run.outputs.changed-php-count > 0 }}
         run: |
           if [[ ${{ matrix.external-http == false }} == true && ${{ matrix.coverage == false }} == true ]]; then
-            phpunit --verbose
+            phpunit
           elif [[ ${{ matrix.external-http == true }} == true && ${{ matrix.coverage == false }} == true ]]; then
-            phpunit --testsuite external-http --verbose
+            phpunit --testsuite external-http
           elif [[ ${{ matrix.external-http == false }} == true && ${{ matrix.coverage == true }} == true ]]; then
-            phpunit --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
+            phpunit --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           elif [[ ${{ matrix.external-http == true }} == true && ${{ matrix.coverage == true }} == true ]]; then
-            phpunit --testsuite external-http --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
+            phpunit --testsuite external-http --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           fi
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
