@@ -966,6 +966,7 @@ class AMP_Theme_Support {
 				continue;
 			}
 			$amp_class_name = 'AMP_Widget_' . $matches[1];
+			// @phpstan-ignore function.impossibleType
 			if ( ! class_exists( $amp_class_name ) || is_a( $amp_class_name, $registered_widget_class_name ) ) {
 				continue;
 			}
