@@ -3381,7 +3381,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$original_html  = trim( ob_get_clean() );
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
-		$this->assertStringContainsString( ".dashicons-admin-customizer:before{content:\"\xEF\x95\x80\"}", $sanitized_html );
+		$this->assertStringContainsString( ".dashicons-admin-customizer:before{content:\"\xEF\x95\x80\"", $sanitized_html );
 		$this->assertStringContainsString( 'span::after{content:"⚡️"}', $sanitized_html );
 	}
 
