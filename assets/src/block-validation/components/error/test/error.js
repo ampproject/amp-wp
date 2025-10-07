@@ -35,6 +35,7 @@ global.URL = class {};
 
 function registerBlockTypes() {
 	registerBlockType(TEST_PLUGIN_BLOCK, {
+		apiVersion: 3,
 		attributes: {},
 		save: noop,
 		category: 'widgets',
@@ -42,6 +43,7 @@ function registerBlockTypes() {
 	});
 
 	registerBlockType(TEST_MU_PLUGIN_BLOCK, {
+		apiVersion: 3,
 		attributes: {},
 		save: noop,
 		category: 'widgets',
@@ -49,6 +51,7 @@ function registerBlockTypes() {
 	});
 
 	registerBlockType(TEST_THEME_BLOCK, {
+		apiVersion: 3,
 		attributes: {},
 		save: noop,
 		category: 'widgets',
@@ -56,6 +59,7 @@ function registerBlockTypes() {
 	});
 
 	registerBlockType(TEST_CORE_BLOCK, {
+		apiVersion: 3,
 		attributes: {},
 		save: noop,
 		category: 'widgets',
@@ -63,6 +67,7 @@ function registerBlockTypes() {
 	});
 
 	registerBlockType(TEST_UNKNOWN_BLOCK, {
+		apiVersion: 3,
 		attributes: {},
 		save: noop,
 		category: 'widgets',
