@@ -30,6 +30,7 @@ jest.mock('../amp-toolbar-button', () => ({
 describe('withAMPToolbarButton: filtering with errors', () => {
 	beforeAll(() => {
 		registerBlockType(TEST_BLOCK, {
+			apiVersion: 3,
 			attributes: {},
 			save: noop,
 			category: 'widgets',
