@@ -99,7 +99,10 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$handler->unregister_embed();
 		$rendered = do_blocks( $categories_block );
 		$this->assertStringContainsString( '<select', $rendered );
-		$this->assertStringContainsString( 'onchange', $rendered );
+
+		// Markup changed in WP 6.9, see https://github.com/WordPress/gutenberg/commit/29292491520762d4f7e23d280948f255c1404ce3.
+		// $this->assertStringContainsString( 'onchange', $rendered );
+
 		$this->assertStringNotContainsString( 'on="change', $rendered );
 		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'core/archives' ) ) {
 			$rendered = do_blocks( $archives_block );
