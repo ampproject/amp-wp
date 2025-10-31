@@ -1804,7 +1804,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 */
 	public function test_has_parameters_passed_by_reference() {
 		$tested_method = new ReflectionMethod( AMP_Validation_Manager::class, 'has_parameters_passed_by_reference' );
-		$tested_method->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$tested_method->setAccessible( true );
+		}
 		$reflection_by_value          = new ReflectionFunction( 'get_bloginfo' );
 		$reflection_by_ref_first_arg  = new ReflectionFunction( 'wp_handle_upload' );
 		$reflection_by_ref_second_arg = new ReflectionFunction( 'wp_parse_str' );

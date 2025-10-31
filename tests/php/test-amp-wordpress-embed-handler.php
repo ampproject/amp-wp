@@ -328,6 +328,8 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 	 * @param array  $post_args Post args.
 	 */
 	public function test__conversion( $source, $expected, $post_args = [] ) {
+		// TODO: Re-enable once issues are resolved on make/core.
+		$this->markTestSkipped( 'Test is currently flaky because of failing oEmbed discovery on make/core.' );
 
 		if ( $post_args ) {
 			$post_id  = self::factory()->post->create( $post_args );
