@@ -14,7 +14,13 @@ import { useSelect } from '@wordpress/data';
  */
 import { useErrorsFetchingStateChanges } from '../use-errors-fetching-state-changes';
 
-jest.mock('@wordpress/data/build/components/use-select', () => jest.fn());
+jest.mock('@wordpress/data', () => ({
+	useSelect: jest.fn(),
+	createReduxStore: jest.fn(),
+	combineReducers: jest.fn(),
+	register: jest.fn(),
+	createSelector: jest.fn(),
+}));
 
 describe('useErrorsFetchingStateChanges', () => {
 	function ComponentContainingHook() {

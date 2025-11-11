@@ -22,10 +22,14 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import AMPRevalidateNotification from '../revalidate-notification';
 import { useErrorsFetchingStateChanges } from '../../../hooks/use-errors-fetching-state-changes';
 
-jest.mock('@wordpress/data/build/components/use-select', () => jest.fn());
-jest.mock('@wordpress/data/build/components/use-dispatch/use-dispatch', () =>
-	jest.fn()
-);
+jest.mock('@wordpress/data', () => ({
+	useSelect: jest.fn(),
+	useDispatch: jest.fn(),
+	createReduxStore: jest.fn(),
+	combineReducers: jest.fn(),
+	register: jest.fn(),
+	createSelector: jest.fn(),
+}));
 jest.mock('../../../hooks/use-errors-fetching-state-changes', () => ({
 	useErrorsFetchingStateChanges: jest.fn(),
 }));

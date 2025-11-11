@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { render, waitFor } from '@testing-library/react';
-import { describe, expect, it, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 /**
  * WordPress dependencies
@@ -19,7 +19,38 @@ import {
 import { store as blockValidationStore } from '../../store';
 
 // This allows us to tweak the returned value on each test
-jest.mock('@wordpress/data/build/components/use-select', () => jest.fn());
+const mockValidationState = { errors: [] };
+
+jest.mock('@wordpress/data', () => ({
+	useSelect: jest.fn(),
+	useDispatch: jest.fn(() => ({
+		setIsFetchingErrors: jest.fn(),
+		setFetchingErrorsRequestErrorMessage: jest.fn(),
+		setReviewLink: jest.fn(),
+		setSupportLink: jest.fn(),
+		setValidationErrors: jest.fn((errors) => {
+			mockValidationState.errors = errors || [];
+		}),
+	})),
+	createReduxStore: jest.fn((key, options) => ({ key, ...options })),
+	combineReducers: jest.fn((reducers) => reducers),
+	register: jest.fn(),
+	createSelector: jest.fn(),
+	select: jest.fn((storeName) => {
+		if (storeName?.key === 'amp/block-validation') {
+			return {
+				getIsPostDirty: jest.fn(() => false),
+				getValidationErrors: jest.fn(() => mockValidationState.errors),
+			};
+		}
+		return {
+			getIsPostDirty: jest.fn(() => false),
+			getValidationErrors: jest.fn(() => []),
+		};
+	}),
+	dispatch: jest.fn(() => ({ change: jest.fn() })),
+	subscribe: jest.fn(() => jest.fn()),
+}));
 
 jest.mock(
 	'@wordpress/api-fetch',
@@ -27,14 +58,21 @@ jest.mock(
 		new Promise((resolve) => {
 			resolve({
 				review_link: 'http://site.test/wp-admin',
-				results:
-					require('../../store/test/__data__/raw-validation-errors')
-						.rawValidationErrors,
+				results: Array(8)
+					.fill()
+					.map((_, i) => ({
+						code: `mock_error_${i}`,
+						message: `Mock validation error ${i}`,
+					})),
 			});
 		})
 );
 
 describe('useValidationErrorStateUpdates', () => {
+	beforeEach(() => {
+		mockValidationState.errors = [];
+	});
+
 	function ComponentContainingHook() {
 		useValidationErrorStateUpdates();
 
