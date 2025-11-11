@@ -51,8 +51,9 @@ const preparePackagesSchema = (packages = []) => {
 				camelCaseName,
 				entryPath:
 					'polyfill' === camelCaseName
-						? require.resolve(
-								'@wordpress/babel-preset-default/build/polyfill'
+						? path.resolve(
+								__dirname,
+								'node_modules/@wordpress/babel-preset-default/build/polyfill.js'
 							)
 						: packageName,
 				handle,
