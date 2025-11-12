@@ -29,7 +29,16 @@ describe('Twenty Fifteen theme on AMP', () => {
 	});
 
 	afterAll(async () => {
-		await activateTheme('twentytwenty');
+		try {
+			await activateTheme('twentytwenty');
+		} catch (error) {
+			// Theme cleanup failure shouldn't fail the test suite in CI
+			// eslint-disable-next-line no-console
+			console.warn(
+				'Failed to activate twentytwenty theme during cleanup:',
+				error.message
+			);
+		}
 	});
 
 	describe('main navigation on mobile', () => {

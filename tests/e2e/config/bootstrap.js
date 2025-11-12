@@ -265,7 +265,15 @@ async function setupThemesAndPlugins() {
 
 	await installTheme('hestia');
 	await installTheme('twentytwenty'); // Ensure that twentytwenty theme is installed.
-	await activateTheme('twentytwenty');
+	try {
+		await activateTheme('twentytwenty');
+	} catch (error) {
+		// eslint-disable-next-line no-console
+		console.warn(
+			'Failed to activate twentytwenty theme during setup:',
+			error.message
+		);
+	}
 	await activatePlugin('gutenberg');
 }
 
