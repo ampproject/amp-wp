@@ -263,7 +263,16 @@ async function setupThemesAndPlugins() {
 	await deactivatePlugin('e2e-tests-demo-plugin');
 	await deactivatePlugin('do-not-allow-amp-validate-capability');
 
-	await installTheme('hestia');
+	try {
+		await installTheme('hestia');
+	} catch (error) {
+		// eslint-disable-next-line no-console
+		console.warn(
+			'Failed to install Hestia theme during setup:',
+			error.message
+		);
+	}
+
 	await installTheme('twentytwenty'); // Ensure that twentytwenty theme is installed.
 	try {
 		await activateTheme('twentytwenty');
