@@ -13,6 +13,10 @@ services:
 			- phpstan.broker.dynamicStaticMethodReturnTypeExtension
 parameters:
 	level: 4
+	# Don't fail the analysis if there are ignored error patterns that don't match
+	# any reported errors. This helps keep legacy ignored patterns without
+	# breaking CI when the underlying issue no longer appears.
+	reportUnmatchedIgnoredErrors: false
 	treatPhpDocTypesAsCertain: false
 	inferPrivatePropertyTypeFromConstructor: true
 	paths:
