@@ -83,5 +83,15 @@ describe('Block validation data store', () => {
 		dispatch(blockValidationStore).setIsFetchingErrors(false);
 
 		expect(select(blockValidationStore).getIsFetchingErrors()).toBe(false);
+
+		expect(select(blockValidationStore).getIsPostDirty()).toBe(false);
+
+		dispatch(blockValidationStore).setIsPostDirty(true);
+
+		expect(select(blockValidationStore).getIsPostDirty()).toBe(true);
+
+		dispatch(blockValidationStore).setIsPostDirty(false);
+
+		expect(select(blockValidationStore).getIsPostDirty()).toBe(false);
 	});
 });
