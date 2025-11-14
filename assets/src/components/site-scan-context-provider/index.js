@@ -92,7 +92,7 @@ const CONCURRENT_VALIDATION_REQUESTS_WAIT_MS = 500;
  * @param {Object} action Action to call.
  * @return {Object} New state.
  */
-//eslint-disable-next-line complexity
+
 export function siteScanReducer(state, action) {
 	// Bail out early if Site Scan is skipped, i.e. if there is no validation nonce provided meaning the current user
 	// does not have capabilities for running AMP validation.
@@ -553,7 +553,7 @@ export function SiteScanContextProvider({
 				} else {
 					results.error = data?.code || true;
 				}
-			} catch (e) {
+			} catch {
 				if (true === hasUnmounted.current) {
 					return;
 				}
