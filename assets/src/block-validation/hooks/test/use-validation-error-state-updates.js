@@ -32,6 +32,8 @@ jest.mock('@wordpress/data', () => ({
 			mockValidationState.errors = errors || [];
 		}),
 	})),
+	createReduxStore: jest.fn((key, options) => ({ key, ...options })),
+	register: jest.fn(),
 	select: jest.fn((storeName) => {
 		if (storeName?.key === 'amp/block-validation') {
 			return {

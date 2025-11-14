@@ -17,6 +17,10 @@ import AMPValidationStatusNotification from '../status-notification';
 jest.mock('@wordpress/data', () => ({
 	useSelect: jest.fn(),
 	useDispatch: jest.fn(),
+	combineReducers: jest.fn(),
+	createSelector: jest.fn(),
+	createReduxStore: jest.fn(),
+	register: jest.fn(),
 }));
 
 describe('AMPValidationStatusNotification', () => {

@@ -9,6 +9,15 @@ import { beforeAll, describe, expect, it, jest } from '@jest/globals';
  */
 import { useDispatch, useSelect } from '@wordpress/data';
 
+jest.mock('@wordpress/edit-post', () => ({
+	PluginSidebar: ({ children }) => children,
+	PluginSidebarMoreMenuItem: ({ children }) => children,
+}));
+
+jest.mock('@wordpress/block-editor', () => ({
+	BlockIcon: ({ icon }) => icon,
+}));
+
 /**
  * Internal dependencies
  */
@@ -19,6 +28,10 @@ import { useErrorsFetchingStateChanges } from '../../../hooks/use-errors-fetchin
 jest.mock('@wordpress/data', () => ({
 	useSelect: jest.fn(),
 	useDispatch: jest.fn(),
+	combineReducers: jest.fn(),
+	createSelector: jest.fn(),
+	createReduxStore: jest.fn(),
+	register: jest.fn(),
 }));
 
 jest.mock('../../../hooks/use-amp-document-toggle', () => ({
