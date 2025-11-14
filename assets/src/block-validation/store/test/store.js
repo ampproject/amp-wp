@@ -52,6 +52,14 @@ describe('Block validation data store', () => {
 			'http://example.com'
 		);
 
+		dispatch(blockValidationStore).setSupportLink(
+			'http://support.example.com'
+		);
+
+		expect(select(blockValidationStore).getSupportLink()).toBe(
+			'http://support.example.com'
+		);
+
 		expect(select(blockValidationStore).getAMPCompatibilityBroken()).toBe(
 			false
 		);
