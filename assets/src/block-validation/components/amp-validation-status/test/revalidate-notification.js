@@ -25,11 +25,8 @@ import { useErrorsFetchingStateChanges } from '../../../hooks/use-errors-fetchin
 jest.mock('@wordpress/data', () => ({
 	useSelect: jest.fn(),
 	useDispatch: jest.fn(),
-	createReduxStore: jest.fn(),
-	combineReducers: jest.fn(),
-	register: jest.fn(),
-	createSelector: jest.fn(),
 }));
+
 jest.mock('../../../hooks/use-errors-fetching-state-changes', () => ({
 	useErrorsFetchingStateChanges: jest.fn(),
 }));

@@ -34,9 +34,7 @@ jest.mock('@wordpress/data', () => ({
 	useSelect: jest.fn(),
 	useDispatch: jest.fn(() => ({})),
 	createReduxStore: jest.fn((key, options) => ({ key, ...options })),
-	combineReducers: jest.fn((reducers) => reducers),
 	register: jest.fn(),
-	createSelector: jest.fn(),
 	select: jest.fn((storeName) => {
 		if (storeName?.key === 'amp/block-validation') {
 			return { getIsPostDirty: jest.fn(() => mockState.isPostDirty) };
