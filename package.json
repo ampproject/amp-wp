@@ -100,7 +100,7 @@
     "postcss-preset-env": "10.4.0",
     "prettier": "3.6.2",
     "puppeteer": "22.15.0",
-    "react-test-renderer": "18.3.1",
+    "react-test-renderer": "19.2.0",
     "semver": "7.7.3",
     "webpack-remove-empty-scripts": "1.1.1",
     "webpackbar": "7.0.0",
