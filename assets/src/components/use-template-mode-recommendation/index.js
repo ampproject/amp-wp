@@ -112,7 +112,6 @@ export function getTemplateModeRecommendation({
 	hasThemeIssues,
 	userIsTechnical,
 }) {
-	/* eslint-disable @wordpress/no-unused-vars-before-return */
 	const mobileRedirectionNote = __(
 		'If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.',
 		'amp'
@@ -180,7 +179,6 @@ export function getTemplateModeRecommendation({
 		'Not recommended because you have suppressed plugins.',
 		'amp'
 	);
-	/* eslint-enable @wordpress/no-unused-vars-before-return */
 
 	switch (true) {
 		/**
