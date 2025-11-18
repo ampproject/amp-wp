@@ -228,8 +228,8 @@ function amp_remove_admin_bar_in_phone_preview() {
 		} )();
 	</script>
 	<?php
-	$script = str_replace( array( '<script>', '</script>' ), '', ob_get_clean() );
-	wp_print_inline_script_tag( $script, array( 'data-ampdevmode' => true ) );
+	$script = str_replace( [ '<script>', '</script>' ], '', ob_get_clean() );
+	wp_print_inline_script_tag( $script, [ 'data-ampdevmode' => true ] );
 }
 
 /**
