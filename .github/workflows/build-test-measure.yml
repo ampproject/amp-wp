@@ -35,14 +35,14 @@ jobs:
       - name: Checkout including last 2 commits
         # Fetch last 2 commits if it's not a PR, so that we can determine the list of modified files.
         if: ${{ github.base_ref == null }}
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
         with:
           fetch-depth: 2
 
       - name: Checkout
         # Do usual checkout if it's a PR.
         if: ${{ github.base_ref != null }}
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
       - name: Determine modified files
         id: determine-file-counts
@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
       - name: Setup NodeJS and NPM
         uses: ./.github/actions/setup-node-npm
@@ -76,7 +76,7 @@ jobs:
       checks: write
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
       - name: Setup NodeJS and NPM
         uses: ./.github/actions/setup-node-npm
@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
       - name: Setup PHP and Composer
         uses: ./.github/actions/setup-php-composer
@@ -145,7 +145,7 @@ jobs:
     if: needs.pre-run.outputs.changed-php-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
       - name: Setup PHP and Composer
         uses: ./.github/actions/setup-php-composer
@@ -167,13 +167,13 @@ jobs:
     if: needs.pre-run.outputs.changed-js-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
       - name: Setup NodeJS and NPM
         uses: ./.github/actions/setup-node-npm
 
       - name: Setup Jest cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.jest-cache
           key: ${{ runner.os }}-jest
@@ -209,7 +209,7 @@ jobs:
           totalParts: [2]
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
       - name: Setup NodeJS and NPM
         uses: ./.github/actions/setup-node-npm
@@ -221,7 +221,7 @@ jobs:
         uses: ./.github/actions/plugin-build
 
       - name: Setup Jest cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.jest-cache
           key: ${{ runner.os }}-jest-e2e-${{ matrix.part }}
@@ -251,7 +251,7 @@ jobs:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
       - name: Archive debug artifacts (screenshots, HTML snapshots)
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
         if: always()
         with:
           name: e2e-failure-artifacts
@@ -382,7 +382,7 @@ jobs:
 
       - name: Checkout
         if: needs.pre-run.outputs.changed-php-count > 0
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
       - name: Setup PHP and Composer
         if: needs.pre-run.outputs.changed-php-count > 0
@@ -547,7 +547,7 @@ jobs:
           fi
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
       - name: Setup PHP and Composer
         uses: ./.github/actions/setup-php-composer
