@@ -52,6 +52,14 @@ describe('Block validation data store', () => {
 			'http://example.com'
 		);
 
+		dispatch(blockValidationStore).setSupportLink(
+			'http://support.example.com'
+		);
+
+		expect(select(blockValidationStore).getSupportLink()).toBe(
+			'http://support.example.com'
+		);
+
 		expect(select(blockValidationStore).getAMPCompatibilityBroken()).toBe(
 			false
 		);
@@ -83,5 +91,15 @@ describe('Block validation data store', () => {
 		dispatch(blockValidationStore).setIsFetchingErrors(false);
 
 		expect(select(blockValidationStore).getIsFetchingErrors()).toBe(false);
+
+		expect(select(blockValidationStore).getIsPostDirty()).toBe(false);
+
+		dispatch(blockValidationStore).setIsPostDirty(true);
+
+		expect(select(blockValidationStore).getIsPostDirty()).toBe(true);
+
+		dispatch(blockValidationStore).setIsPostDirty(false);
+
+		expect(select(blockValidationStore).getIsPostDirty()).toBe(false);
 	});
 });

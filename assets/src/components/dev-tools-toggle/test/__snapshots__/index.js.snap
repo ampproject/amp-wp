@@ -5,13 +5,13 @@ exports[`DevToolsToggle matches snapshot 1`] = `
   className="amp-setting-toggle"
 >
   <div
-    className="components-base-control components-toggle-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+    className="components-base-control components-toggle-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
   >
     <div
-      className="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+      className="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
     >
       <div
-        className="components-flex components-h-stack css-1ub13jk-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+        className="components-flex components-h-stack css-45um37-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
         data-wp-c16t={true}
         data-wp-component="HStack"
       >
@@ -23,6 +23,7 @@ exports[`DevToolsToggle matches snapshot 1`] = `
             className="components-form-toggle__input"
             id="inspector-toggle-control-0"
             onChange={[Function]}
+            onClick={[Function]}
             type="checkbox"
           />
           <span
@@ -33,7 +34,7 @@ exports[`DevToolsToggle matches snapshot 1`] = `
           />
         </span>
         <label
-          className="components-flex-item components-flex-block components-toggle-control__label css-1mqm1jz-PolymorphicDiv-Item-sx-Base-block e19lxcc00"
+          className="components-flex-item components-flex-block components-toggle-control__label css-8u4av1-PolymorphicDiv-Item-sx-Base-block e19lxcc00"
           data-wp-c16t={true}
           data-wp-component="FlexBlock"
           htmlFor="inspector-toggle-control-0"
@@ -57,7 +58,7 @@ exports[`DevToolsToggle matches snapshot for the loading state 1`] = `
   className="amp-spinner-container"
 >
   <svg
-    className="components-spinner css-1ej1y9w-StyledSpinner ea4tfvq2"
+    className="components-spinner css-1gkqu6h-StyledSpinner ea4tfvq2"
     focusable="false"
     height="16"
     role="presentation"
@@ -66,14 +67,14 @@ exports[`DevToolsToggle matches snapshot for the loading state 1`] = `
     xmlns="http://www.w3.org/2000/svg"
   >
     <circle
-      className="css-s63o93-SpinnerTrack-commonPathProps ea4tfvq1"
+      className="css-1q7cj5i-SpinnerTrack-commonPathProps ea4tfvq1"
       cx="50"
       cy="50"
       r="50"
       vectorEffect="non-scaling-stroke"
     />
     <path
-      className="css-ib3l9u-SpinnerIndicator-commonPathProps ea4tfvq0"
+      className="css-1cwv23j-SpinnerIndicator-commonPathProps ea4tfvq0"
       d="m 50 0 a 50 50 0 0 1 50 50"
       vectorEffect="non-scaling-stroke"
     />

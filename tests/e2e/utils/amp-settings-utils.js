@@ -89,14 +89,28 @@ export async function installLocalPlugin(slug) {
 	await page.click('#install-plugin-submit');
 	await page.waitForSelector('p', { text: /Plugin installed successfully/ });
 
+	// Visit plugins page to ensure WordPress recognizes the newly installed plugin
+	await visitAdminPage('plugins.php', '');
+	await page.waitForSelector('.wp-list-table');
+
 	await switchUserToTest();
 }
 
 export async function activatePlugin(slug) {
-	await installPlugin(slug);
+	// Only try to install remotely if the plugin is not already installed
+	if (!(await isPluginInstalled(slug))) {
+		await installPlugin(slug);
+	}
 
 	if (!(await isPluginActivated(slug))) {
+		// Visit plugins page first to ensure plugin list is current
+		await switchUserToAdmin();
+		await visitAdminPage('plugins.php', '');
+		await page.waitForSelector('.wp-list-table');
+
 		await _activatePlugin(slug);
+
+		await switchUserToTest();
 	}
 }
 

@@ -146,7 +146,7 @@ exports[`TemplateModeOption matches snapshot 1`] = `
           </svg>
         </span>
         <span
-          className="components-visually-hidden css-1qfl78b-PolymorphicDiv e19lxcc00"
+          className="components-visually-hidden css-1ragr82-PolymorphicDiv e19lxcc00"
           data-wp-c16t={true}
           data-wp-component="VisuallyHidden"
           style={
@@ -418,7 +418,7 @@ exports[`TemplateModeOption matches snapshot 2`] = `
           </svg>
         </span>
         <span
-          className="components-visually-hidden css-1qfl78b-PolymorphicDiv e19lxcc00"
+          className="components-visually-hidden css-1ragr82-PolymorphicDiv e19lxcc00"
           data-wp-c16t={true}
           data-wp-component="VisuallyHidden"
           style={
@@ -718,7 +718,7 @@ exports[`TemplateModeOption matches snapshot 3`] = `
           </svg>
         </span>
         <span
-          className="components-visually-hidden css-1qfl78b-PolymorphicDiv e19lxcc00"
+          className="components-visually-hidden css-1ragr82-PolymorphicDiv e19lxcc00"
           data-wp-c16t={true}
           data-wp-component="VisuallyHidden"
           style={

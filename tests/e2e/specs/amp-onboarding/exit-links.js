@@ -1,17 +1,15 @@
 /**
  * WordPress dependencies
  */
-const {
-	visitAdminPage,
-} = require('@wordpress/e2e-test-utils/build/visit-admin-page');
+import { visitAdminPage } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-const {
+import {
 	goToOnboardingWizard,
 	cleanUpSettings,
 	moveToDoneScreen,
-} = require('../../utils/onboarding-wizard-utils');
+} from '../../utils/onboarding-wizard-utils';
 
 describe('Onboarding wizard exit links', () => {
 	it('if no previous page, returns to settings when clicking close', async () => {
