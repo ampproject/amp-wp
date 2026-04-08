@@ -145,6 +145,17 @@ export default (InitialMediaUpload, minImageDimensions) => {
 		});
 	};
 
+	// If the component is not a class (e.g. a functional or arrow function component
+	// returned by another plugin's filter), it cannot be extended via `class extends`.
+	// In that case, return it as-is to avoid crashing the editor with:
+	// "TypeError: Class extends value ... is not a constructor or null"
+	if (
+		!InitialMediaUpload.prototype ||
+		!InitialMediaUpload.prototype.isReactComponent
+	) {
+		return InitialMediaUpload;
+	}
+
 	/**
 	 * Extends the MediaUpload component to display a notice for small images.
 	 */
