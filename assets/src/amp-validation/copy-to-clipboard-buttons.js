@@ -46,7 +46,6 @@ function onSuccess({ trigger }) {
 export function handleCopyToClipboardButtons() {
 	const clipboards = [];
 
-	// eslint-disable-next-line no-new
 	clipboards.push(
 		new Clipboard('button.single-url-detail-copy', {
 			text: (btn) => {
@@ -59,7 +58,6 @@ export function handleCopyToClipboardButtons() {
 		})
 	);
 
-	// eslint-disable-next-line no-new
 	clipboards.push(
 		new Clipboard('button.copy-all', {
 			text: () => {
