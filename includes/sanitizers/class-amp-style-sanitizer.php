@@ -1563,17 +1563,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string|WP_Error Stylesheet string on success, or WP_Error on failure.
 	 */
 	private function get_stylesheet_from_url( $stylesheet_url ) {
-		$stylesheet    = false;
 		$css_file_path = $this->get_validated_url_file_path( $stylesheet_url, [ 'css', 'less', 'scss', 'sass' ] );
-		if ( ! is_wp_error( $css_file_path ) ) {
-			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+		if ( is_wp_error( $css_file_path ) ) {
+			return $css_file_path;
 		}
-		if ( is_string( $stylesheet ) ) {
-			return $stylesheet;
-		}
-
-		// Fall back to doing an HTTP request for the stylesheet is not accessible directly from the filesystem.
-		return $this->fetch_external_stylesheet( $stylesheet_url );
+		
+		$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+		return $stylesheet;
 	}
 
 	/**
