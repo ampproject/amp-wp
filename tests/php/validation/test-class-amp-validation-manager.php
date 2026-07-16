@@ -1461,6 +1461,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		// Remove class added in <https://github.com/WordPress/gutenberg/pull/38740> to normalize with expected data.
 		$rendered_block = str_replace( ' class="wp-block-latest-posts__post-title"', '', $rendered_block );
+		$rendered_block = str_replace( ' class="wp-block-paragraph"', '', $rendered_block );
 
 		// Normalize class ordering.
 		$rendered_block = str_replace(

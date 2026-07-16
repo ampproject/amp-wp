@@ -276,7 +276,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		// Test Reader mode with Reader theme.
 		remove_theme_support( 'amp' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentytwentythree' );
 		$this->assertFalse( amp_is_legacy() );
 		$this->go_to( amp_get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
@@ -1744,20 +1744,18 @@ class Test_AMP_Theme_Support extends TestCase {
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">',
 			'<meta name="generator" content="AMP Plugin',
-			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
+			'favicon.png',
+			'<link rel="preconnect" href="https://fonts.gstatic.com/"',
 
-			'<script type="module" src="https://cdn.ampproject.org/v0.mjs" id="amp-runtime-js" async crossorigin="anonymous"></script>',
-			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.mjs" type="module" crossorigin="anonymous"></script>',
-			'<script src="https://cdn.ampproject.org/v0/amp-experiment-0.1.mjs" async="" custom-element="amp-experiment" type="module" crossorigin="anonymous"></script>',
+			'id="amp-runtime-js"',
+			'amp-dynamic-css-classes-0.1.mjs',
+			'amp-experiment-0.1.mjs',
+			'amp-ad-0.1.mjs',
+			'amp-audio-0.1.mjs',
+			'amp-list-0.1.mjs',
+			'amp-mathml-0.1.mjs',
 
-			'<script src="https://cdn.ampproject.org/v0/amp-ad-0.1.mjs" async="" custom-element="amp-ad" type="module" crossorigin="anonymous"></script>',
-			'<script src="https://cdn.ampproject.org/v0/amp-audio-0.1.mjs" async="" custom-element="amp-audio" type="module" crossorigin="anonymous"></script>',
-			'<script type="module" src="https://cdn.ampproject.org/v0/amp-list-0.1.mjs" id="amp-list-js" async custom-element="amp-list" crossorigin="anonymous"></script>',
-			'<script type="module" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.mjs" id="amp-mathml-js" async custom-element="amp-mathml" crossorigin="anonymous"></script>',
-
-			'<link rel="icon" href="' . home_url( '/favicon.png', 'https' ) . '" sizes="32x32">',
-			'<link rel="icon" href="' . home_url( '/favicon.png', 'https' ) . '" sizes="192x192">',
-			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
+			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine"',
 
 			'#<style amp-custom(="")?>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
 

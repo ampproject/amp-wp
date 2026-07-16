@@ -57,7 +57,7 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 
 		switch_theme( 'twentytwenty' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentytwentythree' );
 		$this->assertFalse( amp_is_legacy() );
 		amp_init_customizer();
 		$this->assertEquals( 500, has_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ] ) );
@@ -235,7 +235,7 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentytwentythree' );
 		$this->assertFalse( amp_is_legacy() );
 		add_filter( 'amp_customizer_is_enabled', '__return_false' ); // This will be ignored.
 		amp_add_customizer_link();

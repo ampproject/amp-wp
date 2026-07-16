@@ -48,6 +48,8 @@ class ReaderThemesTest extends TestCase {
 	public function set_up() {
 		parent::set_up();
 
+		( new ExtraThemeAndPluginHeaders() )->register();
+
 		delete_transient( 'amp_themes_wporg' );
 		$this->add_reader_themes_request_filter();
 
@@ -72,6 +74,8 @@ class ReaderThemesTest extends TestCase {
 	public function test_get_themes() {
 		register_theme_directory( __DIR__ . '/../../data/themes' );
 		delete_site_transient( 'theme_roots' );
+		search_theme_directories( true );
+		wp_clean_themes_cache();
 
 		$extra_theme_and_plugin_headers = new ExtraThemeAndPluginHeaders();
 		$extra_theme_and_plugin_headers->register();
@@ -243,7 +247,7 @@ class ReaderThemesTest extends TestCase {
 			],
 			'twentytwelve_not_requiring_wp_version'  => [
 				static function () {
-					return wp_get_theme( 'twentytwelve' )->exists() ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_NON_INSTALLABLE;
+					return wp_get_theme( 'twentytwelve' )->exists() ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_INSTALLABLE;
 				},
 				true,
 				[
@@ -255,7 +259,7 @@ class ReaderThemesTest extends TestCase {
 			],
 			'twentytwelve_not_requiring_php_version' => [
 				static function () {
-					return wp_get_theme( 'twentysixteen' )->exists() ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_NON_INSTALLABLE;
+					return wp_get_theme( 'twentysixteen' )->exists() ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_INSTALLABLE;
 				},
 				true,
 				[
