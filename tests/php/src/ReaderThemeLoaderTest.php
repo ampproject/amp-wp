@@ -224,6 +224,8 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 
 		switch_theme( $active_theme_slug );
 		remove_all_filters( 'sidebars_widgets' );
+		remove_all_filters( 'stylesheet' );
+		remove_all_filters( 'template' );
 
 		// No query var.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );

@@ -1744,15 +1744,17 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Theme_Support::start_output_buffering();
 		do_action( 'outer_action' );
 		$output = ob_get_clean();
+		$plugin_source = AmpProject\AmpWP\Services::get( 'dev_tools.file_reflection' )->get_file_source( AMP__FILE__ );
+		$slug          = $plugin_source['name'];
 		$this->assertEquals(
 			implode(
 				'',
 				[
-					sprintf( '<!--amp-source-stack {"type":"plugin","name":"amp","file":"tests\/php\/validation\/test-class-amp-validation-manager.php","line":%d,"function":"{closure}","hook":"outer_action","priority":10}-->', $outer_reflection->getStartLine() ),
-					sprintf( '<!--amp-source-stack {"type":"plugin","name":"amp","file":"tests\/php\/validation\/test-class-amp-validation-manager.php","line":%d,"function":"{closure}","hook":"inner_action","priority":10}-->', $inner_reflection->getStartLine() ),
+					sprintf( '<!--amp-source-stack {"type":"plugin","name":"%s","file":"tests\/php\/validation\/test-class-amp-validation-manager.php","line":%d,"function":"{closure}","hook":"outer_action","priority":10}-->', $slug, $outer_reflection->getStartLine() ),
+					sprintf( '<!--amp-source-stack {"type":"plugin","name":"%s","file":"tests\/php\/validation\/test-class-amp-validation-manager.php","line":%d,"function":"{closure}","hook":"inner_action","priority":10}-->', $slug, $inner_reflection->getStartLine() ),
 					'<b>Hello</b>',
-					sprintf( '<!--/amp-source-stack {"type":"plugin","name":"amp","file":"tests\/php\/validation\/test-class-amp-validation-manager.php","line":%d,"function":"{closure}","hook":"inner_action","priority":10}-->', $inner_reflection->getStartLine() ),
-					sprintf( '<!--/amp-source-stack {"type":"plugin","name":"amp","file":"tests\/php\/validation\/test-class-amp-validation-manager.php","line":%d,"function":"{closure}","hook":"outer_action","priority":10}-->', $outer_reflection->getStartLine() ),
+					sprintf( '<!--/amp-source-stack {"type":"plugin","name":"%s","file":"tests\/php\/validation\/test-class-amp-validation-manager.php","line":%d,"function":"{closure}","hook":"inner_action","priority":10}-->', $slug, $inner_reflection->getStartLine() ),
+					sprintf( '<!--/amp-source-stack {"type":"plugin","name":"%s","file":"tests\/php\/validation\/test-class-amp-validation-manager.php","line":%d,"function":"{closure}","hook":"outer_action","priority":10}-->', $slug, $outer_reflection->getStartLine() ),
 				]
 			),
 			$output
