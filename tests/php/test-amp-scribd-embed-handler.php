@@ -101,6 +101,10 @@ class AMP_Scribd_Embed_Handler_Test extends TestCase {
 	 * @param $expected
 	 */
 	public function test__conversion( $source, $expected ) {
+		if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+			$this->markTestSkipped( 'Flaky test because Scrib oEmbed endpoint responds with a client challenge' );
+		}
+
 		$embed = new AMP_Scribd_Embed_Handler();
 		$embed->register_embed();
 		add_filter( 'wp_lazy_loading_enabled', '__return_false' );
