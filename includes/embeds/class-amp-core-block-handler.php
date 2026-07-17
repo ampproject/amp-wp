@@ -506,7 +506,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			if ( ! $form instanceof DOMElement || ! $form->parentNode instanceof DOMElement ) {
 				continue; // @codeCoverageIgnore
 			}
-			$script = $dom->xpath->query( './/script[ contains( text(), "onCatChange" ) or contains( text(), "dropdown" ) or contains( text(), "location.href" ) ]', $form->parentNode )->item( 0 );
+			$script = $dom->xpath->query( './/script', $form->parentNode )->item( 0 );
 			if ( ! $script instanceof DOMElement ) {
 				continue; // @codeCoverageIgnore
 			}
@@ -536,7 +536,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 				continue; // @codeCoverageIgnore
 			}
 
-			$script = $dom->xpath->query( './/script[ contains( text(), "onSelectChange" ) ]', $select->parentNode )->item( 0 );
+			$script = $dom->xpath->query( './/script', $select->parentNode )->item( 0 );
 			if ( $script ) {
 				$script->parentNode->removeChild( $script );
 			} elseif ( $select->hasAttribute( 'onchange' ) ) {

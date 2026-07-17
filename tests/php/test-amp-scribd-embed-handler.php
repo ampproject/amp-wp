@@ -102,7 +102,7 @@ class AMP_Scribd_Embed_Handler_Test extends TestCase {
 	 */
 	public function test__conversion( $source, $expected ) {
 		if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
-			$this->markTestSkipped( 'Flaky test because Scrib oEmbed endpoint responds with a client challenge' );
+			$this->markTestSkipped( 'Flaky test because Scribd oEmbed endpoint responds with a client challenge' );
 		}
 
 		$embed = new AMP_Scribd_Embed_Handler();
