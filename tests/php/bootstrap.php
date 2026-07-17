@@ -7,6 +7,11 @@ use Yoast\WPTestUtils\WPIntegration;
 
 define( 'TESTS_PLUGIN_DIR', dirname( dirname( __DIR__ ) ) );
 
+// Force script debugging to load unminified assets (e.g. view-transitions.css) since minified assets are not compiled in raw checkout environments.
+if ( ! defined( 'SCRIPT_DEBUG' ) ) {
+	define( 'SCRIPT_DEBUG', true );
+}
+
 // When run in wp-env context, set the test config file path.
 if ( ! defined( 'WP_TESTS_CONFIG_FILE_PATH' ) && false !== getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) ) {
 	define( 'WP_TESTS_CONFIG_FILE_PATH', getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) );
