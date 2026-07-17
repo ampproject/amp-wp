@@ -325,7 +325,10 @@ final class FileReflection implements Service, Registerable {
 				if ( strpos( $normalized_file, $plugin_dir . '/' ) === 0 ) {
 					$rel             = substr( $normalized_file, strlen( $plugin_dir . '/' ) );
 					$matches['slug'] = strtok( $rel, '/' );
-					$matches['file'] = $rel;
+					$file_path       = ltrim( substr( $rel, strlen( $matches['slug'] ) ), '/' );
+					if ( '' !== $file_path ) {
+						$matches['file'] = $file_path;
+					}
 				} else {
 					$matches['slug'] = 'amp';
 					$matches['file'] = ltrim( substr( $normalized_file, strlen( $amp_dir ) ), '/' );
