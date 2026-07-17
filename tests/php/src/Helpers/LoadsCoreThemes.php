@@ -24,7 +24,10 @@ trait LoadsCoreThemes {
 
 		$this->original_theme_directories = $wp_theme_directories;
 		register_theme_directory( ABSPATH . 'wp-content/themes' );
+		register_theme_directory( AMP__DIR__ . '/tests/php/data/themes' );
 		delete_site_transient( 'theme_roots' );
+		search_theme_directories( true );
+		wp_clean_themes_cache();
 	}
 
 	/**

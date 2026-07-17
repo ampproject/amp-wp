@@ -292,6 +292,11 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 			$expected = str_replace( ' sizes="', ' sizes="auto, ', $expected );
 		}
 
+		// Type attribute for style tag removed in WordPress 6.8
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '6.8', '>=' ) ) {
+			$expected = str_replace( '<style type="text/css">', '<style>', $expected );
+		}
+
 		$this->assertEquals(
 			$this->normalize( $expected ),
 			$this->normalize( $content )

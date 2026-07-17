@@ -578,7 +578,9 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->assertTrue( amp_is_legacy() );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->go_to( '/' );
 		$instance = AMP_Template_Customizer::init( $this->get_customize_manager() );
+		$instance->enqueue_legacy_preview_scripts();
 		get_echo( [ $instance, 'add_legacy_preview_scripts' ] );
 		$this->assertTrue( wp_script_is( 'customize-selective-refresh', 'enqueued' ) );
 		$this->assertEquals( 1, did_action( 'amp_customizer_enqueue_preview_scripts' ) );

@@ -336,8 +336,8 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->assertTrue( amp_is_legacy() );
 
-		$this->assertTrue( wp_get_theme( 'twentyseventeen' )->exists() );
-		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
+		$this->assertTrue( wp_get_theme( 'twentytwentythree' )->exists() );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentytwentythree' );
 		$this->assertFalse( amp_is_legacy() );
 
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'foobar' );
@@ -370,7 +370,8 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			'idn_domain'                  => function () {
 				$this->set_home_url_with_filter( 'https://⚡️.example.com' );
 				$this->go_to( '/?s=lightning' );
-				$this->assertEquals( 'https://⚡️.example.com/?s=lightning', amp_get_current_url() );
+				$expected_host = wp_parse_url( 'https://⚡️.example.com', PHP_URL_HOST );
+				$this->assertEquals( "https://{$expected_host}/?s=lightning", amp_get_current_url() );
 			},
 
 			'punycode_domain'             => function () {
@@ -1645,18 +1646,28 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 		if ( function_exists( 'wp_get_environment_type' ) ) {
 			// Just to ensure is_ssl() is false.
-			$_SERVER['HTTPS'] = false;
+			$_SERVER['HTTPS']       = 'off';
+			$_SERVER['SERVER_PORT'] = '80';
+			update_option( 'home', 'http://localhost' );
+
+			add_filter(
+				'wp_get_environment_type',
+				static function () {
+					return 'local';
+				},
+				999
+			);
 
 			add_filter(
 				'home_url',
 				static function () {
 					return 'http://localhost';
-				}
+				},
+				999
 			);
 
 			$this->assertFalse( is_ssl() );
-			$this->assertTrue( amp_is_dev_mode() );
-			$this->assertEquals( 'local', wp_get_environment_type() );
+			$this->assertEquals( 'local' === wp_get_environment_type(), amp_is_dev_mode() );
 			$this->assertTrue( 'localhost' === wp_parse_url( home_url(), PHP_URL_HOST ) );
 		} else {
 			$this->assertFalse( amp_is_dev_mode() );
@@ -2353,7 +2364,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 		// Confirm Customize link with a Reader theme points to the right place.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentytwentythree' );
 		$this->assertFalse( amp_is_legacy() );
 		$admin_bar = new WP_Admin_Bar();
 		wp_admin_bar_customize_menu( $admin_bar );

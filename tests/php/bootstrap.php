@@ -7,6 +7,11 @@ use Yoast\WPTestUtils\WPIntegration;
 
 define( 'TESTS_PLUGIN_DIR', dirname( dirname( __DIR__ ) ) );
 
+// Force script debugging to load unminified assets (e.g. view-transitions.css) since minified assets are not compiled in raw checkout environments.
+if ( ! defined( 'SCRIPT_DEBUG' ) ) {
+	define( 'SCRIPT_DEBUG', true );
+}
+
 // When run in wp-env context, set the test config file path.
 if ( ! defined( 'WP_TESTS_CONFIG_FILE_PATH' ) && false !== getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) ) {
 	define( 'WP_TESTS_CONFIG_FILE_PATH', getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) );
@@ -35,10 +40,41 @@ tests_add_filter( 'option_active_plugins', 'amp_filter_active_plugins_for_phpuni
 
 // Ensure plugin is always activated.
 function amp_unit_test_load_plugin_file() {
+	$plugin_slug = basename( TESTS_PLUGIN_DIR );
+	$plugin_dir  = WP_PLUGIN_DIR . '/' . $plugin_slug;
+	if ( ! file_exists( $plugin_dir ) && ! is_link( $plugin_dir ) && is_dir( WP_PLUGIN_DIR ) ) {
+		symlink( TESTS_PLUGIN_DIR, $plugin_dir );
+	}
+	if ( 'amp' !== $plugin_slug && ! file_exists( WP_PLUGIN_DIR . '/amp' ) && ! is_link( WP_PLUGIN_DIR . '/amp' ) && is_dir( WP_PLUGIN_DIR ) ) {
+		symlink( TESTS_PLUGIN_DIR, WP_PLUGIN_DIR . '/amp' );
+	}
 	require_once TESTS_PLUGIN_DIR . '/amp.php';
 }
 
 tests_add_filter( 'muplugins_loaded', 'amp_unit_test_load_plugin_file' );
+
+// Normalize plugins_url for tests when repository directory is outside WP_PLUGIN_DIR.
+tests_add_filter(
+	'plugins_url',
+	static function ( $url, $path, $plugin ) {
+		if ( ! empty( $plugin ) && defined( 'TESTS_PLUGIN_DIR' ) ) {
+			$norm_plugin    = wp_normalize_path( $plugin );
+			$norm_tests_dir = wp_normalize_path( TESTS_PLUGIN_DIR );
+			if ( 0 === strpos( $norm_plugin, $norm_tests_dir ) ) {
+				$rel_path    = ltrim( substr( $norm_plugin, strlen( $norm_tests_dir ) ), '/' );
+				$plugin_slug = basename( TESTS_PLUGIN_DIR );
+				$base_url    = content_url( 'plugins/' . $plugin_slug );
+				if ( $rel_path && is_file( $norm_plugin ) ) {
+					$base_url = dirname( $base_url . '/' . $rel_path );
+				}
+				$url = $base_url . ( $path ? '/' . ltrim( $path, '/' ) : '' );
+			}
+		}
+		return $url;
+	},
+	10,
+	3
+);
 
 /*
  * Load WP CLI. Its test bootstrap file can't be required as it will load

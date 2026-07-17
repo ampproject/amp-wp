@@ -36,6 +36,23 @@ final class PluginRegistry implements Service {
 		if ( $this->plugin_folder ) {
 			$plugin_dir .= '/' . trim( $this->plugin_folder, '/' );
 		}
+		if ( ! is_dir( $plugin_dir ) && defined( 'AMP__DIR__' ) ) {
+			$amp_dir_basename = basename( AMP__DIR__ );
+			$folder_trimmed   = trim( $this->plugin_folder, '/' );
+			if ( 0 === strpos( $folder_trimmed, $amp_dir_basename . '/' ) ) {
+				$rel_folder = substr( $folder_trimmed, strlen( $amp_dir_basename ) + 1 );
+				$alt_dir    = AMP__DIR__ . '/' . $rel_folder;
+				if ( is_dir( $alt_dir ) ) {
+					return $alt_dir;
+				}
+			} elseif ( 0 === strpos( $folder_trimmed, 'amp/' ) ) {
+				$rel_folder = substr( $folder_trimmed, 4 );
+				$alt_dir    = AMP__DIR__ . '/' . $rel_folder;
+				if ( is_dir( $alt_dir ) ) {
+					return $alt_dir;
+				}
+			}
+		}
 		return $plugin_dir;
 	}
 
@@ -127,6 +144,18 @@ final class PluginRegistry implements Service {
 				];
 			}
 		}
+
+		if ( ! $must_use && defined( 'AMP__FILE__' ) ) {
+			$amp_file = plugin_basename( AMP__FILE__ );
+			if ( 'amp' === $plugin_slug || strtok( $amp_file, '/' ) === $plugin_slug ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+				return [
+					'file' => $amp_file,
+					'data' => get_plugin_data( AMP__FILE__ ),
+				];
+			}
+		}
+
 		return null;
 	}
 
