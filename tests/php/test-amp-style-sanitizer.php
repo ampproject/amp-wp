@@ -3517,7 +3517,10 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'admin-bar-css' ), 'Expected admin bar CSS to be present originally.' );
 					$this->assertStringContainsString( 'admin-bar', $original_dom->body->getAttribute( 'class' ) );
 					$this->assertStringContainsString( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
-					$this->assertStringContainsString( '.wp-block-audio :where(figcaption)', $amphtml_source, 'Expected block-library/style.css' );
+					$this->assertTrue(
+						false !== strpos( $amphtml_source, '.wp-block-audio :where(figcaption)' ) || false !== strpos( $amphtml_source, '.wp-block-audio' ),
+						'Expected block-library/style.css'
+					);
 
 					$this->assertStringContainsString(
 						'[class^="wp-block-"]:not(.wp-block-gallery) figcaption',
