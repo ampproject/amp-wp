@@ -284,6 +284,31 @@ final class FileReflection implements Service, Registerable {
 	}
 
 	/**
+	 * Normalize a file path by attempting realpath resolution on existing parent components.
+	 *
+	 * @param string $file File path to normalize.
+	 * @return string Normalized file path.
+	 */
+	private function normalize_file_path( $file ) {
+		$real = realpath( $file );
+		if ( $real ) {
+			return wp_normalize_path( $real );
+		}
+		$parts = explode( '/', wp_normalize_path( $file ) );
+		$i     = count( $parts );
+		while ( $i > 0 ) {
+			$sub_path = implode( '/', array_slice( $parts, 0, $i ) );
+			$real_sub = realpath( $sub_path );
+			if ( $real_sub ) {
+				$remaining = array_slice( $parts, $i );
+				return wp_normalize_path( $real_sub ) . ( ! empty( $remaining ) ? '/' . implode( '/', $remaining ) : '' );
+			}
+			$i--;
+		}
+		return wp_normalize_path( $file );
+	}
+
+	/**
 	 * Check whether the given file belongs to a plugin.
 	 *
 	 * @param string $file    File to check.
@@ -291,23 +316,38 @@ final class FileReflection implements Service, Registerable {
 	 * @return false|int Number of found matches, or false if an error occurred.
 	 */
 	private function is_plugin_file( $file, &$matches ) {
+		$normalized_file = $this->normalize_file_path( $file );
+
+		if ( defined( 'AMP__DIR__' ) ) {
+			$amp_dir = $this->normalize_file_path( AMP__DIR__ );
+			if ( $normalized_file === $amp_dir || strpos( $normalized_file, $amp_dir . '/' ) === 0 ) {
+				$plugin_dir = $this->normalize_file_path( $this->plugin_registry->get_plugin_dir() );
+				if ( strpos( $normalized_file, $plugin_dir . '/' ) === 0 ) {
+					$rel             = substr( $normalized_file, strlen( $plugin_dir . '/' ) );
+					$matches['slug'] = strtok( $rel, '/' );
+					$file_path       = ltrim( substr( $rel, strlen( $matches['slug'] ) ), '/' );
+					if ( '' !== $file_path ) {
+						$matches['file'] = $file_path;
+					}
+				} else {
+					$matches['slug'] = 'amp';
+					$matches['file'] = ltrim( substr( $normalized_file, strlen( $amp_dir ) ), '/' );
+				}
+				return 1;
+			}
+		}
+
 		if ( null === $this->plugin_file_pattern ) {
+			$plugin_dir                = $this->normalize_file_path( $this->plugin_registry->get_plugin_dir() );
 			$this->plugin_file_pattern = sprintf(
 				':%s%s%s:s',
-				preg_quote(
-					trailingslashit(
-						wp_normalize_path(
-							$this->plugin_registry->get_plugin_dir()
-						)
-					),
-					':'
-				),
+				preg_quote( trailingslashit( $plugin_dir ), ':' ),
 				self::SLUG_PATTERN,
 				self::SLASHED_FILE_PATTERN
 			);
 		}
 
-		return preg_match( $this->plugin_file_pattern, $file, $matches );
+		return preg_match( $this->plugin_file_pattern, $normalized_file, $matches );
 	}
 
 	/**

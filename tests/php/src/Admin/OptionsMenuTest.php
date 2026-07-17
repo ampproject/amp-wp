@@ -51,6 +51,16 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 	public function set_up() {
 		parent::set_up();
 
+		global $submenu;
+		if ( ! is_array( $submenu ) ) {
+			$submenu = [];
+		}
+
+		if ( empty( $GLOBALS['wp_styles'] ) || ! ( $GLOBALS['wp_styles'] instanceof \WP_Styles ) ) {
+			$GLOBALS['wp_styles'] = new \WP_Styles();
+		}
+		wp_default_styles( $GLOBALS['wp_styles'] );
+
 		$site_health = $this->injector->make( SiteHealth::class );
 
 		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError(), $site_health );
@@ -110,7 +120,7 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 		$this->instance->register();
 		$this->assertEquals( 9, has_action( 'admin_menu', [ $this->instance, 'add_menu_items' ] ) );
 
-		$this->assertEquals( 10, has_filter( 'plugin_action_links_amp/amp.php', [ $this->instance, 'add_plugin_action_links' ] ) );
+		$this->assertEquals( 10, has_filter( 'plugin_action_links_' . plugin_basename( AMP__FILE__ ), [ $this->instance, 'add_plugin_action_links' ] ) );
 
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->instance, 'enqueue_assets' ] ) );
 	}

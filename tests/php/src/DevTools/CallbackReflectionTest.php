@@ -157,6 +157,9 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 		require_once ABSPATH . '/wp-admin/includes/widgets.php';
 		require_once dirname( dirname( __DIR__ ) ) . '/data/themes/custom/functions.php';
 		require_once dirname( dirname( __DIR__ ) ) . '/data/themes/child-of-core/functions.php';
+		$plugin_source = \AmpProject\AmpWP\Services::get( 'dev_tools.file_reflection' )->get_file_source( AMP__FILE__ );
+		$plugin_slug   = $plugin_source['name'];
+
 		return [
 			'parent_theme_function'               => [
 				'my_custom_after_setup_theme',
@@ -177,7 +180,7 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 			'plugin_function'                     => [
 				'amp_after_setup_theme',
 				'amp_after_setup_theme',
-				'amp',
+				$plugin_slug,
 				'plugin',
 				'includes/amp-helper-functions.php',
 				ReflectionFunction::class,
@@ -209,7 +212,7 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 			'plugin_closure'                      => [
 				function () {},
 				'{closure}',
-				'amp',
+				$plugin_slug,
 				'plugin',
 				'tests/php/src/DevTools/CallbackReflectionTest.php',
 				ReflectionFunction::class,

@@ -119,7 +119,6 @@ export const removeAmpFitTextFromBlocks = (settings, name) => {
 				},
 			},
 			save(props) {
-				/* eslint-disable react/prop-types */
 				const { attributes } = props;
 				const fitTextProps = { layout: 'fixed-height' };
 
@@ -132,7 +131,6 @@ export const removeAmpFitTextFromBlocks = (settings, name) => {
 				if (attributes.height) {
 					fitTextProps.height = attributes.height;
 				}
-				/* eslint-enable react/prop-types */
 
 				fitTextProps.children = settings.save(props);
 

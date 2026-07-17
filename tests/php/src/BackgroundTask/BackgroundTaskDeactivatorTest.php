@@ -42,7 +42,7 @@ final class BackgroundTaskDeactivatorTest extends TestCase {
 		$this->test_instance->register();
 
 		$plugin_file = $this->get_private_property( $this->test_instance, 'plugin_file' );
-		$this->assertEquals( 'amp/amp.php', $plugin_file );
+		$this->assertEquals( plugin_basename( AMP__FILE__ ), $plugin_file );
 
 		$this->assertEquals( 10, has_action( "network_admin_plugin_action_links_{$plugin_file}", [ $this->test_instance, 'add_warning_sign_to_network_deactivate_action' ] ) );
 		$this->assertEquals( 10, has_action( 'plugin_row_meta', [ $this->test_instance, 'add_warning_to_plugin_meta' ] ) );

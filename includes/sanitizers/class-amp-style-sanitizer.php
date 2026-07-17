@@ -1565,7 +1565,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function get_stylesheet_from_url( $stylesheet_url ) {
 		$stylesheet    = false;
 		$css_file_path = $this->get_validated_url_file_path( $stylesheet_url, [ 'css', 'less', 'scss', 'sass' ] );
-		if ( ! is_wp_error( $css_file_path ) ) {
+		if ( ! is_wp_error( $css_file_path ) && is_file( $css_file_path ) ) {
 			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 		}
 		if ( is_string( $stylesheet ) ) {

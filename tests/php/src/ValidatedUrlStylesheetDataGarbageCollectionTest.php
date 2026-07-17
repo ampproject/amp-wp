@@ -65,9 +65,9 @@ class ValidatedUrlStylesheetDataGarbageCollectionTest extends TestCase {
 
 		foreach ( $post_ids as $days_ago => $post_id ) {
 			if ( $days_ago > 7 ) {
-				$this->assertEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY ), "Expected $days_ago days ago to be empty." );
+				$this->assertEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true ), "Expected $days_ago days ago to be empty." );
 			} else {
-				$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY ), "Expected $days_ago days ago to not be empty." );
+				$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true ), "Expected $days_ago days ago to not be empty." );
 			}
 		}
 	}

@@ -111,7 +111,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	public function register() {
 		add_action( 'admin_menu', [ $this, 'add_menu_items' ], 9 );
 
-		$plugin_file = preg_replace( '#.+/(?=.+?/.+?)#', '', AMP__FILE__ );
+		$plugin_file = plugin_basename( AMP__FILE__ );
 		add_filter( "plugin_action_links_{$plugin_file}", [ $this, 'add_plugin_action_links' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}

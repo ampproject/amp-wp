@@ -65,6 +65,49 @@ function isInitiallyOpen(mode, selectionDetails, savedCurrentMode) {
 }
 
 /**
+ * Create a template mode option with the appropriate props.
+ *
+ * @param {string}  mode                       The template mode.
+ * @param {Object}  templateModeRecommendation Recommendations for each template mode.
+ * @param {string}  savedCurrentMode           The current selected mode saved in the database.
+ * @param {boolean} technicalQuestionChanged   Whether the user changed their technical question from the previous option.
+ * @param {boolean} firstTimeInWizard          Whether the wizard is running for the first time.
+ * @return {Object} TemplateModeOption component.
+ */
+function createTemplateModeOption(
+	mode,
+	templateModeRecommendation,
+	savedCurrentMode,
+	technicalQuestionChanged,
+	firstTimeInWizard
+) {
+	const modeRecommendation = templateModeRecommendation?.[mode];
+
+	return (
+		<TemplateModeOption
+			key={mode}
+			details={modeRecommendation?.details}
+			initialOpen={isInitiallyOpen(
+				mode,
+				templateModeRecommendation,
+				savedCurrentMode
+			)}
+			mode={mode}
+			previouslySelected={
+				savedCurrentMode === mode &&
+				technicalQuestionChanged &&
+				!firstTimeInWizard
+			}
+			labelExtra={
+				modeRecommendation?.recommendationLevel === RECOMMENDED ? (
+					<RecommendedNotice />
+				) : null
+			}
+		/>
+	);
+}
+
+/**
  * The interface for the mode selection screen. Avoids using context for easier testing.
  *
  * @param {Object}  props                            Component props.
@@ -79,70 +122,19 @@ export function ScreenUI({
 	technicalQuestionChanged,
 	templateModeRecommendation,
 }) {
+	const modes = [READER, TRANSITIONAL, STANDARD];
+
 	return (
 		<form>
-			<TemplateModeOption
-				details={templateModeRecommendation?.[READER]?.details}
-				initialOpen={isInitiallyOpen(
-					READER,
+			{modes.map((mode) =>
+				createTemplateModeOption(
+					mode,
 					templateModeRecommendation,
-					savedCurrentMode
-				)}
-				mode={READER}
-				previouslySelected={
-					savedCurrentMode === READER &&
-					technicalQuestionChanged &&
-					!firstTimeInWizard
-				}
-				labelExtra={
-					templateModeRecommendation?.[READER]
-						?.recommendationLevel === RECOMMENDED ? (
-						<RecommendedNotice />
-					) : null
-				}
-			/>
-
-			<TemplateModeOption
-				details={templateModeRecommendation?.[TRANSITIONAL]?.details}
-				initialOpen={isInitiallyOpen(
-					TRANSITIONAL,
-					templateModeRecommendation,
-					savedCurrentMode
-				)}
-				mode={TRANSITIONAL}
-				previouslySelected={
-					savedCurrentMode === TRANSITIONAL &&
-					technicalQuestionChanged &&
-					!firstTimeInWizard
-				}
-				labelExtra={
-					templateModeRecommendation?.[TRANSITIONAL]
-						?.recommendationLevel === RECOMMENDED ? (
-						<RecommendedNotice />
-					) : null
-				}
-			/>
-
-			<TemplateModeOption
-				details={templateModeRecommendation?.[STANDARD]?.details}
-				initialOpen={isInitiallyOpen(
-					STANDARD,
-					templateModeRecommendation,
-					savedCurrentMode
-				)}
-				mode={STANDARD}
-				previouslySelected={
-					savedCurrentMode === STANDARD &&
-					technicalQuestionChanged &&
-					!firstTimeInWizard
-				}
-				labelExtra={
-					templateModeRecommendation?.[STANDARD]
-						?.recommendationLevel === RECOMMENDED ? (
-						<RecommendedNotice />
-					) : null
-				}
-			/>
+					savedCurrentMode,
+					technicalQuestionChanged,
+					firstTimeInWizard
+				)
+			)}
 		</form>
 	);
 }
