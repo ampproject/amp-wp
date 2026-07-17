@@ -30,16 +30,16 @@
 		<whitelist processUncoveredFilesFromWhitelist="false">
 			<directory suffix=".php">./</directory>
 			<exclude>
-				<directory suffix=".php">assets</directory>
-				<directory suffix=".php">back-compat</directory>
-				<directory suffix=".php">bin</directory>
-				<directory suffix=".php">build</directory>
-				<directory suffix=".php">docs</directory>
-				<directory suffix=".php">node_modules</directory>
-				<directory suffix=".php">svn</directory>
-				<directory suffix=".php">tests</directory>
-				<directory suffix=".php">vendor</directory>
-				<directory suffix=".php">includes/ecosystem-data</directory>
+				<directory>assets</directory>
+				<directory>back-compat</directory>
+				<directory>bin</directory>
+				<directory>build</directory>
+				<directory>docs</directory>
+				<directory>node_modules</directory>
+				<directory>svn</directory>
+				<directory>tests</directory>
+				<directory>vendor</directory>
+				<directory>includes/ecosystem-data</directory>
 				<file>.phpstorm.meta.php</file>
 			</exclude>
 		</whitelist>
