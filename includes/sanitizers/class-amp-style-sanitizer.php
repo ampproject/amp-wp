@@ -24,12 +24,14 @@ use Sabberworm\CSS\CSSList\CSSList;
 use Sabberworm\CSS\CSSList\Document as CSSDocument;
 use Sabberworm\CSS\CSSList\KeyFrame;
 use Sabberworm\CSS\OutputFormat;
+use Sabberworm\CSS\Renderable;
 use Sabberworm\CSS\Parsing\SourceException;
 use Sabberworm\CSS\Property\AtRule;
 use Sabberworm\CSS\Property\Import;
 use Sabberworm\CSS\Property\Selector;
 use Sabberworm\CSS\RuleSet\AtRuleSet;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
+use Sabberworm\CSS\RuleSet\DeclarationList;
 use Sabberworm\CSS\RuleSet\RuleSet;
 use Sabberworm\CSS\Rule\Rule;
 use Sabberworm\CSS\Value\CSSFunction;
@@ -408,15 +410,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$reflection = new ReflectionClass( 'Sabberworm\CSS\OutputFormat' );
 
 		$has_output_format_extensions = (
-			$reflection->hasProperty( 'sBeforeAtRuleBlock' )
+			$reflection->hasProperty( 'contentBeforeAtRuleBlock' )
 			&&
-			$reflection->hasProperty( 'sAfterAtRuleBlock' )
+			$reflection->hasProperty( 'contentAfterAtRuleBlock' )
 			&&
-			$reflection->hasProperty( 'sBeforeDeclarationBlock' )
+			$reflection->hasProperty( 'contentBeforeDeclarationBlock' )
 			&&
-			$reflection->hasProperty( 'sAfterDeclarationBlockSelectors' )
+			$reflection->hasProperty( 'contentAfterDeclarationBlockSelectors' )
 			&&
-			$reflection->hasProperty( 'sAfterDeclarationBlock' )
+			$reflection->hasProperty( 'contentAfterDeclarationBlock' )
 		);
 		if ( ! $has_output_format_extensions ) {
 			return false;
@@ -2033,6 +2035,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$output_format = Sabberworm\CSS\OutputFormat::createCompact();
 			$output_format->setSemicolonAfterLastRule( false );
+			$output_format->setSpaceAroundSelectorCombinator( ' ' );
 
 			$before_declaration_block          = sprintf( '/*%s*/', chr( 1 ) );
 			$between_selectors                 = sprintf( '/*%s*/', chr( 2 ) );
@@ -2044,14 +2047,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Add comments to stylesheet if PHP-CSS-Parser has the required extensions for tree shaking.
 			if ( self::has_required_php_css_parser() ) {
-				$output_format->set( 'BeforeDeclarationBlock', $before_declaration_block );
-				$output_format->set( 'SpaceBeforeSelectorSeparator', $between_selectors );
-				$output_format->set( 'AfterDeclarationBlockSelectors', $after_declaration_block_selectors );
-				$output_format->set( 'AfterDeclarationBlock', $after_declaration_block );
-				$output_format->set( 'BeforeAtRuleBlock', $before_at_rule );
-				$output_format->set( 'AfterAtRuleBlock', $after_at_rule );
+				$output_format->setBeforeDeclarationBlock( $before_declaration_block );
+				$output_format->setSpaceBeforeSelectorSeparator( $between_selectors );
+				$output_format->setAfterDeclarationBlockSelectors( $after_declaration_block_selectors );
+				$output_format->setAfterDeclarationBlock( $after_declaration_block );
+				$output_format->setBeforeAtRuleBlock( $before_at_rule );
+				$output_format->setAfterAtRuleBlock( $after_at_rule );
 			}
-			$output_format->set( 'SpaceBetweenRules', $between_properties );
+			$output_format->setSpaceBetweenRules( $between_properties );
 
 			$stylesheet_string = $css_document->render( $output_format );
 
@@ -2454,9 +2457,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @link https://www.ampproject.org/docs/design/responsive/style_pages#disallowed-styles
 	 * @link https://www.ampproject.org/docs/design/responsive/style_pages#restricted-styles
 	 *
-	 * @param RuleSet $ruleset  Ruleset.
-	 * @param CSSList $css_list CSS List.
-	 * @param array   $options  Options.
+	 * @param DeclarationList $ruleset  Ruleset.
+	 * @param CSSList         $css_list CSS List.
+	 * @param array           $options  Options.
 	 *
 	 * @return array {
 	 *     Results.
@@ -2466,7 +2469,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type string[] $preload_font_urls  Font URLs to preload.
 	 * }
 	 */
-	private function process_css_declaration_block( RuleSet $ruleset, CSSList $css_list, $options ) {
+	private function process_css_declaration_block( DeclarationList $ruleset, CSSList $css_list, $options ) {
 		$validation_results = [];
 		$important_count    = 0;
 		$preload_font_urls  = [];
@@ -2491,13 +2494,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$error     = [
 						'code'               => self::CSS_SYNTAX_INVALID_PROPERTY,
 						'css_property_name'  => $property->getRule(),
-						'css_property_value' => $property->getValue(),
+						'css_property_value' => $this->get_css_value_string( $property->getValue() ),
 						'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 						'spec_name'          => $options['spec_name'],
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
-						$ruleset->removeRule( $property->getRule() );
+						$ruleset->removeDeclaration( $property );
 					}
 					$validation_results[] = compact( 'error', 'sanitized' );
 				}
@@ -2509,13 +2512,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$error     = [
 						'code'               => self::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
 						'css_property_name'  => $property->getRule(),
-						'css_property_value' => (string) $property->getValue(),
+						'css_property_value' => $this->get_css_value_string( $property->getValue() ),
 						'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 						'spec_name'          => $options['spec_name'],
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
-						$ruleset->removeRule( $property->getRule() );
+						$ruleset->removeDeclaration( $property );
 					}
 					$validation_results[] = compact( 'error', 'sanitized' );
 				}
@@ -2567,7 +2570,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$properties    = $ruleset->getRules( 'font-family' );
 		$property      = end( $properties );
 		if ( $property instanceof Rule ) {
-			$font_family = trim( $property->getValue(), '"\'' );
+			$font_family = trim( $this->get_css_value_string( $property->getValue() ), '"\'' );
 
 			// Remove all non-word characters from the font family to serve as the filename.
 			$font_basename = preg_replace( '/[^A-Za-z0-9_\-]/', '', $font_family ); // Same as sanitize_key() minus case changes.
@@ -2591,46 +2594,27 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		// Attempt to transform data: URLs in src properties to be external file URLs.
 		foreach ( $src_properties as $src_property ) {
 			$value = $src_property->getValue();
-			if ( ! ( $value instanceof RuleValueList ) ) {
-				continue;
-			}
+
 
 			/*
-			 * The CSS Parser parses a src such as:
-			 *
-			 *    url(data:application/font-woff;...) format('woff'),
-			 *    url('Genericons.ttf') format('truetype'),
-			 *    url('Genericons.svg#genericonsregular') format('svg')
-			 *
-			 * As a list of components consisting of:
-			 *
-			 *    URL,
-			 *    RuleValueList( CSSFunction, URL ),
-			 *    RuleValueList( CSSFunction, URL ),
-			 *    CSSFunction
-			 *
-			 * Clearly the components here are not logically grouped. So the first step is to fix the order.
+			 * Normalise the sources into an array of sources, where each source is an array
+			 * of components (e.g. [ URL, CSSFunction ] or just [ URL ]).
 			 */
 			$sources = [];
-			foreach ( $value->getListComponents() as $component ) {
-				if ( $component instanceof RuleValueList ) {
-					$subcomponents = $component->getListComponents();
-					$subcomponent  = array_shift( $subcomponents );
-					if ( $subcomponent ) {
-						if ( empty( $sources ) ) {
-							$sources[] = [ $subcomponent ];
+			if ( $value instanceof RuleValueList ) {
+				if ( ',' === $value->getListSeparator() ) {
+					foreach ( $value->getListComponents() as $component ) {
+						if ( $component instanceof RuleValueList ) {
+							$sources[] = $component->getListComponents();
 						} else {
-							$sources[ count( $sources ) - 1 ][] = $subcomponent;
+							$sources[] = [ $component ];
 						}
 					}
-					foreach ( $subcomponents as $subcomponent ) {
-						$sources[] = [ $subcomponent ];
-					}
-				} elseif ( empty( $sources ) ) {
-					$sources[] = [ $component ];
 				} else {
-					$sources[ count( $sources ) - 1 ][] = $component;
+					$sources[] = $value->getListComponents();
 				}
+			} else {
+				$sources[] = [ $value ];
 			}
 
 			/**
@@ -2664,7 +2648,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				list( $format_value ) = $format->getArguments();
-				$format_value         = trim( $format_value, '"\'' );
+				$format_value         = trim( $this->get_css_value_string( $format_value ), '"\'' );
 
 				$value = $url->getURL()->getString();
 				if ( 'data:' === substr( $value, 0, 5 ) ) {
@@ -2683,6 +2667,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Convert data: URLs into regular URLs, assuming there will be a file present (e.g. woff fonts in core themes).
 			foreach ( $source_data_url_objects as $format => $data_url ) {
+				/** @var URL $data_url */
 				$mime_type = strtok( substr( $data_url->getURL()->getString(), 5 ), ';' );
 				if ( $mime_type ) {
 					$extension = preg_replace( ':.+/(.+-)?:', '', $mime_type );
@@ -2746,10 +2731,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Override the 'font-display' property to improve font performance.
 		if ( $font_family && in_array( $font_family, array_keys( $this->args['font_face_display_overrides'] ), true ) ) {
-			$ruleset->removeRule( 'font-display' );
+			$ruleset->removeMatchingDeclarations( 'font-display' );
 			$font_display_rule = new Rule( 'font-display' );
 			$font_display_rule->setValue( $this->args['font_face_display_overrides'][ $font_family ] );
-			$ruleset->addRule( $font_display_rule );
+			$ruleset->addDeclaration( $font_display_rule );
 		}
 
 		// If the font-display is auto, block, or swap then we should automatically add the preload link for the first font file.
@@ -2757,7 +2742,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$property   = end( $properties ); // Last since the last property wins in CSS.
 
 		/** @var RuleValueList|string|null */
-		$property_value = $property instanceof Rule ? $property->getValue() : '';
+		$property_value = $property instanceof Rule ? $this->get_css_value_string( $property->getValue() ) : '';
 
 		if (
 			(
@@ -2830,13 +2815,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						$error     = [
 							'code'               => self::CSS_SYNTAX_INVALID_PROPERTY,
 							'css_property_name'  => $property->getRule(),
-							'css_property_value' => (string) $property->getValue(),
+							'css_property_value' => $this->get_css_value_string( $property->getValue() ),
 							'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 							'spec_name'          => $options['spec_name'],
 						];
 						$sanitized = $this->should_sanitize_validation_error( $error );
 						if ( $sanitized ) {
-							$rules->removeRule( $property->getRule() );
+							$rules->removeDeclaration( $property );
 						}
 						$validation_results[] = compact( 'error', 'sanitized' );
 					}
@@ -2853,9 +2838,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see https://www.npmjs.com/package/replace-important
 	 * @see https://www.ampproject.org/docs/fundamentals/spec#important
 	 *
-	 * @param RuleSet|DeclarationBlock $ruleset  Rule set.
-	 * @param CSSList                  $css_list CSS List.
-	 * @param array                    $options  Options.
+	 * @param DeclarationList $ruleset  Rule set.
+	 * @param CSSList         $css_list CSS List.
+	 * @param array           $options  Options.
 	 * @return array {
 	 *     Results.
 	 *
@@ -2863,7 +2848,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type int   $important_count    Number of !important qualifiers.
 	 * }
 	 */
-	private function transform_important_qualifiers( RuleSet $ruleset, CSSList $css_list, $options ) {
+	private function transform_important_qualifiers( DeclarationList $ruleset, CSSList $css_list, $options ) {
 		$important_count    = 0;
 		$validation_results = [];
 
@@ -2885,13 +2870,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $allow_transformation ) {
 				$importants[] = $property;
 				$property->setIsImportant( false );
-				$ruleset->removeRule( $property->getRule() );
+				$ruleset->removeDeclaration( $property );
 			} else {
 				$error     = [
 					'code'               => self::CSS_SYNTAX_INVALID_IMPORTANT,
 					'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					'css_property_name'  => $property->getRule(),
-					'css_property_value' => $property->getValue(),
+					'css_property_value' => $this->get_css_value_string( $property->getValue() ),
 					'spec_name'          => $options['spec_name'],
 				];
 				$sanitized = $this->should_sanitize_validation_error( $error );
@@ -3815,6 +3800,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return compact( 'included_count', 'is_excessive_size', 'important_count', 'kept_error_count', 'preload_font_urls' );
+	}
+
+	/**
+	 * Get CSS value as a string.
+	 *
+	 * @param Value|string $value CSS value.
+	 * @return string CSS value string.
+	 */
+	private function get_css_value_string( $value ) {
+		if ( $value instanceof Renderable ) {
+			return $value->render( OutputFormat::createCompact() );
+		}
+		return (string) $value;
 	}
 
 	/**
