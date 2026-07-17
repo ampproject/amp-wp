@@ -24,7 +24,7 @@
     "google/cloud-storage": "^1.0",
     "mikey179/vfsstream": "1.6.12",
     "mustache/mustache": "^2",
-    "php-stubs/wordpress-stubs": "^6.0",
+    "php-stubs/wordpress-stubs": "^7.0",
     "phpcompatibility/phpcompatibility-wp": "2.1.7",
     "phpdocumentor/reflection": "^3.0",
     "phpstan/phpstan": "^2.1.13",
