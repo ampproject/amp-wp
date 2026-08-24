@@ -1354,6 +1354,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$reflection_function = new ReflectionFunction( $latest_posts_block->render_callback );
 		$is_gutenberg = false !== strpos( $reflection_function->getFileName(), 'gutenberg' );
 
+		// TODO: Verify version number where this changed.
+		$expected_latest_posts_classes = version_compare( strtok( get_bloginfo( 'version' ), '-' ), '6.7', '>=' ) ? 'wp-block-latest-posts wp-block-latest-posts__list is-layout-flow wp-block-latest-posts-is-layout-flow' : 'wp-block-latest-posts wp-block-latest-posts__list';
+
 		return [
 			'paragraph'    => [
 				"<!-- wp:paragraph -->\n<p>Latest posts:</p>\n<!-- /wp:paragraph -->",
@@ -1366,7 +1369,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			'latest_posts' => [
 				'<!-- wp:latest-posts {"postsToShow":1} /-->',
 				sprintf(
-					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}--><ul class="wp-block-latest-posts wp-block-latest-posts__list is-layout-flow wp-block-latest-posts-is-layout-flow"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}-->',
+					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}--><ul class="%6$s"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}-->',
 					$is_gutenberg ? 'plugin' : 'core',
 					$is_gutenberg ? 'gutenberg' : 'wp-includes',
 					$latest_posts_block->render_callback instanceof Closure ? '{closure}' : $latest_posts_block->render_callback,
@@ -1375,7 +1378,8 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 						? preg_replace( ':.*gutenberg/:', '', $reflection_function->getFileName() )
 						: preg_replace( ':.*wp-includes/:', '', $reflection_function->getFileName() )
 					),
-					$reflection_function->getStartLine()
+					$reflection_function->getStartLine(),
+					$expected_latest_posts_classes,
 				),
 				[
 					'element' => 'ul',
