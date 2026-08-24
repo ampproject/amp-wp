@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b59c0ded7db7712d79cfa547c21f677f",
+    "content-hash": "108ab62748397658b377209f929de50e",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "0.11.7",
+            "version": "0.11.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "8ff33e741ec8e9357df11bdeac663ea1081e3dea"
+                "reference": "678a33dfc8e75fd2dfe730fbdc3e5cdeb370185f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/8ff33e741ec8e9357df11bdeac663ea1081e3dea",
-                "reference": "8ff33e741ec8e9357df11bdeac663ea1081e3dea",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/678a33dfc8e75fd2dfe730fbdc3e5cdeb370185f",
+                "reference": "678a33dfc8e75fd2dfe730fbdc3e5cdeb370185f",
                 "shasum": ""
             },
             "require": {
@@ -76,9 +76,9 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.11.7"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.11.8"
             },
-            "time": "2025-09-15T11:53:38+00:00"
+            "time": "2026-08-24T09:32:53+00:00"
         },
         {
             "name": "cweagans/composer-patches",
