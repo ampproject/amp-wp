@@ -1103,6 +1103,7 @@ class AMP_Validated_URL_Post_Type {
 
 			// If the term's removal status is not the same as the default removed status for the validation
 			// error, and this is the only instance of that validation error for a URL, then skip removing the URL.
+
 			// @phpstan-ignore function.impossibleHaystackValue (todo: improve types)
 			$is_sanitized = in_array(
 				$validation_error_term->term_group,
