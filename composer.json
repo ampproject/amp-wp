@@ -28,7 +28,6 @@
     "phpcompatibility/phpcompatibility-wp": "2.1.7",
     "phpdocumentor/reflection": "^3.0",
     "phpstan/phpstan": "^2.1.13",
-    "roave/security-advisories": "dev-latest",
     "sirbrillig/phpcs-variable-analysis": "2.13.0",
     "wp-cli/export-command": "^2.0",
     "wp-cli/extension-command": "^2.0",
@@ -71,6 +70,13 @@
     "allow-plugins": {
       "cweagans/composer-patches": true,
       "dealerdirect/phpcodesniffer-composer-installer": true
+    },
+    "policy": {
+      "advisories": {
+        "ignore": [
+          "firebase/php-jwt"
+        ]
+      }
     },
     "platform": {
       "php": "7.4"
