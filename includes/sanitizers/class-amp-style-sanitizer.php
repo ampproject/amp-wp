@@ -3247,6 +3247,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				case self::STYLE_AMP_CUSTOM_GROUP_INDEX:
 					$pending_stylesheet['group'] = 'amp-custom';
 					break;
+				// @phpstan-ignore switch.duplicateCase (False positive)
 				case self::STYLE_AMP_KEYFRAMES_SPEC_NAME:
 					$pending_stylesheet['group'] = 'amp-keyframes';
 					break;

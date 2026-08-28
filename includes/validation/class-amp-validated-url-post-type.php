@@ -248,7 +248,7 @@ class AMP_Validated_URL_Post_Type {
 				[
 					'post_type'      => 'amp_invalid_url',
 					'fields'         => 'ids',
-					'posts_per_page' => -1,
+					'posts_per_page' => -1, // phpcs:ignore WordPressVIPMinimum.Performance.NoPaging.posts_per_page_posts_per_page
 				]
 			);
 			foreach ( $post_ids as $post_id ) {
@@ -1103,6 +1103,7 @@ class AMP_Validated_URL_Post_Type {
 
 			// If the term's removal status is not the same as the default removed status for the validation
 			// error, and this is the only instance of that validation error for a URL, then skip removing the URL.
+			// @phpstan-ignore function.impossibleHaystackValue (todo: improve types)
 			$is_sanitized = in_array(
 				$validation_error_term->term_group,
 				[
