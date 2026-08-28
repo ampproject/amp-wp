@@ -320,7 +320,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<style>@media (max-width: 450px) { .sidebar { padding: 0; }; } .sidebar { margin: 0 auto; }</style><div class="sidebar"></div>',
 				'<div class="sidebar"></div>',
 				[
-					'@media (max-width: 450px){.sidebar{padding:0}.sidebar{margin:0 auto}}',
+					'@media (max-width: 450px){.sidebar{padding:0}}.sidebar{margin:0 auto}',
 				],
 			],
 			'with_mustache_template' => [

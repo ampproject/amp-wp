@@ -3809,8 +3809,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string CSS value string.
 	 */
 	private function get_css_value_string( $value ) {
+		static $output_format = null;
+		if ( null === $output_format ) {
+			$output_format = OutputFormat::createCompact();
+		}
 		if ( $value instanceof Renderable ) {
-			return $value->render( OutputFormat::createCompact() );
+			return $value->render( $output_format );
 		}
 		return (string) $value;
 	}
