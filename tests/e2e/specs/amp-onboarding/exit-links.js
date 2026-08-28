@@ -1,23 +1,25 @@
 /**
  * WordPress dependencies
  */
-const {
-	visitAdminPage,
-} = require('@wordpress/e2e-test-utils/build/visit-admin-page');
+import { visitAdminPage } from '@wordpress/e2e-test-utils';
+
 /**
  * Internal dependencies
  */
-const {
+import {
 	goToOnboardingWizard,
 	cleanUpSettings,
 	moveToDoneScreen,
-} = require('../../utils/onboarding-wizard-utils');
+} from '../../utils/onboarding-wizard-utils';
 
 describe('Onboarding wizard exit links', () => {
 	it('if no previous page, returns to settings when clicking close', async () => {
 		await goToOnboardingWizard();
 
-		await expect(page).toClick('a', { text: 'Close' });
+		await Promise.all([
+			page.waitForNavigation(),
+			expect(page).toClick('a', { text: 'Close' }),
+		]);
 
 		await page.waitForSelector('.wp-admin');
 
@@ -32,13 +34,19 @@ describe('Onboarding wizard exit links', () => {
 			'a[href*="admin.php?page=amp-onboarding-wizard"]'
 		);
 
-		await expect(page).toClick(
-			'a[href*="admin.php?page=amp-onboarding-wizard"]'
-		);
+		await Promise.all([
+			page.waitForNavigation(),
+			expect(page).toClick(
+				'a[href*="admin.php?page=amp-onboarding-wizard"]'
+			),
+		]);
 
 		await page.waitForSelector('#amp-onboarding-wizard');
 
-		await expect(page).toClick('a', { text: 'Close' });
+		await Promise.all([
+			page.waitForNavigation(),
+			expect(page).toClick('a', { text: 'Close' }),
+		]);
 
 		await page.waitForSelector('.wp-admin');
 
@@ -48,7 +56,10 @@ describe('Onboarding wizard exit links', () => {
 	it('goes to settings when clicking finish', async () => {
 		await moveToDoneScreen({ mode: 'standard' });
 
-		await expect(page).toClick('a', { text: 'Finish' });
+		await Promise.all([
+			page.waitForNavigation(),
+			expect(page).toClick('a', { text: 'Finish' }),
+		]);
 
 		await page.waitForSelector('.wp-admin');
 
