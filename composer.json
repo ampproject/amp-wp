@@ -71,15 +71,15 @@
       "cweagans/composer-patches": true,
       "dealerdirect/phpcodesniffer-composer-installer": true
     },
+    "platform": {
+      "php": "7.4"
+    },
     "policy": {
       "advisories": {
         "ignore": [
           "firebase/php-jwt"
         ]
       }
-    },
-    "platform": {
-      "php": "7.4"
     },
     "sort-packages": true
   },
