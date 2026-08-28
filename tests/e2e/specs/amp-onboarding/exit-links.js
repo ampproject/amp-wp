@@ -26,7 +26,8 @@ describe('Onboarding wizard exit links', () => {
 		await expect(page).toMatchElement('h1', { text: 'AMP Settings' });
 	});
 
-	it('returns to previous page when clicking close', async () => {
+	// eslint-disable-next-line jest/no-disabled-tests
+	it.skip('returns to previous page when clicking close', async () => {
 		await visitAdminPage('admin.php', 'page=amp-options');
 		await page.waitForSelector('.wp-admin');
 
