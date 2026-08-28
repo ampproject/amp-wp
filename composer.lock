@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c967de70e085acf5af761b0d19fd5f71",
+    "content-hash": "c27df6d23caad3ae39f1d8306b234913",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "0.11.7",
+            "version": "0.11.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "8ff33e741ec8e9357df11bdeac663ea1081e3dea"
+                "reference": "678a33dfc8e75fd2dfe730fbdc3e5cdeb370185f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/8ff33e741ec8e9357df11bdeac663ea1081e3dea",
-                "reference": "8ff33e741ec8e9357df11bdeac663ea1081e3dea",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/678a33dfc8e75fd2dfe730fbdc3e5cdeb370185f",
+                "reference": "678a33dfc8e75fd2dfe730fbdc3e5cdeb370185f",
                 "shasum": ""
             },
             "require": {
@@ -76,9 +76,9 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.11.7"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.11.8"
             },
-            "time": "2025-09-15T11:53:38+00:00"
+            "time": "2026-08-24T09:32:53+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -2674,16 +2674,16 @@
         },
         {
             "name": "phpcompatibility/phpcompatibility-wp",
-            "version": "2.1.7",
+            "version": "2.1.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCompatibility/PHPCompatibilityWP.git",
-                "reference": "5bfbbfbabb3df2b9a83e601de9153e4a7111962c"
+                "reference": "7c8d18b4d90dac9e86b0869a608fa09158e168fa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityWP/zipball/5bfbbfbabb3df2b9a83e601de9153e4a7111962c",
-                "reference": "5bfbbfbabb3df2b9a83e601de9153e4a7111962c",
+                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityWP/zipball/7c8d18b4d90dac9e86b0869a608fa09158e168fa",
+                "reference": "7c8d18b4d90dac9e86b0869a608fa09158e168fa",
                 "shasum": ""
             },
             "require": {
@@ -2745,7 +2745,7 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2025-05-12T16:38:37+00:00"
+            "time": "2025-10-18T00:05:59+00:00"
         },
         {
             "name": "phpcsstandards/phpcsextra",
