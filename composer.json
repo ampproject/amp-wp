@@ -87,7 +87,7 @@
     "composer-exit-on-patch-failure": true,
     "patches": {
       "sabberworm/php-css-parser": {
-        "Port custom patches (strict validation, deep clone, expression parser, trailing semicolon)": "https://github.com/swissspidy/PHP-CSS-Parser/commit/b1e67992b1b9b6a94b286aad1dcd89fa7fbe1824.patch"
+        "Port custom patches (strict validation, deep clone, expression parser, trailing semicolon)": "https://github.com/swissspidy/PHP-CSS-Parser/commit/47c4420abe46b829d32fe64c8eb0306443ee5883.patch"
       }
     }
   },
