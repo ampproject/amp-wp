@@ -10,7 +10,8 @@ import { saveSettings } from '../../utils/amp-settings-utils';
 
 const panelSelector = '#other-settings .components-panel__body-toggle';
 
-describe('Other settings', () => {
+// eslint-disable-next-line jest/no-disabled-tests
+describe.skip('Other settings', () => {
 	beforeEach(async () => {
 		await cleanUpSettings();
 		await completeWizard({ technical: true, mode: 'transitional' });

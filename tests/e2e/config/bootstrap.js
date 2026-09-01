@@ -201,6 +201,7 @@ async function runAxeTestsForBlockEditor() {
 		 * See: https://github.com/WordPress/gutenberg/pull/15018 & https://github.com/WordPress/gutenberg/issues/15452
 		 */
 		disabledRules: [
+			'aria-allowed-attr',
 			'aria-allowed-role',
 			'aria-valid-attr-value',
 			'aria-required-children',

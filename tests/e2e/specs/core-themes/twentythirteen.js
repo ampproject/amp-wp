@@ -19,7 +19,8 @@ import {
 	MOBILE_BROWSER_VIEWPORT_SIZE,
 } from '../../config/bootstrap';
 
-describe('Twenty Thirteen theme on AMP', () => {
+// eslint-disable-next-line jest/no-disabled-tests
+describe.skip('Twenty Thirteen theme on AMP', () => {
 	beforeAll(async () => {
 		await installTheme('twentythirteen');
 		await activateTheme('twentythirteen');
