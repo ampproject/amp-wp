@@ -180,12 +180,25 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		$block_id++;
 		$block_content = preg_replace( '/(?<="wp-block-archives-)\w+(?=")/', $block_id, $block_content );
 
-		// Replace onchange with on attribute.
-		$block_content = preg_replace(
-			'/onchange=".+?"/',
-			'on="change:AMP.navigateTo(url=event.value)"',
-			$block_content
-		);
+		// Replace onchange with on attribute, or process inline script.
+		if ( false !== strpos( $block_content, 'onchange=' ) ) {
+			$block_content = preg_replace(
+				'/onchange=".+?"/',
+				'on="change:AMP.navigateTo(url=event.value)"',
+				$block_content
+			);
+		} else {
+			$block_content = preg_replace(
+				'#<script[^>]*>.*?</script>#s',
+				'',
+				$block_content
+			);
+			$block_content = preg_replace(
+				'#<select([^>]*)>#',
+				'<select$1 on="change:AMP.navigateTo(url=event.value)">',
+				$block_content
+			);
+		}
 
 		return $block_content;
 	}
@@ -493,7 +506,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			if ( ! $form instanceof DOMElement || ! $form->parentNode instanceof DOMElement ) {
 				continue; // @codeCoverageIgnore
 			}
-			$script = $dom->xpath->query( './/script[ contains( text(), "onCatChange" ) ]', $form->parentNode )->item( 0 );
+			$script = $dom->xpath->query( './/script', $form->parentNode )->item( 0 );
 			if ( ! $script instanceof DOMElement ) {
 				continue; // @codeCoverageIgnore
 			}
@@ -523,7 +536,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 				continue; // @codeCoverageIgnore
 			}
 
-			$script = $dom->xpath->query( './/script[ contains( text(), "onSelectChange" ) ]', $select->parentNode )->item( 0 );
+			$script = $dom->xpath->query( './/script', $select->parentNode )->item( 0 );
 			if ( $script ) {
 				$script->parentNode->removeChild( $script );
 			} elseif ( $select->hasAttribute( 'onchange' ) ) {

@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import fs from 'fs';
 import path from 'path';
 
 /**
@@ -57,7 +58,17 @@ export function isPluginActivated(slug) {
 
 export async function installPlugin(slug) {
 	if (!(await isPluginInstalled(slug))) {
-		await _installPlugin(slug);
+		const localPluginPath = path.join(
+			__dirname,
+			'..',
+			'plugins',
+			`${slug}.zip`
+		);
+		if (fs.existsSync(localPluginPath)) {
+			await installLocalPlugin(slug);
+		} else {
+			await _installPlugin(slug);
+		}
 	}
 }
 

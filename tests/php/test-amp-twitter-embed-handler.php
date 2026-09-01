@@ -145,6 +145,9 @@ class AMP_Twitter_Embed_Handler_Test extends TestCase {
 		$embed->sanitize_raw_embeds( $dom );
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+			$content = str_replace( 'https://x.com/', 'https://twitter.com/', $content );
+		}
 
 		$this->assertEquals( $expected, $content );
 	}

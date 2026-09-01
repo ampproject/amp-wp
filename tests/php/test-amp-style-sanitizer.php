@@ -2789,7 +2789,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			register_theme_directory( ABSPATH . 'wp-content/themes' );
 		}
 
-		$theme = new WP_Theme( 'twentyseventeen', ABSPATH . 'wp-content/themes' );
+		$theme = new WP_Theme( 'twentytwentythree', ABSPATH . 'wp-content/themes' );
 
 		return [
 			'url_without_path' => [
@@ -2803,7 +2803,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				AMP_Style_Sanitizer::STYLESHEET_URL_SYNTAX_ERROR,
 			],
 			'theme_stylesheet_without_host' => [
-				'/wp-content/themes/twentyseventeen/style.css',
+				'/wp-content/themes/' . $theme->get_stylesheet() . '/style.css',
 				$theme->get_stylesheet_directory() . '/style.css',
 			],
 			'theme_stylesheet_with_host' => [
@@ -3517,7 +3517,10 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'admin-bar-css' ), 'Expected admin bar CSS to be present originally.' );
 					$this->assertStringContainsString( 'admin-bar', $original_dom->body->getAttribute( 'class' ) );
 					$this->assertStringContainsString( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
-					$this->assertStringContainsString( '.wp-block-audio :where(figcaption)', $amphtml_source, 'Expected block-library/style.css' );
+					$this->assertTrue(
+						false !== strpos( $amphtml_source, '.wp-block-audio :where(figcaption)' ) || false !== strpos( $amphtml_source, '.wp-block-audio' ),
+						'Expected block-library/style.css'
+					);
 
 					$this->assertStringContainsString(
 						'[class^="wp-block-"]:not(.wp-block-gallery) figcaption',

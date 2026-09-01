@@ -72,12 +72,13 @@ class AMP_Crowdsignal_Embed_Handler_Test extends TestCase {
 	 * @param string $oembed_response oEmbed response.
 	 */
 	public function test_conversion( $url, $expected, $oembed_response ) {
+		if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+			$this->markTestSkipped( 'Crowdsignal remote oEmbed API endpoint is no longer active.' );
+		}
+
 		add_filter(
 			'pre_http_request',
 			static function ( $pre, $r, $request_url ) use ( $oembed_response ) {
-				if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
-					return $pre;
-				}
 
 				if ( ! preg_match( '/crowdsignal|polldaddy/', $request_url ) ) {
 					return $pre;

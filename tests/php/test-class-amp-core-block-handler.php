@@ -107,7 +107,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'core/archives' ) ) {
 			$rendered = do_blocks( $archives_block );
 			$this->assertStringContainsString( '<select', $rendered );
-			$this->assertStringContainsString( 'onchange', $rendered );
+			$this->assertTrue( false !== strpos( $rendered, 'onchange' ) || false !== strpos( $rendered, '<script' ) );
 			$this->assertStringNotContainsString( 'on="change', $rendered );
 		}
 	}

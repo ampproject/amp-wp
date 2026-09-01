@@ -38,7 +38,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @since 0.2
 	 * @var string
 	 */
-	const URL_PATTERN = '#https?:\/\/twitter\.com(?:\/\#\!\/|\/)(?P<username>[a-zA-Z0-9_]{1,20})\/status(?:es)?\/(?P<tweet>\d+)#i';
+	const URL_PATTERN = '#https?:\/\/(?:twitter|x)\.com(?:\/\#\!\/|\/)(?P<username>[a-zA-Z0-9_]{1,20})\/status(?:es)?\/(?P<tweet>\d+)#i';
 
 	/**
 	 * URL pattern for a Twitter timeline.
@@ -46,7 +46,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @since 1.0
 	 * @var string
 	 */
-	const URL_PATTERN_TIMELINE = '#https?:\/\/twitter\.com(?:\/\#\!\/|\/)(?P<username>[a-zA-Z0-9_]{1,20})(?:$|\/(?P<type>likes|lists)(\/(?P<id>[a-zA-Z0-9_-]+))?)#i';
+	const URL_PATTERN_TIMELINE = '#https?:\/\/(?:twitter|x)\.com(?:\/\#\!\/|\/)(?P<username>[a-zA-Z0-9_]{1,20})(?:$|\/(?P<type>likes|lists)(\/(?P<id>[a-zA-Z0-9_-]+))?)#i';
 
 	/**
 	 * Tag.
@@ -265,12 +265,14 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			$next_element_sibling = $next_element_sibling->nextSibling;
 		}
 
-		$script_src = 'platform.twitter.com/widgets.js';
+		$is_twitter_script = static function ( $src ) {
+			return false !== strpos( $src, 'widgets.js' ) && ( false !== strpos( $src, 'twitter.com' ) || false !== strpos( $src, 'x.com' ) );
+		};
 
 		// Handle case where script is wrapped in paragraph by wpautop.
 		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->nodeName ) {
 			$children = $next_element_sibling->getElementsByTagName( '*' );
-			if ( 1 === $children->length && 'script' === $children->item( 0 )->nodeName && false !== strpos( $children->item( 0 )->getAttribute( 'src' ), $script_src ) ) {
+			if ( 1 === $children->length && 'script' === $children->item( 0 )->nodeName && $is_twitter_script( $children->item( 0 )->getAttribute( 'src' ) ) ) {
 				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 				return;
 			}
@@ -282,7 +284,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			&&
 			'script' === strtolower( $next_element_sibling->nodeName )
 			&&
-			false !== strpos( $next_element_sibling->getAttribute( 'src' ), $script_src )
+			$is_twitter_script( $next_element_sibling->getAttribute( 'src' ) )
 		);
 		if ( $is_embed_script ) {
 			$next_element_sibling->parentNode->removeChild( $next_element_sibling );

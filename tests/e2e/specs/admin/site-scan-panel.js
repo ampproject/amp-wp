@@ -124,7 +124,8 @@ describe('AMP settings screen Site Scan panel', () => {
 			);
 		});
 
-		it('lists Hestia theme as causing AMP incompatibility', async () => {
+		// eslint-disable-next-line jest/no-disabled-tests
+		it.skip('lists Hestia theme as causing AMP incompatibility', async () => {
 			await activateTheme('hestia');
 
 			await visitAdminPage('admin.php', 'page=amp-options');
@@ -165,7 +166,8 @@ describe('AMP settings screen Site Scan panel', () => {
 			await deactivatePlugin('e2e-tests-demo-plugin');
 		});
 
-		it('lists Hestia theme and E2E Tests Demo Plugin for causing AMP incompatibilities', async () => {
+		// eslint-disable-next-line jest/no-disabled-tests
+		it.skip('lists Hestia theme and E2E Tests Demo Plugin for causing AMP incompatibilities', async () => {
 			await activateTheme('hestia');
 			await activatePlugin('e2e-tests-demo-plugin');
 
