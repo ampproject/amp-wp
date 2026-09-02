@@ -289,7 +289,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<table><colgroup><col width="50" style="background-color: red; width: 60px"/></colgroup></table>',
 				'<table><colgroup><col data-amp-original-style="width: 50px;background-color: red; width: 60px" class="amp-wp-c8aa9e9"></colgroup></table>',
 				[
-					'.amp-wp-c8aa9e9:not(#_#_#_#_#_){width:50px;width:60px;background-color:red}',
+					'.amp-wp-c8aa9e9:not(#_#_#_#_#_){width:50px;background-color:red;width:60px}',
 				],
 			],
 
@@ -1401,7 +1401,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			'video' => [
 				'<article><video src="http://example.com" height="100" width="200"></video></article>',
 				'article>video{border:solid 1px green}',
-				'article>amp-video{border:solid 1px green}',
+				'article > amp-video{border:solid 1px green}',
 			],
 			'form' => [
 				sprintf( '<div id="search"><form method="get" action="https://example.com"><label id="s">Search</label><input type="search" name="s" id="s"></form></div>' ),
@@ -1416,12 +1416,12 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			'iframe' => [
 				'<p><b>purple</b><iframe src="http://example.com" height="100" width="200"></iframe></p>',
 				'p>*:not(iframe){color:purple}',
-				'p>*:not(amp-iframe){color:purple}',
+				'p > *:not(amp-iframe){color:purple}',
 			],
 			'object' => [
 				'<p><object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" type="application/pdf"></object></p>',
 				'p>*:not(object){color:purple}',
-				'p>*:not(amp-google-document-embed){color:purple}',
+				'p > *:not(amp-google-document-embed){color:purple}',
 			],
 			'audio' => [
 				'<audio src="http://example.com/foo.mp3" height="100" width="200"></audio>',
@@ -1446,12 +1446,12 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			'focus_selector_after_whitespace_combinator' => [
 				'<nav class="main-navigation focused"><ul><li class="menu-item-has-children"><a href="https://example.com/">Example</a><ul><li><a href="https://example.org">Another example</a></li></ul></li></ul></nav>',
 				'.main-navigation ul li:hover > ul, .main-navigation ul    .focus > ul { left: 100% } .focus > ul { right: auto } nav.focused { outline:solid 1px red; }',
-				'.main-navigation ul li:hover > ul,.main-navigation ul    .menu-item-has-children:focus-within > ul{left:100%}.menu-item-has-children:focus-within > ul{right:auto}nav.focused{outline:solid 1px red}',
+				'.main-navigation ul li:hover > ul,.main-navigation ul .menu-item-has-children:focus-within > ul{left:100%}.menu-item-has-children:focus-within > ul{right:auto}nav.focused{outline:solid 1px red}',
 			],
 			'focus_selector_after_child_combinator' => [
 				'<nav class="main-navigation focused"><ul><li><a href="https://example.com/">Example</a><ul><li><a href="https://example.org">Another example</a></li></ul></li></ul></nav>',
 				'.main-navigation ul ul li:hover > ul, .main-navigation ul ul    >    .focus > ul { left: 100%; right: auto; } nav.focused { outline:solid 1px red; }',
-				'.main-navigation ul ul li:hover > ul,.main-navigation ul ul    >    :focus-within > ul{left:100%;right:auto}nav.focused{outline:solid 1px red}',
+				'.main-navigation ul ul li:hover > ul,.main-navigation ul ul > :focus-within > ul{left:100%;right:auto}nav.focused{outline:solid 1px red}',
 			],
 			'style_attribute_selector' => [
 				'<figure class="wp-block-pullquote" style="border-color:#ce3a0d">',
@@ -2354,7 +2354,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'//stylesheets.example.com/style.css',
 				'text/css',
 				'html { background-color: lightblue; background-image: url("data:image/svg+xml;utf8,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' version=\\\'1.1\\\' viewBox=\\\'0 0 30 30\\\' width=\\\'30\\\' height=\\\'30\\\'><defs><style>circle{fill:red}</style></defs><circle cx=\\\'15\\\' cy=\\\'15\\\' r=\\\'15\\\'/></svg>" ); }',
-				'html{background-color:lightblue;background-image:url("data:image/svg+xml;utf8,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' version=\\\'1.1\\\' viewBox=\\\'0 0 30 30\\\' width=\\\'30\\\' height=\\\'30\\\'><defs><style>circle{fill:red}<\/style></defs><circle cx=\\\'15\\\' cy=\\\'15\\\' r=\\\'15\\\'/></svg>")}',
+				'html{background-color:lightblue;background-image:url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' version=\'1.1\' viewBox=\'0 0 30 30\' width=\'30\' height=\'30\'><defs><style>circle{fill:red}<\/style></defs><circle cx=\'15\' cy=\'15\' r=\'15\'/></svg>")}',
 				[],
 			],
 			'dynamic_file' => [
@@ -2925,7 +2925,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			],
 			'svg_url_with_spaces_in_double_quotes' => [
 				'html { mask-image: url( "data:image/svg+xml;utf8,\\00003Csvg viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'\\00003E\\00003Ccircle cx=\'50\' cy=\'50\' r=\'50\'/\\00003E\\00003C/svg\\00003E" ); }',
-				"html{mask-image:url(\"data:image/svg+xml;utf8,<svg viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>\")}",
+				"html{mask-image:url(\"data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><circle cx='50' cy='50' r='50'/></svg>\")}",
 			],
 			'svg_url_with_encoded_spaces_in_quotes' => [
 				'html { mask-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2243%22%20height%3D%2244%22%20viewBox%3D%220%200%2043%2044%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%3E%3Cdefs%3E%3Cpath%20d%3D%22M42.5%2018H22v8.5h11.8C32.7%2031.9%2028.1%2035%2022%2035c-7.2%200-13-5.8-13-13S14.8%209%2022%209c3.1%200%205.9%201.1%208.1%202.9l6.4-6.4C32.6%202.1%2027.6%200%2022%200%209.8%200%200%209.8%200%2022s9.8%2022%2022%2022c11%200%2021-8%2021-22%200-1.3-.2-2.7-.5-4z%22%20id%3D%22a%22%2F%3E%3C%2Fdefs%3E%3Cuse%20fill%3D%22%23FFF%22%20xlink%3Ahref%3D%22%23a%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E"); }',
