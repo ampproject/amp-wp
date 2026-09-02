@@ -95,7 +95,13 @@ describe.skip('Twenty Thirteen theme on AMP', () => {
 				visible: false,
 			});
 
-			await expect(menuItemWithSubmenu).toClick('.dropdown-toggle');
+			// Click dropdown toggle to open submenu
+			const dropdownToggle =
+				await menuItemWithSubmenu.$('.dropdown-toggle');
+			await dropdownToggle.evaluate((el) => el.scrollIntoView());
+			await page.waitForTimeout(500);
+			await dropdownToggle.click();
+
 			await expect(menuItemWithSubmenu).toMatchElement(
 				'.dropdown-toggle[aria-expanded=true]'
 			);
@@ -103,7 +109,9 @@ describe.skip('Twenty Thirteen theme on AMP', () => {
 				visible: true,
 			});
 
-			await expect(menuItemWithSubmenu).toClick('.dropdown-toggle');
+			// Click dropdown toggle to close submenu
+			await dropdownToggle.click();
+
 			await expect(menuItemWithSubmenu).toMatchElement(
 				'.dropdown-toggle[aria-expanded=false]'
 			);
