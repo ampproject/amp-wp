@@ -984,6 +984,52 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	}
 
 	/**
+	 * Test get_stylesheet_from_url with a bad URL.
+	 *
+	 * @covers AMP_Style_Sanitizer::get_stylesheet_from_url()
+	 */
+	public function test_get_stylesheet_from_url_bad_url() {
+		$dom = Document::fromHtml( '<html><head></head><body></body></html>', Options::DEFAULTS );
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, [] );
+
+		$css_url = 'https://example.com/style.css';
+
+		add_filter(
+			'pre_http_request',
+			static function( $preempt, $request, $url ) use ( $css_url ) {
+				if ( $css_url === $url ) {
+					return new WP_Error( 'http_request_failed', 'Failed to fetch URL.' );
+				}
+
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$stylesheet = $this->call_private_method( $sanitizer, 'get_stylesheet_from_url', [ $css_url ] );
+
+		$this->assertTrue( is_wp_error( $stylesheet ) );
+		$this->assertInstanceOf( WP_Error::class, $stylesheet );
+		$this->assertStringStartsWith( 'Failed to fetch:', $stylesheet->get_error_message() );
+
+		$css_url    = amp_get_asset_url( 'css/amp-default.css' );
+		$stylesheet = $this->call_private_method( $sanitizer, 'get_stylesheet_from_url', [ $css_url ] );
+
+		$this->assertIsString( $stylesheet );
+		$this->assertNotEmpty( $stylesheet );
+		$this->assertFalse( is_wp_error( $stylesheet ) );
+
+		$css_url    = '/wp-includes/css/admin-bar.css';
+		$stylesheet = $this->call_private_method( $sanitizer, 'get_stylesheet_from_url', [ $css_url ] );
+
+		$this->assertIsString( $stylesheet );
+		$this->assertNotEmpty( $stylesheet );
+		$this->assertFalse( is_wp_error( $stylesheet ) );
+	}
+
+	/**
 	 * Add test coverage for the property_allowlist condition in process_css_declaration_block which is not currently reachable given the spec.
 	 *
 	 * @covers AMP_Style_Sanitizer::process_css_declaration_block()
