@@ -83,7 +83,7 @@
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "6.1.0",
     "globals": "16.5.0",
-    "grunt": "1.6.1",
+    "grunt": "1.6.3",
     "grunt-contrib-clean": "2.0.1",
     "grunt-contrib-copy": "1.0.0",
     "grunt-shell": "4.0.0",
