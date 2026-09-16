@@ -36,7 +36,11 @@ final class PairedUrl implements Service {
 	 * @return bool Has endpoint suffix.
 	 */
 	public function has_path_suffix( $url ) {
-		$path    = wp_parse_url( $url, PHP_URL_PATH );
+		$path = wp_parse_url( $url, PHP_URL_PATH );
+		if ( empty( $path ) ) {
+			return false;
+		}
+
 		$pattern = sprintf(
 			':/%s/?$:',
 			preg_quote( amp_get_slug(), ':' )

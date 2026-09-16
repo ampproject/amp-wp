@@ -51,6 +51,11 @@ class PairedUrlTest extends DependencyInjectedTestCase {
 		$this->assertTrue( $this->instance->has_path_suffix( "/foo/$slug" ) );
 		$this->assertTrue( $this->instance->has_path_suffix( "/foo/$slug?bar=1" ) );
 		$this->assertTrue( $this->instance->has_path_suffix( "/foo/$slug#bar" ) );
+		$this->assertFalse( $this->instance->has_path_suffix( 'https://example.com' ) );
+		$this->assertFalse( $this->instance->has_path_suffix( 'https://example.com?bar=1' ) );
+		$this->assertFalse( $this->instance->has_path_suffix( '?bar=1' ) );
+		$this->assertFalse( $this->instance->has_path_suffix( '#bar' ) );
+		$this->assertFalse( $this->instance->has_path_suffix( '' ) );
 	}
 
 	/** @covers ::remove_path_suffix() */
