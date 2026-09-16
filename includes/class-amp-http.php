@@ -509,6 +509,7 @@ class AMP_HTTP {
 			200
 		);
 
+		// @phpstan-ignore deadCode.unreachable (pleasing WordPressVIPMinimum.Hooks.AlwaysReturnInFilter.MissingReturnStatement)
 		return null;
 	}
 

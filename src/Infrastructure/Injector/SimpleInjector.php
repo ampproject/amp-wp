@@ -323,6 +323,7 @@ final class SimpleInjector implements Injector {
 
 		$type = $parameter->getType();
 
+		// @phpstan-ignore identical.alwaysFalse (todo: improve types)
 		if ( null === $type ||
 			( is_a( $type, 'ReflectionType' ) && method_exists( $type, 'isBuiltin' ) && $type->isBuiltin() )
 		) {

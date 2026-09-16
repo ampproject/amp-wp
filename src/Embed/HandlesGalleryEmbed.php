@@ -50,27 +50,25 @@ trait HandlesGalleryEmbed {
 			return;
 		}
 
-		if ( $is_carousel ) {
-			$amp_carousel     = $this->generate_amp_carousel( $img_elements, $is_lightbox );
-			$carousel_element = $amp_carousel->get_dom_element();
+		$amp_carousel     = $this->generate_amp_carousel( $img_elements, $is_lightbox );
+		$carousel_element = $amp_carousel->get_dom_element();
 
-			if ( $is_lightbox ) {
-				$carousel_element->setAttribute( Attribute::LIGHTBOX, '' );
-			}
+		if ( $is_lightbox ) {
+			$carousel_element->setAttribute( Attribute::LIGHTBOX, '' );
+		}
 
-			if ( Tag::FIGURE === $gallery_element->tagName ) {
+		if ( Tag::FIGURE === $gallery_element->tagName ) {
 
-				// Remove gallery container or item wrappers, leaving behind the gallery caption.
-				foreach ( iterator_to_array( $gallery_element->childNodes ) as $child_node ) {
-					if ( ! ( $child_node instanceof Element && Tag::FIGCAPTION === $child_node->tagName ) ) {
-						$gallery_element->removeChild( $child_node );
-					}
+			// Remove gallery container or item wrappers, leaving behind the gallery caption.
+			foreach ( iterator_to_array( $gallery_element->childNodes ) as $child_node ) {
+				if ( ! ( $child_node instanceof Element && Tag::FIGCAPTION === $child_node->tagName ) ) {
+					$gallery_element->removeChild( $child_node );
 				}
-
-				$gallery_element->insertBefore( $carousel_element, $gallery_element->firstChild );
-			} else {
-				$gallery_element->parentNode->replaceChild( $carousel_element, $gallery_element );
 			}
+
+			$gallery_element->insertBefore( $carousel_element, $gallery_element->firstChild );
+		} else {
+			$gallery_element->parentNode->replaceChild( $carousel_element, $gallery_element );
 		}
 	}
 

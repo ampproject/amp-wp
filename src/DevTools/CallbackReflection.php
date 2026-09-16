@@ -56,8 +56,6 @@ final class CallbackReflection implements Service {
 				&&
 				is_callable( $callback )
 				&&
-				isset( $callback[0], $callback[1] )
-				&&
 				$callback[0] instanceof AMP_Validation_Callback_Wrapper
 				&&
 				'invoke_with_first_ref_arg' === $callback[1]
