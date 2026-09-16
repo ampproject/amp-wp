@@ -203,8 +203,10 @@ function amp_remove_admin_bar_in_phone_preview() {
 	if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
 		return;
 	}
+
+	ob_start();
 	?>
-	<script data-ampdevmode>
+	<script>
 		( () => {
 			if ( 'amp-wizard-completion-preview' !== window.name ) {
 				return;
@@ -226,6 +228,8 @@ function amp_remove_admin_bar_in_phone_preview() {
 		} )();
 	</script>
 	<?php
+	$script = str_replace( [ '<script>', '</script>' ], '', ob_get_clean() );
+	wp_print_inline_script_tag( $script, [ 'data-ampdevmode' => true ] );
 }
 
 /**
