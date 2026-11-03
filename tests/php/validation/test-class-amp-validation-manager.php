@@ -323,11 +323,13 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
 		AMP_Validation_Manager::init_validate_request();
 		$this->assertFalse( AMP_Validation_Manager::is_validate_request() );
+		$this->assertTrue( apply_filters( 'litespeed_comment', true ) );
 
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = wp_slash( AMP_Validation_Manager::get_amp_validate_nonce() ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->assertTrue( AMP_Validation_Manager::should_validate_response() );
 		AMP_Validation_Manager::init_validate_request();
 		$this->assertTrue( AMP_Validation_Manager::is_validate_request() );
+		$this->assertFalse( apply_filters( 'litespeed_comment', true ) );
 	}
 
 	/**
