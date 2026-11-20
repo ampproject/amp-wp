@@ -156,6 +156,10 @@ class Test_AMP_TikTok_Embed_Handler extends TestCase {
 	 * @dataProvider get_conversion_data
 	 */
 	public function test_conversion( $source, $expected = null ) {
+		if ( in_array( 'external-http', $_SERVER['argv'], true ) && 0 === strpos( $source, 'https://www.tiktok.com/' ) ) {
+			$this->markTestSkipped( 'TikTok remote oEmbed API now returns an iframe instead of a blockquote.' );
+		}
+
 		if ( ! $expected ) {
 			$expected = $source;
 		}

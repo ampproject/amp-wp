@@ -71,9 +71,10 @@ final class ValidationExemptionTest extends TestCase {
 	 * @covers ::is_document_containing_attributes()
 	 */
 	public function test_px_verified_node_for_non_element_nor_attribute() {
-		$dom = Document::fromHtml( '<html><body><?greeting hello ?></body></html>' );
+		$dom  = Document::fromHtml( '<html><body></body></html>' );
+		$node = $dom->createProcessingInstruction( 'greeting', 'hello' );
+		$dom->body->appendChild( $node );
 
-		$node = $dom->xpath->query( '//processing-instruction()' )->item( 0 );
 		$this->assertInstanceOf( DOMProcessingInstruction::class, $node );
 
 		// Ensure that PI is a no-op.
@@ -153,9 +154,10 @@ final class ValidationExemptionTest extends TestCase {
 	 * @covers ::is_document_containing_attributes()
 	 */
 	public function test_amp_unvalidated_node_for_non_element_nor_attribute() {
-		$dom = Document::fromHtml( '<html><body><?greeting hello ?></body></html>' );
+		$dom  = Document::fromHtml( '<html><body></body></html>' );
+		$node = $dom->createProcessingInstruction( 'greeting', 'hello' );
+		$dom->body->appendChild( $node );
 
-		$node = $dom->xpath->query( '//processing-instruction()' )->item( 0 );
 		$this->assertInstanceOf( DOMProcessingInstruction::class, $node );
 
 		// Ensure that PI is a no-op.

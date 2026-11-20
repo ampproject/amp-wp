@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "888f83a6f74895c5f52d4653f7083a78",
+    "content-hash": "8b7992310983be3fa8060a28f9b164e0",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
@@ -3095,7 +3095,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-22T07:38:16+00:00"
+            "time": "2026-08-22T07:38:16+00:00",
+            "published-time": "2026-08-22T07:38:30+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -7623,5 +7624,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.11.0"
 }

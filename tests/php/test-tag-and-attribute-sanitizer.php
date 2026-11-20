@@ -2487,18 +2487,27 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
+			// libxml2 2.14.0 parses XML/PHP processing instructions in HTML as bogus comments (DOMComment) per HTML5.
 			'invalid_php_pi'                               => [
 				'<?php $schema = get_post_meta(get_the_ID(), \'schema\', true); if(!empty($schema)) { echo $schema; } ?>',
-				'',
+				version_compare( LIBXML_DOTTED_VERSION, '2.14', '>=' )
+					? '<!--?php $schema = get_post_meta(get_the_ID(), \'schema\', true); if(!empty($schema)) { echo $schema; } ?-->'
+					: '',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION ],
+				version_compare( LIBXML_DOTTED_VERSION, '2.14', '>=' )
+					? []
+					: [ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION ],
 			],
 
 			'invalid_xml_pi'                               => [
 				'<?xml version="1.0" encoding="utf-8"?>',
-				'',
+				version_compare( LIBXML_DOTTED_VERSION, '2.14', '>=' )
+					? '<!--?xml version="1.0" encoding="utf-8"?-->'
+					: '',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION ],
+				version_compare( LIBXML_DOTTED_VERSION, '2.14', '>=' )
+					? []
+					: [ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION ],
 			],
 
 			'malformed_attribute_syntax_curly_quotes'      => [
@@ -3451,7 +3460,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 			],
 			'head_with_invalid_nodes'                 => [
 				'<html amp><head><meta charset="utf-8"><META NAME="foo" CONTENT="bar"><bad>bad!</bad> other</head><body></body></html>',
-				'<html amp><head><meta charset="utf-8"><meta name="foo" content="bar"></head><body>bad!<p> other</p></body></html>',
+				version_compare( LIBXML_DOTTED_VERSION, '2.14', '>=' )
+					// libxml2 2.14.0 stopped implying <p> start tags for text nodes.
+					? '<html amp><head><meta charset="utf-8"><meta name="foo" content="bar"></head><body>bad!other</body></html>'
+					: '<html amp><head><meta charset="utf-8"><meta name="foo" content="bar"></head><body>bad!<p> other</p></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
@@ -4194,5 +4206,38 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 
 		$this->assertEmpty( $expected_errors, 'There should be no expected validation errors remaining.' );
 		$this->assertEqualMarkup( $expected_content, AMP_DOM_Utils::get_content_from_dom( $dom ) );
+	}
+
+	/**
+	 * Test that DOMProcessingInstruction nodes are removed regardless of libxml2 version.
+	 *
+	 * @covers AMP_Tag_And_Attribute_Sanitizer::sanitize_element()
+	 */
+	public function test_sanitize_processing_instruction() {
+		$dom = Document::fromHtml( '<html amp><head><meta charset="utf-8"></head><body><!-- before --><!-- after --></body></html>', Options::DEFAULTS );
+		$pi  = $dom->createProcessingInstruction( 'php', 'echo "hi";' );
+		$dom->body->insertBefore( $pi, $dom->body->lastChild );
+
+		$actual_errors = [];
+		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
+			$dom,
+			[
+				'use_document_element'      => true,
+				'validation_error_callback' => static function ( $error ) use ( &$actual_errors ) {
+					$actual_errors[] = $error;
+					return true;
+				},
+			]
+		);
+		$sanitizer->sanitize();
+
+		$this->assertEqualMarkup(
+			'<html amp><head><meta charset="utf-8"></head><body><!-- before --><!-- after --></body></html>',
+			$dom->saveHTML( $dom->documentElement )
+		);
+		$this->assertEquals(
+			[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION ],
+			wp_list_pluck( $actual_errors, 'code' )
+		);
 	}
 }

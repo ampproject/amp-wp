@@ -86,10 +86,10 @@ final class DetermineHeroImages implements Transformer {
 			}
 
 			if ( $candidate instanceof Element ) {
-				$hero_image_elements[ spl_object_hash( $candidate ) ] = $candidate;
+				$hero_image_elements[ spl_object_id( $candidate ) ] = $candidate;
 			} elseif ( is_array( $candidate ) ) {
 				foreach ( $candidate as $hero_image_element ) {
-					$hero_image_elements[ spl_object_hash( $hero_image_element ) ] = $hero_image_element;
+					$hero_image_elements[ spl_object_id( $hero_image_element ) ] = $hero_image_element;
 				}
 			}
 		}
