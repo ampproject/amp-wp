@@ -546,7 +546,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				),
 				[
 					'strong.before-dashicon',
-					'.dashicons-dashboard:before',
+					'/\.dashicons-dashboard::?before/',
 					'strong.after-dashicon',
 					's:not(#_#_#_#_#_#_#_#_){color:yellow}',
 				],
@@ -970,12 +970,17 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				continue;
 			}
 
-			if ( false === strpos( $expected_stylesheet, '{' ) ) {
-				$this->assertStringContainsString( $expected_stylesheet, $actual_stylesheets[ $i ] );
+			if ( 0 === strpos( $expected_stylesheet, '/' ) && 0 !== strpos( $expected_stylesheet, '/*' ) ) {
+				$this->assertMatchesRegularExpression( $expected_stylesheet, $actual_stylesheets[ $i ] );
+				$this->assertMatchesRegularExpression( $expected_stylesheet, $sanitized_html );
 			} else {
-				$this->assertEquals( $expected_stylesheet, $actual_stylesheets[ $i ] );
+				if ( false === strpos( $expected_stylesheet, '{' ) ) {
+					$this->assertStringContainsString( $expected_stylesheet, $actual_stylesheets[ $i ] );
+				} else {
+					$this->assertEquals( $expected_stylesheet, $actual_stylesheets[ $i ] );
+				}
+				$this->assertStringContainsString( $expected_stylesheet, $sanitized_html );
 			}
-			$this->assertStringContainsString( $expected_stylesheet, $sanitized_html );
 		}
 
 		if ( $actual_stylesheets ) {
@@ -1945,8 +1950,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$this->assertStringContainsString( 'dashicons.woff") format("woff")', $actual_stylesheets[0] );
 		$this->assertStringNotContainsString( 'data:application/font-woff;', $actual_stylesheets[0] );
 		$this->assertStringContainsString( '.dashicons{', $actual_stylesheets[0] );
-		$this->assertStringContainsString( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
-		$this->assertStringNotContainsString( '.dashicons-format-chat:before', $actual_stylesheets[0] );
+		$this->assertMatchesRegularExpression( '/\.dashicons-admin-appearance::?before\{/', $actual_stylesheets[0] );
+		$this->assertDoesNotMatchRegularExpression( '/\.dashicons-format-chat::?before/', $actual_stylesheets[0] );
 	}
 
 	/**
@@ -3381,7 +3386,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$original_html  = trim( ob_get_clean() );
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
-		$this->assertStringContainsString( ".dashicons-admin-customizer:before{content:\"\xEF\x95\x80\"", $sanitized_html );
+		$this->assertMatchesRegularExpression( "/\.dashicons-admin-customizer::?before\{content:\"\xEF\x95\x80\"/", $sanitized_html );
 		$this->assertStringContainsString( 'span::after{content:"⚡️"}', $sanitized_html );
 	}
 

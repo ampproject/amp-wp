@@ -46,14 +46,15 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 			return $pre;
 		}
 
-		$parsed_url = wp_parse_url( $url, PHP_URL_QUERY );
-
-		if ( ! $parsed_url ) {
+		if ( ! $url ) {
 			return $pre;
 		}
 
 		$query_vars = [];
-		parse_str( $parsed_url, $query_vars );
+		$query      = wp_parse_url( $url, PHP_URL_QUERY );
+		if ( is_string( $query ) ) {
+			parse_str( $query, $query_vars );
+		}
 
 		$content_type = null;
 		$body         = null;
@@ -328,8 +329,10 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 	 * @param array  $post_args Post args.
 	 */
 	public function test__conversion( $source, $expected, $post_args = [] ) {
-		// TODO: Re-enable once issues are resolved on make/core.
-		$this->markTestSkipped( 'Test is currently flaky because of failing oEmbed discovery on make/core.' );
+		if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+			// TODO: Re-enable once amp-wp.org and make/core oEmbed discovery issues are resolved.
+			$this->markTestSkipped( 'Test is currently flaky because of failing oEmbed discovery on make/core and amp-wp.org.' );
+		}
 
 		if ( $post_args ) {
 			$post_id  = self::factory()->post->create( $post_args );
@@ -390,7 +393,7 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 				[],
 			],
 			'converted'     => [
-				self::WP_58_STABLE_POST_URL . PHP_EOL,
+				self::WP_59_ALPHA_POST_URL . PHP_EOL,
 				[ 'amp-wordpress-embed' => true ],
 			],
 		];

@@ -710,6 +710,44 @@ class AMP_Iframe_Converter_Test extends TestCase {
 	}
 
 	/**
+	 * Test extracting custom placeholder and overflow from raw text inside <iframe> (as parsed by libxml2 >= 2.14).
+	 *
+	 * @covers ::sanitize()
+	 */
+	public function test_converter_with_raw_text_iframe_children() {
+		$dom    = AMP_DOM_Utils::get_dom_from_content( '<iframe resizable src="https://example.com" width="320" height="640"></iframe>' );
+		$iframe = $dom->getElementsByTagName( 'iframe' )->item( 0 );
+		$this->assertInstanceOf( DOMElement::class, $iframe );
+
+		$iframe->appendChild(
+			$dom->createTextNode(
+				"\n\t<a placeholder href=\"https://example.com\">Loading example site…</a>\n\t<button overflow>See more</button>\n"
+			)
+		);
+
+		$args = [ 'add_placeholder' => true ];
+
+		$sanitizer = new AMP_Iframe_Sanitizer( $dom, $args );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Layout_Sanitizer( $dom, $args );
+		$sanitizer->sanitize();
+
+		$expected = '
+			<amp-iframe resizable="" src="https://example.com" width="320" height="640" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic" class="amp-wp-enforced-sizes">
+				<a placeholder href="https://example.com">Loading example site…</a>
+				<button overflow>See more</button>
+				<noscript>
+					<iframe resizable src="https://example.com" width="320" height="640"></iframe>
+				</noscript>
+			</amp-iframe>
+		';
+
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEqualMarkup( $expected, $content );
+	}
+
+	/**
 	 * Test HTTPS required.
 	 *
 	 * @covers ::sanitize()

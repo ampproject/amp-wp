@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
+use AmpProject\Dom\Document;
 use AmpProject\Html\Attribute;
 use AmpProject\Layout;
 
@@ -192,13 +193,50 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$placeholder_node = null;
 			$overflow_node    = null;
 			foreach ( iterator_to_array( $node->childNodes ) as $child ) {
-				if ( ! ( $child instanceof DOMElement ) ) {
-					continue;
-				}
-				if ( $child->hasAttribute( 'placeholder' ) ) {
-					$placeholder_node = $node->removeChild( $child );
-				} elseif ( $child->hasAttribute( 'overflow' ) ) {
-					$overflow_node = $node->removeChild( $child );
+				if ( $child instanceof DOMElement ) {
+					if ( $child->hasAttribute( 'placeholder' ) ) {
+						$placeholder_node = $node->removeChild( $child );
+					} elseif ( $child->hasAttribute( 'overflow' ) ) {
+						$overflow_node = $node->removeChild( $child );
+					}
+				} elseif ( $child instanceof DOMText && false !== strpos( $child->nodeValue, '<' ) ) {
+					/*
+					 * In libxml2 >= 2.14, <iframe> content is parsed as raw text (per HTML5) rather than child
+					 * elements, so parse the text as an HTML fragment to extract placeholder/overflow elements.
+					 */
+					$fragment_dom = Document::fromHtmlFragment( $child->nodeValue, 'UTF-8' );
+					if ( ! ( $fragment_dom instanceof Document ) ) {
+						continue;
+					}
+					$extracted_any = false;
+					foreach ( iterator_to_array( $fragment_dom->body->childNodes ) as $fragment_child ) {
+						if ( ! ( $fragment_child instanceof DOMElement ) ) {
+							continue;
+						}
+						if ( $fragment_child->hasAttribute( 'placeholder' ) ) {
+							$imported = $this->dom->importNode( $fragment_child, true );
+							if ( $imported instanceof DOMElement ) {
+								$placeholder_node = $imported;
+								$fragment_dom->body->removeChild( $fragment_child );
+								$extracted_any = true;
+							}
+						} elseif ( $fragment_child->hasAttribute( 'overflow' ) ) {
+							$imported = $this->dom->importNode( $fragment_child, true );
+							if ( $imported instanceof DOMElement ) {
+								$overflow_node = $imported;
+								$fragment_dom->body->removeChild( $fragment_child );
+								$extracted_any = true;
+							}
+						}
+					}
+					if ( $extracted_any ) {
+						$remaining = AMP_DOM_Utils::get_content_from_dom( $fragment_dom );
+						if ( '' === trim( $remaining ) ) {
+							$node->removeChild( $child );
+						} else {
+							$child->nodeValue = $remaining;
+						}
+					}
 				}
 			}
 

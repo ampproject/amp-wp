@@ -18,10 +18,24 @@ class AMP_Imgur_Embed_Handler_Test extends TestCase {
 	}
 
 	/**
+	 * Whether the Imgur oEmbed provider was added during test setup.
+	 *
+	 * @var bool
+	 */
+	private $added_imgur_oembed_provider = false;
+
+	/**
 	 * Set up.
 	 */
 	public function set_up() {
 		$this->prevent_block_pre_render();
+
+		// WordPress 7.1.3 (and security backports) removed Imgur from core oEmbed providers.
+		$oembed = _wp_oembed_get_object();
+		if ( ! isset( $oembed->providers['#https?://(.+\.)?imgur\.com/.*#i'] ) ) {
+			wp_oembed_add_provider( '#https?://(.+\.)?imgur\.com/.*#i', 'https://api.imgur.com/oembed', true );
+			$this->added_imgur_oembed_provider = true;
+		}
 
 		// Mock the HTTP request.
 		add_filter(
@@ -52,6 +66,17 @@ class AMP_Imgur_Embed_Handler_Test extends TestCase {
 			10,
 			3
 		);
+	}
+
+	/**
+	 * Tear down.
+	 */
+	public function tear_down() {
+		if ( $this->added_imgur_oembed_provider ) {
+			wp_oembed_remove_provider( '#https?://(.+\.)?imgur\.com/.*#i' );
+			$this->added_imgur_oembed_provider = false;
+		}
+		parent::tear_down();
 	}
 
 	/**
