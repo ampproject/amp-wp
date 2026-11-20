@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: composer
     directory: "/"
     schedule:
-      interval: monthly
+      interval: quarterly
       time: "17:00"
       timezone: America/Los_Angeles
     open-pull-requests-limit: 10
@@ -11,14 +11,43 @@ updates:
       wp-cli-packages:
         patterns:
           - "wp-cli/*"
+      phpstan:
+        patterns:
+          - "phpstan/*"
+          - "php-stubs/*"
+      phpcs:
+        patterns:
+          - "automattic/vipwpcs"
+          - "dealerdirect/phpcodesniffer-composer-installer"
+          - "phpcompatibility/*"
+          - "phpcsstandards/*"
+          - "sirbrillig/phpcs-variable-analysis"
+          - "squizlabs/php_codesniffer"
+          - "wp-coding-standards/wpcs"
+      development-dependencies:
+        dependency-type: development
+        update-types:
+          - "minor"
+          - "patch"
+      production-dependencies:
+        dependency-type: production
+        update-types:
+          - "minor"
+          - "patch"
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
     ignore:
       # @see <https://github.com/ampproject/amp-wp/issues/7501#issuecomment-1656231088>.
       - dependency-name: phpdocumentor/reflection
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: npm
     directory: "/"
     schedule:
-      interval: monthly
+      interval: quarterly
       time: "17:00"
       timezone: America/Los_Angeles
     open-pull-requests-limit: 10
@@ -26,24 +55,73 @@ updates:
       wordpress-packages:
         patterns:
           - "@wordpress/*"
+      eslint:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@eslint/*"
+          - "@eslint-community/*"
+          - "@typescript-eslint/*"
+          - "globals"
+      babel:
+        patterns:
+          - "babel-*"
+          - "@babel/*"
+      postcss:
+        patterns:
+          - "postcss"
+          - "postcss-*"
+      webpack:
+        patterns:
+          - "webpack*"
+          - "*-webpack-plugin"
+      grunt:
+        patterns:
+          - "grunt"
+          - "grunt-*"
+      jest:
+        patterns:
+          - "jest"
+          - "jest-*"
+          - "@jest/*"
+      development-dependencies:
+        dependency-type: development
+        update-types:
+          - "minor"
+          - "patch"
+      production-dependencies:
+        dependency-type: production
+        update-types:
+          - "minor"
+          - "patch"
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
     ignore:
-    # Need to be updated based on `@wordpress/element` react peer dependency version.
-    - dependency-name: react
-    - dependency-name: react-dom
+      # Need to be updated based on `@wordpress/element` react peer dependency version.
+      - dependency-name: react
+      - dependency-name: react-dom
+      - dependency-name: react-test-renderer
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: github-actions
-    directory: "/"
+    directories:
+      - "/"
+      - "/.github/actions/*"
     schedule:
-      interval: monthly
+      interval: quarterly
       time: "17:00"
       timezone: America/Los_Angeles
-    open-pull-requests-limit: 10
-
-  # Config for composite GitHub Actions.
-  - package-ecosystem: github-actions
-    directory: "/.github/actions"
-    schedule:
-      interval: monthly
-      time: "17:00"
-      timezone: America/Los_Angeles
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+    cooldown:
+      default-days: 7
