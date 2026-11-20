@@ -17,7 +17,7 @@
     "ampproject/amp-toolbox": "0.11.8",
     "cweagans/composer-patches": "^1.0",
     "fasterimage/fasterimage": "1.5.0",
-    "sabberworm/php-css-parser": "8.5.1"
+    "sabberworm/php-css-parser": "9.4.0"
   },
   "require-dev": {
     "automattic/vipwpcs": "^3.0",
@@ -28,7 +28,6 @@
     "phpcompatibility/phpcompatibility-wp": "2.1.8",
     "phpdocumentor/reflection": "^3.0",
     "phpstan/phpstan": "^2.1.13",
-    "roave/security-advisories": "dev-latest",
     "sirbrillig/phpcs-variable-analysis": "2.13.0",
     "wp-cli/export-command": "^2.0",
     "wp-cli/extension-command": "^2.0",
@@ -75,15 +74,20 @@
     "platform": {
       "php": "7.4"
     },
+    "policy": {
+      "advisories": {
+        "ignore": [
+          "firebase/php-jwt"
+        ]
+      }
+    },
     "sort-packages": true
   },
   "extra": {
     "composer-exit-on-patch-failure": true,
     "patches": {
       "sabberworm/php-css-parser": {
-        "1. Validate name-start code points for identifier <https://github.com/westonruter/PHP-CSS-Parser/pull/2>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/cc791ad...westonruter:PHP-CSS-Parser:fix/malformed-identifier-without-tests.diff",
-        "2. Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/cc791ad...westonruter:PHP-CSS-Parser:fix/selector-comma-parsing-without-tests.diff",
-        "3. Parse simple expressions <https://github.com/sabberworm/PHP-CSS-Parser/pull/389>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/cc791ad...westonruter:PHP-CSS-Parser:fix/expression-parsing-without-tests.diff"
+        "Port custom patches (strict validation, deep clone, expression parser, trailing semicolon)": "https://github.com/swissspidy/PHP-CSS-Parser/commit/47c4420abe46b829d32fe64c8eb0306443ee5883.patch"
       }
     }
   },

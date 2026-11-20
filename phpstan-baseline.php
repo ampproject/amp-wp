@@ -48,16 +48,6 @@ $ignore_errors_due_to_function_and_method_exists_always_evaluating_to_true = [
 		'path'    => __DIR__ . '/includes/amp-helper-functions.php',
 	],
 	[
-		'message' => '#^Call to function function_exists\\(\\) with \'amp_activate\'\\|\'amp_backcompat_use…\'\\|\'amp_init_customizer\'\\|\'amp_load_classes\' will always evaluate to true\\.$#',
-		'count'   => 1,
-		'path'    => __DIR__ . '/includes/bootstrap.php',
-	],
-	[
-		'message' => '#^Call to function function_exists\\(\\) with \'curl_multi_add…\'\\|\'curl_multi_exec\'\\|\'curl_multi_init\' will always evaluate to true\\.$#',
-		'count'   => 1,
-		'path'    => __DIR__ . '/src/Admin/SiteHealth.php',
-	],
-	[
 		'message' => '#^Call to function method_exists\\(\\) with ReflectionType and \'isBuiltin\' will always evaluate to true\\.$#',
 		'count'   => 1,
 		'path'    => __DIR__ . '/src/Infrastructure/Injector/SimpleInjector.php',
