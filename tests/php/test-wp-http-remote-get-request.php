@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\AmpWP\Tests\TestCase;
+use WpOrg\Requests\Utility\CaseInsensitiveDictionary;
 
 /**
  * Tests for the WpHttpRemoteGetRequest class.
@@ -25,7 +26,7 @@ class Test_WP_Http_Remote_Get_Request extends TestCase {
 			'accepts arrays'       => [ [ 'something' => 'to test' ], 'something', 'to test' ],
 
 			'accepts traversables' => [
-				new Requests_Utility_CaseInsensitiveDictionary( [ 'something' => 'to test' ] ),
+				new CaseInsensitiveDictionary( [ 'something' => 'to test' ] ),
 				'something',
 				'to test',
 			],
