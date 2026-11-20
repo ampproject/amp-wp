@@ -305,7 +305,7 @@ class AMP_Post_Template {
 		$format = 'U';
 
 		if ( empty( $this->post->post_date_gmt ) || '0000-00-00 00:00:00' === $this->post->post_date_gmt ) {
-			$timestamp = time();
+			$timestamp =  (int) get_the_time('U');
 		} else {
 			$timestamp = (int) get_post_time( $format, true, $this->post, true );
 		}
