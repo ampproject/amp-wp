@@ -6,7 +6,7 @@ runs:
   using: 'composite'
   steps:
     - name: Cache assets directory
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       id: assets-cache
       env:
         SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
