@@ -638,6 +638,10 @@ class AMP_Validation_Manager {
 				// as actual validation errors.
 				ini_set( 'display_errors', 0 ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
 			}
+
+			// Prevent LiteSpeed Cache from appending its HTML comment to the JSON validation response, which would make it unparsable.
+			// See <https://github.com/litespeedtech/lscache_wp/issues/212>.
+			add_filter( 'litespeed_comment', '__return_false' );
 		} else {
 			self::$is_validate_request = false;
 
